@@ -63,14 +63,19 @@ const HOUR_HEIGHT = 96;
 
 const APPOINTMENTS_STORAGE_KEY =
   "nails-calendar-appointments";
+
 const CLIENTS_STORAGE_KEY =
   "nails-calendar-clients";
+
 const SERVICES_STORAGE_KEY =
   "nails-calendar-services";
+
 const WORK_SETTINGS_STORAGE_KEY =
   "nails-calendar-work-settings";
+
 const LANGUAGE_STORAGE_KEY =
   "nails-calendar-language";
+
 const MIGRATION_STORAGE_KEY =
   "nails-calendar-supabase-migrated";
 
@@ -111,11 +116,13 @@ const translations = {
     total: "Всего",
     searchClient: "Поиск по имени, телефону...",
     noClients: "Клиентов пока нет",
-    addFirstClient: "Нажми +, чтобы добавить первого клиента",
+    addFirstClient:
+      "Нажми +, чтобы добавить первого клиента",
     nothingFound: "Никого не нашли",
 
     financeRecords: "Финансы и записи",
-    completedOnlyIncome: "Доход только по завершённым записям",
+    completedOnlyIncome:
+      "Доход только по завершённым записям",
     todayIncome: "Сегодня",
     sevenDays: "7 дней",
     currentMonthIncome: "Текущий месяц",
@@ -124,49 +131,63 @@ const translations = {
     cancelled: "Отменено",
     noShow: "Не пришли",
     topServices: "Топ услуг",
-    noCompleted: "Пока нет завершённых записей",
+    noCompleted:
+      "Пока нет завершённых записей",
 
     app: "Приложение",
     language: "Язык приложения",
-    languageHint: "Изменяется весь интерфейс приложения",
+    languageHint:
+      "Изменяется весь интерфейс приложения",
 
     workSchedule: "Рабочий график",
-    workScheduleHint: "Эти настройки меняют дневной календарь",
+    workScheduleHint:
+      "Эти настройки меняют дневной календарь",
     startDay: "Начало дня",
     endDay: "Конец дня",
     workDays: "Рабочие дни",
 
     database: "Облачная база",
-    databaseConnected: "Supabase подключён",
-    databaseConnecting: "Подключение к Supabase...",
-    databaseError: "Ошибка подключения к Supabase",
+    databaseConnected:
+      "Supabase подключён",
+    databaseConnecting:
+      "Подключение к Supabase...",
+    databaseError:
+      "Ошибка подключения к Supabase",
 
     account: "Аккаунт",
     signedInAs: "Выполнен вход",
     logout: "Выйти",
 
     services: "Услуги",
-    servicePriceDuration: "Цена и длительность",
-    addFirstService: "Добавь первую услугу",
+    servicePriceDuration:
+      "Цена и длительность",
+    addFirstService:
+      "Добавь первую услугу",
     edit: "Изменить",
     delete: "Удалить",
 
     dayOff: "Выходной день",
-    dayOffHint: "Запись всё равно можно создать, если нужно.",
+    dayOffHint:
+      "Запись всё равно можно создать, если нужно.",
     dayOffShort: "выходной",
 
     appointmentNew: "Новая запись",
-    appointmentEdit: "Редактировать запись",
-    appointmentSubtitle: "Клиент, услуга, время и статус",
+    appointmentEdit:
+      "Редактировать запись",
+    appointmentSubtitle:
+      "Клиент, услуга, время и статус",
     close: "Закрыть",
 
     client: "Клиент",
-    manualName: "Ввести имя вручную",
+    manualName:
+      "Ввести имя вручную",
     clientName: "Имя клиента",
 
     service: "Услуга",
-    manualService: "Ввести вручную",
-    serviceName: "Название услуги",
+    manualService:
+      "Ввести вручную",
+    serviceName:
+      "Название услуги",
 
     date: "Дата",
     time: "Время",
@@ -174,66 +195,100 @@ const translations = {
     price: "Цена, грн",
     status: "Статус",
 
-    createAppointment: "Создать запись",
-    saveChanges: "Сохранить изменения",
-    deleteAppointment: "Удалить запись",
-    forceSave: "Всё равно сохранить",
+    createAppointment:
+      "Создать запись",
+    saveChanges:
+      "Сохранить изменения",
+    deleteAppointment:
+      "Удалить запись",
+    forceSave:
+      "Всё равно сохранить",
 
-    scheduledStatus: "Запланирована",
-    completedStatus: "Завершена",
-    cancelledStatus: "Отменена",
-    noShowStatus: "Не пришла",
+    scheduledStatus:
+      "Запланирована",
+    completedStatus:
+      "Завершена",
+    cancelledStatus:
+      "Отменена",
+    noShowStatus:
+      "Не пришла",
 
     newClient: "Новый клиент",
-    editClient: "Редактировать клиента",
+    editClient:
+      "Редактировать клиента",
     name: "Имя",
     phone: "Телефон",
-    social: "Instagram / Telegram",
+    social:
+      "Instagram / Telegram",
     note: "Заметка",
     save: "Сохранить",
 
-    clientCard: "Карточка клиента",
-    phoneMissing: "Телефон не указан",
-    totalAppointments: "Всего записей",
-    futureAppointmentsCount: "Будущих",
-    bookClient: "Записать клиента",
-    editClientButton: "Редактировать",
+    clientCard:
+      "Карточка клиента",
+    phoneMissing:
+      "Телефон не указан",
+    totalAppointments:
+      "Всего записей",
+    futureAppointmentsCount:
+      "Будущих",
+    bookClient:
+      "Записать клиента",
+    editClientButton:
+      "Редактировать",
 
-    futureAppointments: "Ближайшие записи",
-    noFutureAppointments: "Будущих записей нет",
+    futureAppointments:
+      "Ближайшие записи",
+    noFutureAppointments:
+      "Будущих записей нет",
     history: "История",
-    noHistory: "Прошлых записей нет",
-    deleteClient: "Удалить клиента",
+    noHistory:
+      "Прошлых записей нет",
+    deleteClient:
+      "Удалить клиента",
 
     call: "Позвонить",
     telegram: "Telegram",
     instagram: "Instagram",
     remind: "Напомнить",
 
-    reminder: "Напоминание клиенту",
-    reminderHint: "Текст всегда формируется на украинском языке",
-    copyText: "Скопировать текст",
+    reminder:
+      "Напоминание клиенту",
+    reminderHint:
+      "Текст всегда формируется на украинском языке",
+    copyText:
+      "Скопировать текст",
     copied: "Скопировано",
-    openTelegram: "Открыть Telegram",
-    openInstagram: "Открыть Instagram",
+    openTelegram:
+      "Открыть Telegram",
+    openInstagram:
+      "Открыть Instagram",
 
     newService: "Новая услуга",
-    editService: "Редактировать услугу",
-    serviceDuration: "Длительность",
-    servicePrice: "Цена, грн",
+    editService:
+      "Редактировать услугу",
+    serviceDuration:
+      "Длительность",
+    servicePrice:
+      "Цена, грн",
 
     minutes: "мин.",
     completed: "завершено",
 
-    clientRequired: "Укажи клиента.",
-    dateRequired: "Укажи дату.",
-    timeRequired: "Укажи время.",
-    conflict: "Это время пересекается с записью",
+    clientRequired:
+      "Укажи клиента.",
+    dateRequired:
+      "Укажи дату.",
+    timeRequired:
+      "Укажи время.",
+    conflict:
+      "Это время пересекается с записью",
 
-    deleteAppointmentConfirm: "Удалить эту запись?",
+    deleteAppointmentConfirm:
+      "Удалить эту запись?",
     deleteClientConfirm:
       "Удалить клиента? Его записи останутся в календаре.",
-    deleteServiceConfirm: "Удалить эту услугу?",
+    deleteServiceConfirm:
+      "Удалить эту услугу?",
 
     databaseSaveError:
       "Не удалось сохранить данные в облако.",
@@ -248,142 +303,219 @@ const translations = {
     settings: "Налаштування",
 
     today: "Сьогодні",
-    returnToday: "Повернутися на сьогодні",
-    currentMonth: "Поточний місяць",
-    returnCurrentMonth: "Повернутися на поточний місяць",
+    returnToday:
+      "Повернутися на сьогодні",
+    currentMonth:
+      "Поточний місяць",
+    returnCurrentMonth:
+      "Повернутися на поточний місяць",
 
     day: "День",
     month: "Місяць",
     records: "Записів",
-    totalRecords: "Усього записів",
+    totalRecords:
+      "Усього записів",
 
-    clientBase: "База клієнтів",
+    clientBase:
+      "База клієнтів",
     total: "Усього",
-    searchClient: "Пошук за ім'ям, телефоном...",
-    noClients: "Клієнтів поки немає",
-    addFirstClient: "Натисни +, щоб додати першого клієнта",
-    nothingFound: "Нічого не знайдено",
+    searchClient:
+      "Пошук за ім'ям, телефоном...",
+    noClients:
+      "Клієнтів поки немає",
+    addFirstClient:
+      "Натисни +, щоб додати першого клієнта",
+    nothingFound:
+      "Нічого не знайдено",
 
-    financeRecords: "Фінанси та записи",
-    completedOnlyIncome: "Дохід лише за завершеними записами",
+    financeRecords:
+      "Фінанси та записи",
+    completedOnlyIncome:
+      "Дохід лише за завершеними записами",
     todayIncome: "Сьогодні",
     sevenDays: "7 днів",
-    currentMonthIncome: "Поточний місяць",
-    averageCheck: "Середній чек",
-    scheduled: "Заплановано",
+    currentMonthIncome:
+      "Поточний місяць",
+    averageCheck:
+      "Середній чек",
+    scheduled:
+      "Заплановано",
     cancelled: "Скасовано",
     noShow: "Не прийшли",
-    topServices: "Топ послуг",
-    noCompleted: "Поки немає завершених записів",
+    topServices:
+      "Топ послуг",
+    noCompleted:
+      "Поки немає завершених записів",
 
     app: "Застосунок",
-    language: "Мова застосунку",
-    languageHint: "Змінюється весь інтерфейс застосунку",
+    language:
+      "Мова застосунку",
+    languageHint:
+      "Змінюється весь інтерфейс застосунку",
 
-    workSchedule: "Робочий графік",
-    workScheduleHint: "Ці налаштування змінюють денний календар",
-    startDay: "Початок дня",
-    endDay: "Кінець дня",
-    workDays: "Робочі дні",
+    workSchedule:
+      "Робочий графік",
+    workScheduleHint:
+      "Ці налаштування змінюють денний календар",
+    startDay:
+      "Початок дня",
+    endDay:
+      "Кінець дня",
+    workDays:
+      "Робочі дні",
 
-    database: "Хмарна база",
-    databaseConnected: "Supabase підключено",
-    databaseConnecting: "Підключення до Supabase...",
-    databaseError: "Помилка підключення до Supabase",
+    database:
+      "Хмарна база",
+    databaseConnected:
+      "Supabase підключено",
+    databaseConnecting:
+      "Підключення до Supabase...",
+    databaseError:
+      "Помилка підключення до Supabase",
 
     account: "Акаунт",
-    signedInAs: "Виконано вхід",
+    signedInAs:
+      "Виконано вхід",
     logout: "Вийти",
 
     services: "Послуги",
-    servicePriceDuration: "Ціна та тривалість",
-    addFirstService: "Додай першу послугу",
+    servicePriceDuration:
+      "Ціна та тривалість",
+    addFirstService:
+      "Додай першу послугу",
     edit: "Змінити",
     delete: "Видалити",
 
-    dayOff: "Вихідний день",
-    dayOffHint: "Запис усе одно можна створити, якщо потрібно.",
-    dayOffShort: "вихідний",
+    dayOff:
+      "Вихідний день",
+    dayOffHint:
+      "Запис усе одно можна створити, якщо потрібно.",
+    dayOffShort:
+      "вихідний",
 
-    appointmentNew: "Новий запис",
-    appointmentEdit: "Редагувати запис",
-    appointmentSubtitle: "Клієнт, послуга, час і статус",
+    appointmentNew:
+      "Новий запис",
+    appointmentEdit:
+      "Редагувати запис",
+    appointmentSubtitle:
+      "Клієнт, послуга, час і статус",
     close: "Закрити",
 
     client: "Клієнт",
-    manualName: "Ввести ім'я вручну",
-    clientName: "Ім'я клієнта",
+    manualName:
+      "Ввести ім'я вручну",
+    clientName:
+      "Ім'я клієнта",
 
     service: "Послуга",
-    manualService: "Ввести вручну",
-    serviceName: "Назва послуги",
+    manualService:
+      "Ввести вручну",
+    serviceName:
+      "Назва послуги",
 
     date: "Дата",
     time: "Час",
-    duration: "Тривалість",
+    duration:
+      "Тривалість",
     price: "Ціна, грн",
     status: "Статус",
 
-    createAppointment: "Створити запис",
-    saveChanges: "Зберегти зміни",
-    deleteAppointment: "Видалити запис",
-    forceSave: "Усе одно зберегти",
+    createAppointment:
+      "Створити запис",
+    saveChanges:
+      "Зберегти зміни",
+    deleteAppointment:
+      "Видалити запис",
+    forceSave:
+      "Усе одно зберегти",
 
-    scheduledStatus: "Заплановано",
-    completedStatus: "Завершено",
-    cancelledStatus: "Скасовано",
-    noShowStatus: "Не прийшла",
+    scheduledStatus:
+      "Заплановано",
+    completedStatus:
+      "Завершено",
+    cancelledStatus:
+      "Скасовано",
+    noShowStatus:
+      "Не прийшла",
 
-    newClient: "Новий клієнт",
-    editClient: "Редагувати клієнта",
+    newClient:
+      "Новий клієнт",
+    editClient:
+      "Редагувати клієнта",
     name: "Ім'я",
     phone: "Телефон",
-    social: "Instagram / Telegram",
+    social:
+      "Instagram / Telegram",
     note: "Нотатка",
     save: "Зберегти",
 
-    clientCard: "Картка клієнта",
-    phoneMissing: "Телефон не вказано",
-    totalAppointments: "Усього записів",
-    futureAppointmentsCount: "Майбутніх",
-    bookClient: "Записати клієнта",
-    editClientButton: "Редагувати",
+    clientCard:
+      "Картка клієнта",
+    phoneMissing:
+      "Телефон не вказано",
+    totalAppointments:
+      "Усього записів",
+    futureAppointmentsCount:
+      "Майбутніх",
+    bookClient:
+      "Записати клієнта",
+    editClientButton:
+      "Редагувати",
 
-    futureAppointments: "Найближчі записи",
-    noFutureAppointments: "Майбутніх записів немає",
+    futureAppointments:
+      "Найближчі записи",
+    noFutureAppointments:
+      "Майбутніх записів немає",
     history: "Історія",
-    noHistory: "Минулих записів немає",
-    deleteClient: "Видалити клієнта",
+    noHistory:
+      "Минулих записів немає",
+    deleteClient:
+      "Видалити клієнта",
 
     call: "Подзвонити",
     telegram: "Telegram",
     instagram: "Instagram",
     remind: "Нагадати",
 
-    reminder: "Нагадування клієнту",
-    reminderHint: "Текст завжди формується українською мовою",
-    copyText: "Скопіювати текст",
+    reminder:
+      "Нагадування клієнту",
+    reminderHint:
+      "Текст завжди формується українською мовою",
+    copyText:
+      "Скопіювати текст",
     copied: "Скопійовано",
-    openTelegram: "Відкрити Telegram",
-    openInstagram: "Відкрити Instagram",
+    openTelegram:
+      "Відкрити Telegram",
+    openInstagram:
+      "Відкрити Instagram",
 
-    newService: "Нова послуга",
-    editService: "Редагувати послугу",
-    serviceDuration: "Тривалість",
-    servicePrice: "Ціна, грн",
+    newService:
+      "Нова послуга",
+    editService:
+      "Редагувати послугу",
+    serviceDuration:
+      "Тривалість",
+    servicePrice:
+      "Ціна, грн",
 
     minutes: "хв.",
     completed: "завершено",
 
-    clientRequired: "Вкажи клієнта.",
-    dateRequired: "Вкажи дату.",
-    timeRequired: "Вкажи час.",
-    conflict: "Цей час перетинається із записом",
+    clientRequired:
+      "Вкажи клієнта.",
+    dateRequired:
+      "Вкажи дату.",
+    timeRequired:
+      "Вкажи час.",
+    conflict:
+      "Цей час перетинається із записом",
 
-    deleteAppointmentConfirm: "Видалити цей запис?",
+    deleteAppointmentConfirm:
+      "Видалити цей запис?",
     deleteClientConfirm:
       "Видалити клієнта? Його записи залишаться в календарі.",
-    deleteServiceConfirm: "Видалити цю послугу?",
+    deleteServiceConfirm:
+      "Видалити цю послугу?",
 
     databaseSaveError:
       "Не вдалося зберегти дані у хмарі.",
@@ -393,127 +525,251 @@ const translations = {
 };
 
 function formatDateKey(date: Date) {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
+  const year =
+    date.getFullYear();
+
+  const month = String(
+    date.getMonth() + 1
+  ).padStart(2, "0");
+
+  const day = String(
+    date.getDate()
+  ).padStart(2, "0");
 
   return `${year}-${month}-${day}`;
 }
 
-function getLocale(language: Language) {
-  return language === "uk" ? "uk-UA" : "ru-RU";
+function getLocale(
+  language: Language
+) {
+  return language === "uk"
+    ? "uk-UA"
+    : "ru-RU";
 }
 
-function formatDateTitle(date: Date, language: Language) {
-  return new Intl.DateTimeFormat(getLocale(language), {
-    day: "numeric",
-    month: "long",
-  }).format(date);
+function formatDateTitle(
+  date: Date,
+  language: Language
+) {
+  return new Intl.DateTimeFormat(
+    getLocale(language),
+    {
+      day: "numeric",
+      month: "long",
+    }
+  ).format(date);
 }
 
-function formatMonthTitle(date: Date, language: Language) {
-  return new Intl.DateTimeFormat(getLocale(language), {
-    month: "long",
-    year: "numeric",
-  }).format(date);
+function formatMonthTitle(
+  date: Date,
+  language: Language
+) {
+  return new Intl.DateTimeFormat(
+    getLocale(language),
+    {
+      month: "long",
+      year: "numeric",
+    }
+  ).format(date);
 }
 
-function formatFullDate(dateString: string, language: Language) {
-  const date = new Date(`${dateString}T12:00:00`);
+function formatFullDate(
+  dateString: string,
+  language: Language
+) {
+  const date = new Date(
+    `${dateString}T12:00:00`
+  );
 
-  return new Intl.DateTimeFormat(getLocale(language), {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  }).format(date);
+  return new Intl.DateTimeFormat(
+    getLocale(language),
+    {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    }
+  ).format(date);
 }
 
-function formatWeekday(date: Date, language: Language) {
-  return new Intl.DateTimeFormat(getLocale(language), {
-    weekday: "long",
-  }).format(date);
+function formatWeekday(
+  date: Date,
+  language: Language
+) {
+  return new Intl.DateTimeFormat(
+    getLocale(language),
+    {
+      weekday: "long",
+    }
+  ).format(date);
 }
 
-function formatUkrainianReminderDate(dateString: string) {
-  const date = new Date(`${dateString}T12:00:00`);
+function formatUkrainianReminderDate(
+  dateString: string
+) {
+  const date = new Date(
+    `${dateString}T12:00:00`
+  );
 
-  return new Intl.DateTimeFormat("uk-UA", {
-    day: "numeric",
-    month: "long",
-  }).format(date);
+  return new Intl.DateTimeFormat(
+    "uk-UA",
+    {
+      day: "numeric",
+      month: "long",
+    }
+  ).format(date);
 }
 
-function isSameDay(first: Date, second: Date) {
-  return formatDateKey(first) === formatDateKey(second);
+function isSameDay(
+  first: Date,
+  second: Date
+) {
+  return (
+    formatDateKey(first) ===
+    formatDateKey(second)
+  );
 }
 
-function timeToMinutes(time: string) {
-  const [hours, minutes] = time.split(":").map(Number);
+function timeToMinutes(
+  time: string
+) {
+  const [hours, minutes] =
+    time.split(":").map(Number);
+
   return hours * 60 + minutes;
 }
 
-function minutesToTime(totalMinutes: number) {
-  const hours = Math.floor(totalMinutes / 60);
-  const minutes = totalMinutes % 60;
+function minutesToTime(
+  totalMinutes: number
+) {
+  const hours =
+    Math.floor(totalMinutes / 60);
 
-  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(
+  const minutes =
+    totalMinutes % 60;
+
+  return `${String(hours).padStart(
+    2,
+    "0"
+  )}:${String(minutes).padStart(
     2,
     "0"
   )}`;
 }
 
-function getAppointmentTop(time: string, startHour: number) {
-  const startMinutes = startHour * 60;
-  const appointmentMinutes = timeToMinutes(time);
+function getAppointmentTop(
+  time: string,
+  startHour: number
+) {
+  const startMinutes =
+    startHour * 60;
 
-  return ((appointmentMinutes - startMinutes) / 60) * HOUR_HEIGHT;
+  const appointmentMinutes =
+    timeToMinutes(time);
+
+  return (
+    ((appointmentMinutes -
+      startMinutes) /
+      60) *
+    HOUR_HEIGHT
+  );
 }
 
-function getAppointmentHeight(duration: number) {
-  return Math.max((duration / 60) * HOUR_HEIGHT, 48);
+function getAppointmentHeight(
+  duration: number
+) {
+  return Math.max(
+    (duration / 60) *
+      HOUR_HEIGHT,
+    48
+  );
 }
 
-function getMonthCalendarDays(date: Date) {
-  const year = date.getFullYear();
-  const month = date.getMonth();
+function getMonthCalendarDays(
+  date: Date
+) {
+  const year =
+    date.getFullYear();
 
-  const firstDay = new Date(year, month, 1);
-  const lastDay = new Date(year, month + 1, 0);
+  const month =
+    date.getMonth();
 
-  let firstWeekday = firstDay.getDay();
+  const firstDay =
+    new Date(
+      year,
+      month,
+      1
+    );
+
+  const lastDay =
+    new Date(
+      year,
+      month + 1,
+      0
+    );
+
+  let firstWeekday =
+    firstDay.getDay();
 
   if (firstWeekday === 0) {
     firstWeekday = 7;
   }
 
-  const daysBefore = firstWeekday - 1;
-  const daysInMonth = lastDay.getDate();
+  const daysBefore =
+    firstWeekday - 1;
+
+  const daysInMonth =
+    lastDay.getDate();
 
   const cells: {
     date: Date;
     isCurrentMonth: boolean;
   }[] = [];
 
-  for (let index = daysBefore; index > 0; index--) {
+  for (
+    let index = daysBefore;
+    index > 0;
+    index--
+  ) {
     cells.push({
-      date: new Date(year, month, 1 - index),
+      date: new Date(
+        year,
+        month,
+        1 - index
+      ),
       isCurrentMonth: false,
     });
   }
 
-  for (let day = 1; day <= daysInMonth; day++) {
+  for (
+    let day = 1;
+    day <= daysInMonth;
+    day++
+  ) {
     cells.push({
-      date: new Date(year, month, day),
+      date: new Date(
+        year,
+        month,
+        day
+      ),
       isCurrentMonth: true,
     });
   }
 
-  while (cells.length % 7 !== 0) {
+  while (
+    cells.length % 7 !== 0
+  ) {
     const nextDay =
-      cells.length - daysBefore - daysInMonth + 1;
+      cells.length -
+      daysBefore -
+      daysInMonth +
+      1;
 
     cells.push({
-      date: new Date(year, month + 1, nextDay),
+      date: new Date(
+        year,
+        month + 1,
+        nextDay
+      ),
       isCurrentMonth: false,
     });
   }
@@ -521,74 +777,141 @@ function getMonthCalendarDays(date: Date) {
   return cells;
 }
 
-function sumPrices(appointments: Appointment[]) {
+function sumPrices(
+  appointments: Appointment[]
+) {
   return appointments.reduce(
     (total, appointment) =>
-      total + Number(appointment.price || 0),
+      total +
+      Number(
+        appointment.price || 0
+      ),
     0
   );
 }
 
-function cleanUsername(value: string) {
-  let username = value.trim();
+function cleanUsername(
+  value: string
+) {
+  let username =
+    value.trim();
 
-  username = username.replace(/^https?:\/\/(www\.)?/, "");
-  username = username.replace(/^t\.me\//, "");
-  username = username.replace(/^telegram\.me\//, "");
-  username = username.replace(/^instagram\.com\//, "");
-  username = username.replace(/^www\.instagram\.com\//, "");
-  username = username.replace(/^@/, "");
+  username =
+    username.replace(
+      /^https?:\/\/(www\.)?/,
+      ""
+    );
 
-  username = username.split("/")[0];
-  username = username.split("?")[0];
+  username =
+    username.replace(
+      /^t\.me\//,
+      ""
+    );
+
+  username =
+    username.replace(
+      /^telegram\.me\//,
+      ""
+    );
+
+  username =
+    username.replace(
+      /^instagram\.com\//,
+      ""
+    );
+
+  username =
+    username.replace(
+      /^www\.instagram\.com\//,
+      ""
+    );
+
+  username =
+    username.replace(
+      /^@/,
+      ""
+    );
+
+  username =
+    username.split("/")[0];
+
+  username =
+    username.split("?")[0];
 
   return username;
 }
 
-function getTelegramUrl(social: string) {
-  const username = cleanUsername(social);
+function getTelegramUrl(
+  social: string
+) {
+  const username =
+    cleanUsername(social);
 
   return username
     ? `https://t.me/${username}`
     : "";
 }
 
-function getInstagramUrl(social: string) {
-  const username = cleanUsername(social);
+function getInstagramUrl(
+  social: string
+) {
+  const username =
+    cleanUsername(social);
 
   return username
     ? `https://instagram.com/${username}`
     : "";
 }
 
-function getSocialType(social: string) {
-  const normalized = social.toLowerCase();
+function getSocialType(
+  social: string
+) {
+  const normalized =
+    social.toLowerCase();
 
   if (
-    normalized.includes("t.me") ||
-    normalized.includes("telegram")
+    normalized.includes(
+      "t.me"
+    ) ||
+    normalized.includes(
+      "telegram"
+    )
   ) {
     return "telegram";
   }
 
-  if (normalized.includes("instagram")) {
+  if (
+    normalized.includes(
+      "instagram"
+    )
+  ) {
     return "instagram";
   }
 
   return "unknown";
 }
 
-function getPhoneUrl(phone: string) {
-  return `tel:${phone.replace(/[^+\d]/g, "")}`;
+function getPhoneUrl(
+  phone: string
+) {
+  return `tel:${phone.replace(
+    /[^+\d]/g,
+    ""
+  )}`;
 }
 
-function safeParseArray<T>(value: string | null): T[] {
+function safeParseArray<T>(
+  value: string | null
+): T[] {
   if (!value) return [];
 
   try {
-    const parsed = JSON.parse(value);
+    const parsed =
+      JSON.parse(value);
 
-    return Array.isArray(parsed)
+    return Array.isArray(
+      parsed
+    )
       ? parsed
       : [];
   } catch {
@@ -596,193 +919,309 @@ function safeParseArray<T>(value: string | null): T[] {
   }
 }
 
-function getStatusBadgeClass(status: AppointmentStatus) {
-  if (status === "completed") {
+function getStatusBadgeClass(
+  status: AppointmentStatus
+) {
+  if (
+    status === "completed"
+  ) {
     return "border-green-200 bg-green-50 text-green-700";
   }
 
-  if (status === "cancelled") {
+  if (
+    status === "cancelled"
+  ) {
     return "border-red-200 bg-red-50 text-red-600";
   }
 
-  if (status === "no-show") {
+  if (
+    status === "no-show"
+  ) {
     return "border-orange-200 bg-orange-50 text-orange-700";
   }
 
-  return "border-blue-200 bg-blue-50 text-blue-700";
+  return "border-rose-200 bg-rose-100 text-rose-700";
 }
 
-function getAppointmentCardClass(status: AppointmentStatus) {
-  if (status === "completed") {
+function getAppointmentCardClass(
+  status: AppointmentStatus
+) {
+  if (
+    status === "completed"
+  ) {
     return "border-green-400 bg-green-50/95";
   }
 
-  if (status === "cancelled") {
+  if (
+    status === "cancelled"
+  ) {
     return "border-red-300 bg-red-50/90";
   }
 
-  if (status === "no-show") {
+  if (
+    status === "no-show"
+  ) {
     return "border-orange-300 bg-orange-50/90";
   }
 
-  return "border-neutral-400 bg-neutral-200/90";
+  return "border-rose-300 bg-rose-100/95";
 }
 
 export default function Home() {
-  const supabase = useMemo(
-    () => createClient(),
-    []
-  );
+  const supabase =
+    useMemo(
+      () => createClient(),
+      []
+    );
 
-  const [today, setToday] = useState(
-    new Date("2000-01-01T12:00:00")
-  );
+  const [today, setToday] =
+    useState(
+      new Date(
+        "2000-01-01T12:00:00"
+      )
+    );
 
-  const todayKey = formatDateKey(today);
+  const todayKey =
+    formatDateKey(today);
 
-  const [session, setSession] =
-    useState<Session | null>(null);
+  const [
+    session,
+    setSession,
+  ] =
+    useState<Session | null>(
+      null
+    );
 
-  const [authChecked, setAuthChecked] =
+  const [
+    authChecked,
+    setAuthChecked,
+  ] =
     useState(false);
 
-  const [loginEmail, setLoginEmail] =
+  const [
+    loginEmail,
+    setLoginEmail,
+  ] =
     useState("");
 
-  const [loginPassword, setLoginPassword] =
+  const [
+    loginPassword,
+    setLoginPassword,
+  ] =
     useState("");
 
-  const [loginError, setLoginError] =
+  const [
+    loginError,
+    setLoginError,
+  ] =
     useState("");
 
-  const [loginLoading, setLoginLoading] =
+  const [
+    loginLoading,
+    setLoginLoading,
+  ] =
     useState(false);
 
-  const [language, setLanguage] =
+  const [
+    language,
+    setLanguage,
+  ] =
     useState<Language>("uk");
 
-  const t = translations[language];
+  const t =
+    translations[language];
 
-  const [databaseStatus, setDatabaseStatus] =
-    useState<DatabaseStatus>("connecting");
-
-  const [activeTab, setActiveTab] =
-    useState<Tab>("calendar");
-
-  const [calendarView, setCalendarView] =
-    useState<CalendarView>("day");
-
-  const [selectedDate, setSelectedDate] =
-    useState(
-      new Date("2000-01-01T12:00:00")
+  const [
+    databaseStatus,
+    setDatabaseStatus,
+  ] =
+    useState<DatabaseStatus>(
+      "connecting"
     );
 
-  const [visibleMonth, setVisibleMonth] =
-    useState(
-      new Date("2000-01-01T12:00:00")
+  const [
+    activeTab,
+    setActiveTab,
+  ] =
+    useState<Tab>(
+      "calendar"
     );
 
-  const [appointments, setAppointments] =
-    useState<Appointment[]>([]);
+  const [
+    calendarView,
+    setCalendarView,
+  ] =
+    useState<CalendarView>(
+      "day"
+    );
 
-  const [clients, setClients] =
-    useState<Client[]>([]);
+  const [
+    selectedDate,
+    setSelectedDate,
+  ] =
+    useState(
+      new Date(
+        "2000-01-01T12:00:00"
+      )
+    );
 
-  const [services, setServices] =
-    useState<Service[]>([]);
+  const [
+    visibleMonth,
+    setVisibleMonth,
+  ] =
+    useState(
+      new Date(
+        "2000-01-01T12:00:00"
+      )
+    );
 
-  const [workSettings, setWorkSettings] =
+  const [
+    appointments,
+    setAppointments,
+  ] =
+    useState<
+      Appointment[]
+    >([]);
+
+  const [
+    clients,
+    setClients,
+  ] =
+    useState<Client[]>(
+      []
+    );
+
+  const [
+    services,
+    setServices,
+  ] =
+    useState<Service[]>(
+      []
+    );
+
+  const [
+    workSettings,
+    setWorkSettings,
+  ] =
     useState<WorkSettings>(
       DEFAULT_WORK_SETTINGS
     );
 
-  const [isLoaded, setIsLoaded] =
+  const [
+    isLoaded,
+    setIsLoaded,
+  ] =
     useState(false);
 
   const [
     isAppointmentModalOpen,
     setIsAppointmentModalOpen,
-  ] = useState(false);
+  ] =
+    useState(false);
 
   const [
     isClientModalOpen,
     setIsClientModalOpen,
-  ] = useState(false);
+  ] =
+    useState(false);
 
   const [
     isClientDetailsOpen,
     setIsClientDetailsOpen,
-  ] = useState(false);
+  ] =
+    useState(false);
 
   const [
     isServiceModalOpen,
     setIsServiceModalOpen,
-  ] = useState(false);
+  ] =
+    useState(false);
 
   const [
     isReminderModalOpen,
     setIsReminderModalOpen,
-  ] = useState(false);
+  ] =
+    useState(false);
 
   const [
     editingAppointmentId,
     setEditingAppointmentId,
-  ] = useState<number | null>(null);
+  ] =
+    useState<
+      number | null
+    >(null);
 
   const [
     editingClientId,
     setEditingClientId,
-  ] = useState<number | null>(null);
+  ] =
+    useState<
+      number | null
+    >(null);
 
   const [
     editingServiceId,
     setEditingServiceId,
-  ] = useState<number | null>(null);
+  ] =
+    useState<
+      number | null
+    >(null);
 
   const [
     selectedClientDetailsId,
     setSelectedClientDetailsId,
-  ] = useState<number | null>(null);
+  ] =
+    useState<
+      number | null
+    >(null);
 
   const [
     selectedClientId,
     setSelectedClientId,
-  ] = useState("");
+  ] =
+    useState("");
 
   const [
     selectedServiceId,
     setSelectedServiceId,
-  ] = useState("");
+  ] =
+    useState("");
 
   const [
     appointmentName,
     setAppointmentName,
-  ] = useState("");
+  ] =
+    useState("");
 
   const [
     appointmentDate,
     setAppointmentDate,
-  ] = useState("");
+  ] =
+    useState("");
 
   const [
     appointmentTime,
     setAppointmentTime,
-  ] = useState("");
+  ] =
+    useState("");
 
   const [
     appointmentService,
     setAppointmentService,
-  ] = useState("");
+  ] =
+    useState("");
 
   const [
     appointmentDuration,
     setAppointmentDuration,
-  ] = useState("90");
+  ] =
+    useState("90");
 
   const [
     appointmentPrice,
     setAppointmentPrice,
-  ] = useState("");
+  ] =
+    useState("");
 
   const [
     appointmentStatus,
@@ -795,55 +1234,92 @@ export default function Home() {
   const [
     appointmentError,
     setAppointmentError,
-  ] = useState("");
+  ] =
+    useState("");
 
-  const [hasConflict, setHasConflict] =
+  const [
+    hasConflict,
+    setHasConflict,
+  ] =
     useState(false);
 
-  const [clientName, setClientName] =
+  const [
+    clientName,
+    setClientName,
+  ] =
     useState("");
 
-  const [clientPhone, setClientPhone] =
+  const [
+    clientPhone,
+    setClientPhone,
+  ] =
     useState("");
 
-  const [clientSocial, setClientSocial] =
+  const [
+    clientSocial,
+    setClientSocial,
+  ] =
     useState("");
 
-  const [clientNote, setClientNote] =
+  const [
+    clientNote,
+    setClientNote,
+  ] =
     useState("");
 
-  const [serviceName, setServiceName] =
+  const [
+    serviceName,
+    setServiceName,
+  ] =
     useState("");
 
   const [
     serviceDuration,
     setServiceDuration,
-  ] = useState("90");
+  ] =
+    useState("90");
 
-  const [servicePrice, setServicePrice] =
+  const [
+    servicePrice,
+    setServicePrice,
+  ] =
     useState("");
 
-  const [clientSearch, setClientSearch] =
+  const [
+    clientSearch,
+    setClientSearch,
+  ] =
     useState("");
 
-  const [reminderText, setReminderText] =
+  const [
+    reminderText,
+    setReminderText,
+  ] =
     useState("");
 
   const [
     reminderClientId,
     setReminderClientId,
-  ] = useState<number | null>(null);
+  ] =
+    useState<
+      number | null
+    >(null);
 
   const [
     reminderCopied,
     setReminderCopied,
-  ] = useState(false);
+  ] =
+    useState(false);
 
   useEffect(() => {
-    const current = new Date();
+    const current =
+      new Date();
 
     setToday(current);
-    setSelectedDate(current);
+
+    setSelectedDate(
+      current
+    );
 
     setVisibleMonth(
       new Date(
@@ -861,25 +1337,53 @@ export default function Home() {
       );
 
     if (
-      localLanguage === "ru" ||
-      localLanguage === "uk"
+      localLanguage ===
+        "ru" ||
+      localLanguage ===
+        "uk"
     ) {
-      setLanguage(localLanguage);
+      setLanguage(
+        localLanguage
+      );
     }
 
     const {
-      data: { subscription },
+      data: {
+        subscription,
+      },
     } =
       supabase.auth.onAuthStateChange(
-        (_event, nextSession) => {
-          setSession(nextSession);
-          setAuthChecked(true);
+        (
+          _event,
+          nextSession
+        ) => {
+          setSession(
+            nextSession
+          );
 
-          if (!nextSession) {
-            setIsLoaded(false);
-            setClients([]);
-            setServices([]);
-            setAppointments([]);
+          setAuthChecked(
+            true
+          );
+
+          if (
+            !nextSession
+          ) {
+            setIsLoaded(
+              false
+            );
+
+            setClients(
+              []
+            );
+
+            setServices(
+              []
+            );
+
+            setAppointments(
+              []
+            );
+
             setDatabaseStatus(
               "connecting"
             );
@@ -897,7 +1401,10 @@ export default function Home() {
 
     async function loadData() {
       setIsLoaded(false);
-      setDatabaseStatus("connecting");
+
+      setDatabaseStatus(
+        "connecting"
+      );
 
       try {
         const [
@@ -905,68 +1412,120 @@ export default function Home() {
           servicesResult,
           appointmentsResult,
           settingsResult,
-        ] = await Promise.all([
-          supabase
-            .from("clients")
-            .select("*")
-            .order("name"),
+        ] =
+          await Promise.all([
+            supabase
+              .from(
+                "clients"
+              )
+              .select("*")
+              .order(
+                "name"
+              ),
 
-          supabase
-            .from("services")
-            .select("*")
-            .order("name"),
+            supabase
+              .from(
+                "services"
+              )
+              .select("*")
+              .order(
+                "name"
+              ),
 
-          supabase
-            .from("appointments")
-            .select("*")
-            .order("date")
-            .order("time"),
+            supabase
+              .from(
+                "appointments"
+              )
+              .select("*")
+              .order(
+                "date"
+              )
+              .order(
+                "time"
+              ),
 
-          supabase
-            .from("settings")
-            .select("*")
-            .eq("id", "main")
-            .maybeSingle(),
-        ]);
+            supabase
+              .from(
+                "settings"
+              )
+              .select("*")
+              .eq(
+                "id",
+                "main"
+              )
+              .maybeSingle(),
+          ]);
 
-        if (clientsResult.error) {
+        if (
+          clientsResult.error
+        ) {
           throw clientsResult.error;
         }
 
-        if (servicesResult.error) {
+        if (
+          servicesResult.error
+        ) {
           throw servicesResult.error;
         }
 
-        if (appointmentsResult.error) {
+        if (
+          appointmentsResult.error
+        ) {
           throw appointmentsResult.error;
         }
 
-        if (settingsResult.error) {
+        if (
+          settingsResult.error
+        ) {
           throw settingsResult.error;
         }
 
         const databaseClients: Client[] =
-          (clientsResult.data ?? []).map(
+          (
+            clientsResult.data ??
+            []
+          ).map(
             (row) => ({
-              id: Number(row.id),
-              name: row.name ?? "",
-              phone: row.phone ?? "",
-              social: row.social ?? "",
-              note: row.note ?? "",
+              id: Number(
+                row.id
+              ),
+              name:
+                row.name ??
+                "",
+              phone:
+                row.phone ??
+                "",
+              social:
+                row.social ??
+                "",
+              note:
+                row.note ??
+                "",
             })
           );
 
         const databaseServices: Service[] =
-          (servicesResult.data ?? []).map(
+          (
+            servicesResult.data ??
+            []
+          ).map(
             (row) => ({
-              id: Number(row.id),
-              name: row.name ?? "",
-              duration: Number(
-                row.duration ?? 90
+              id: Number(
+                row.id
               ),
-              price: Number(
-                row.price ?? 0
-              ),
+              name:
+                row.name ??
+                "",
+              duration:
+                Number(
+                  row.duration ??
+                    90
+                ),
+              price:
+                Number(
+                  row.price ??
+                    0
+                ),
             })
           );
 
@@ -974,44 +1533,70 @@ export default function Home() {
           (
             appointmentsResult.data ??
             []
-          ).map((row) => ({
-            id: Number(row.id),
-            date: row.date ?? "",
-            time: String(
-              row.time ?? ""
-            ).slice(0, 5),
+          ).map(
+            (row) => ({
+              id: Number(
+                row.id
+              ),
 
-            clientId:
-              row.client_id !== null &&
-              row.client_id !== undefined
-                ? Number(row.client_id)
-                : undefined,
+              date:
+                row.date ??
+                "",
 
-            name: row.name ?? "",
+              time:
+                String(
+                  row.time ??
+                    ""
+                ).slice(
+                  0,
+                  5
+                ),
 
-            serviceId:
-              row.service_id !== null &&
-              row.service_id !== undefined
-                ? Number(
-                    row.service_id
-                  )
-                : undefined,
+              clientId:
+                row.client_id !==
+                  null &&
+                row.client_id !==
+                  undefined
+                  ? Number(
+                      row.client_id
+                    )
+                  : undefined,
 
-            service:
-              row.service ?? "",
+              name:
+                row.name ??
+                "",
 
-            duration: Number(
-              row.duration ?? 90
-            ),
+              serviceId:
+                row.service_id !==
+                  null &&
+                row.service_id !==
+                  undefined
+                  ? Number(
+                      row.service_id
+                    )
+                  : undefined,
 
-            price: Number(
-              row.price ?? 0
-            ),
+              service:
+                row.service ??
+                "",
 
-            status:
-              (row.status ??
-                "scheduled") as AppointmentStatus,
-          }));
+              duration:
+                Number(
+                  row.duration ??
+                    90
+                ),
+
+              price:
+                Number(
+                  row.price ??
+                    0
+                ),
+
+              status:
+                (row.status ??
+                  "scheduled") as AppointmentStatus,
+            })
+          );
 
         const databaseIsEmpty =
           databaseClients.length ===
@@ -1055,14 +1640,22 @@ export default function Home() {
             localClients.length >
             0
           ) {
-            const { error } =
+            const {
+              error,
+            } =
               await supabase
-                .from("clients")
+                .from(
+                  "clients"
+                )
                 .upsert(
                   localClients.map(
-                    (client) => ({
-                      id: client.id,
-                      name: client.name,
+                    (
+                      client
+                    ) => ({
+                      id:
+                        client.id,
+                      name:
+                        client.name,
                       phone:
                         client.phone ??
                         "",
@@ -1089,23 +1682,32 @@ export default function Home() {
             localServices.length >
             0
           ) {
-            const { error } =
+            const {
+              error,
+            } =
               await supabase
-                .from("services")
+                .from(
+                  "services"
+                )
                 .upsert(
                   localServices.map(
-                    (service) => ({
-                      id: service.id,
+                    (
+                      service
+                    ) => ({
+                      id:
+                        service.id,
                       name:
                         service.name,
                       duration:
                         Number(
                           service.duration
-                        ) || 90,
+                        ) ||
+                        90,
                       price:
                         Number(
                           service.price
-                        ) || 0,
+                        ) ||
+                        0,
                     })
                   ),
                   {
@@ -1122,7 +1724,9 @@ export default function Home() {
           const validClientIds =
             new Set(
               localClients.map(
-                (client) =>
+                (
+                  client
+                ) =>
                   client.id
               )
             );
@@ -1130,7 +1734,9 @@ export default function Home() {
           const validServiceIds =
             new Set(
               localServices.map(
-                (service) =>
+                (
+                  service
+                ) =>
                   service.id
               )
             );
@@ -1139,7 +1745,9 @@ export default function Home() {
             localAppointments.length >
             0
           ) {
-            const { error } =
+            const {
+              error,
+            } =
               await supabase
                 .from(
                   "appointments"
@@ -1151,8 +1759,10 @@ export default function Home() {
                     ) => ({
                       id:
                         appointment.id,
+
                       date:
                         appointment.date,
+
                       time:
                         appointment.time,
 
@@ -1182,12 +1792,14 @@ export default function Home() {
                       duration:
                         Number(
                           appointment.duration
-                        ) || 90,
+                        ) ||
+                        90,
 
                       price:
                         Number(
                           appointment.price
-                        ) || 0,
+                        ) ||
+                        0,
 
                       status:
                         appointment.status ??
@@ -1210,17 +1822,27 @@ export default function Home() {
             "true"
           );
 
-          setClients(localClients);
-          setServices(localServices);
+          setClients(
+            localClients
+          );
+
+          setServices(
+            localServices
+          );
 
           setAppointments(
             localAppointments.map(
-              (appointment) => ({
+              (
+                appointment
+              ) => ({
                 ...appointment,
-                price: Number(
-                  appointment.price ??
-                    0
-                ),
+
+                price:
+                  Number(
+                    appointment.price ??
+                      0
+                  ),
+
                 status:
                   appointment.status ??
                   "scheduled",
@@ -1231,9 +1853,11 @@ export default function Home() {
           setClients(
             databaseClients
           );
+
           setServices(
             databaseServices
           );
+
           setAppointments(
             databaseAppointments
           );
@@ -1246,7 +1870,8 @@ export default function Home() {
             settingsResult.data;
 
           const nextLanguage: Language =
-            row.language === "ru"
+            row.language ===
+            "ru"
               ? "ru"
               : "uk";
 
@@ -1255,13 +1880,17 @@ export default function Home() {
           );
 
           setWorkSettings({
-            startHour: Number(
-              row.start_hour ?? 9
-            ),
+            startHour:
+              Number(
+                row.start_hour ??
+                  9
+              ),
 
-            endHour: Number(
-              row.end_hour ?? 21
-            ),
+            endHour:
+              Number(
+                row.end_hour ??
+                  21
+              ),
 
             workDays:
               Array.isArray(
@@ -1277,7 +1906,9 @@ export default function Home() {
         setDatabaseStatus(
           "connected"
         );
-      } catch (error) {
+      } catch (
+        error
+      ) {
         console.error(
           "Supabase load error:",
           error
@@ -1287,33 +1918,60 @@ export default function Home() {
           "error"
         );
       } finally {
-        setIsLoaded(true);
+        setIsLoaded(
+          true
+        );
       }
     }
 
     loadData();
-  }, [session, supabase]);
+  }, [
+    session,
+    supabase,
+  ]);
 
   useEffect(() => {
-    if (!isLoaded) return;
+    if (
+      !isLoaded
+    ) {
+      return;
+    }
 
     localStorage.setItem(
       CLIENTS_STORAGE_KEY,
-      JSON.stringify(clients)
+      JSON.stringify(
+        clients
+      )
     );
-  }, [clients, isLoaded]);
+  }, [
+    clients,
+    isLoaded,
+  ]);
 
   useEffect(() => {
-    if (!isLoaded) return;
+    if (
+      !isLoaded
+    ) {
+      return;
+    }
 
     localStorage.setItem(
       SERVICES_STORAGE_KEY,
-      JSON.stringify(services)
+      JSON.stringify(
+        services
+      )
     );
-  }, [services, isLoaded]);
+  }, [
+    services,
+    isLoaded,
+  ]);
 
   useEffect(() => {
-    if (!isLoaded) return;
+    if (
+      !isLoaded
+    ) {
+      return;
+    }
 
     localStorage.setItem(
       APPOINTMENTS_STORAGE_KEY,
@@ -1327,7 +1985,11 @@ export default function Home() {
   ]);
 
   useEffect(() => {
-    if (!isLoaded) return;
+    if (
+      !isLoaded
+    ) {
+      return;
+    }
 
     localStorage.setItem(
       LANGUAGE_STORAGE_KEY,
@@ -1359,19 +2021,29 @@ export default function Home() {
     const timer =
       window.setTimeout(
         async () => {
-          const { error } =
+          const {
+            error,
+          } =
             await supabase
-              .from("settings")
+              .from(
+                "settings"
+              )
               .upsert(
                 {
-                  id: "main",
+                  id:
+                    "main",
+
                   language,
+
                   start_hour:
                     workSettings.startHour,
+
                   end_hour:
                     workSettings.endHour,
+
                   work_days:
                     workSettings.workDays,
+
                   updated_at:
                     new Date().toISOString(),
                 },
@@ -1381,7 +2053,9 @@ export default function Home() {
                 }
               );
 
-          if (error) {
+          if (
+            error
+          ) {
             console.error(
               "Settings save error:",
               error
@@ -1413,46 +2087,81 @@ export default function Home() {
   ) {
     event.preventDefault();
 
-    setLoginError("");
-    setLoginLoading(true);
+    setLoginError(
+      ""
+    );
 
-    const { error } =
+    setLoginLoading(
+      true
+    );
+
+    const {
+      error,
+    } =
       await supabase.auth.signInWithPassword(
         {
           email:
             loginEmail.trim(),
+
           password:
             loginPassword,
         }
       );
 
     if (error) {
-      console.error(error);
+      console.error(
+        error
+      );
 
       setLoginError(
-        language === "uk"
+        language ===
+        "uk"
           ? "Невірний email або пароль."
           : "Неверный email или пароль."
       );
 
-      setLoginLoading(false);
+      setLoginLoading(
+        false
+      );
 
       return;
     }
 
-    setLoginPassword("");
-    setLoginLoading(false);
+    setLoginPassword(
+      ""
+    );
+
+    setLoginLoading(
+      false
+    );
   }
 
   async function handleLogout() {
     await supabase.auth.signOut();
 
-    setActiveTab("calendar");
-    setIsClientDetailsOpen(false);
-    setIsAppointmentModalOpen(false);
-    setIsClientModalOpen(false);
-    setIsServiceModalOpen(false);
-    setIsReminderModalOpen(false);
+    setActiveTab(
+      "calendar"
+    );
+
+    setIsClientDetailsOpen(
+      false
+    );
+
+    setIsAppointmentModalOpen(
+      false
+    );
+
+    setIsClientModalOpen(
+      false
+    );
+
+    setIsServiceModalOpen(
+      false
+    );
+
+    setIsReminderModalOpen(
+      false
+    );
   }
 
   const selectedDateKey =
@@ -1463,14 +2172,20 @@ export default function Home() {
   const selectedDayAppointments =
     appointments
       .filter(
-        (appointment) =>
+        (
+          appointment
+        ) =>
           appointment.date ===
           selectedDateKey
       )
-      .sort((a, b) =>
-        a.time.localeCompare(
-          b.time
-        )
+      .sort(
+        (
+          a,
+          b
+        ) =>
+          a.time.localeCompare(
+            b.time
+          )
       );
 
   const selectedDateIsToday =
@@ -1498,7 +2213,10 @@ export default function Home() {
           workSettings.startHour +
           1,
       },
-      (_, index) =>
+      (
+        _,
+        index
+      ) =>
         workSettings.startHour +
         index
     );
@@ -1517,7 +2235,9 @@ export default function Home() {
     selectedClientDetailsId !==
     null
       ? clients.find(
-          (client) =>
+          (
+            client
+          ) =>
             client.id ===
             selectedClientDetailsId
         )
@@ -1528,28 +2248,38 @@ export default function Home() {
     null
       ? appointments
           .filter(
-            (appointment) =>
+            (
+              appointment
+            ) =>
               appointment.clientId ===
               selectedClientDetailsId
           )
-          .sort((a, b) => {
-            if (
-              a.date !== b.date
-            ) {
-              return a.date.localeCompare(
+          .sort(
+            (
+              a,
+              b
+            ) => {
+              if (
+                a.date !==
                 b.date
+              ) {
+                return a.date.localeCompare(
+                  b.date
+                );
+              }
+
+              return a.time.localeCompare(
+                b.time
               );
             }
-
-            return a.time.localeCompare(
-              b.time
-            );
-          })
+          )
       : [];
 
   const futureClientAppointments =
     selectedClientAppointments.filter(
-      (appointment) =>
+      (
+        appointment
+      ) =>
         appointment.date >=
           todayKey &&
         appointment.status ===
@@ -1559,67 +2289,99 @@ export default function Home() {
   const pastClientAppointments =
     selectedClientAppointments
       .filter(
-        (appointment) =>
+        (
+          appointment
+        ) =>
           appointment.date <
             todayKey ||
           appointment.status !==
             "scheduled"
       )
-      .sort((a, b) => {
-        if (
-          a.date !== b.date
-        ) {
-          return b.date.localeCompare(
-            a.date
+      .sort(
+        (
+          a,
+          b
+        ) => {
+          if (
+            a.date !==
+            b.date
+          ) {
+            return b.date.localeCompare(
+              a.date
+            );
+          }
+
+          return b.time.localeCompare(
+            a.time
           );
         }
-
-        return b.time.localeCompare(
-          a.time
-        );
-      });
+      );
 
   const filteredClients =
-    [...clients]
-      .filter((client) => {
-        const search =
-          clientSearch
-            .trim()
-            .toLowerCase();
+    [
+      ...clients,
+    ]
+      .filter(
+        (
+          client
+        ) => {
+          const search =
+            clientSearch
+              .trim()
+              .toLowerCase();
 
-        if (!search) {
-          return true;
+          if (
+            !search
+          ) {
+            return true;
+          }
+
+          return (
+            client.name
+              .toLowerCase()
+              .includes(
+                search
+              ) ||
+            client.phone
+              .toLowerCase()
+              .includes(
+                search
+              ) ||
+            client.social
+              .toLowerCase()
+              .includes(
+                search
+              )
+          );
         }
-
-        return (
-          client.name
-            .toLowerCase()
-            .includes(search) ||
-          client.phone
-            .toLowerCase()
-            .includes(search) ||
-          client.social
-            .toLowerCase()
-            .includes(search)
-        );
-      })
-      .sort((a, b) =>
-        a.name.localeCompare(
-          b.name,
-          getLocale(language)
-        )
+      )
+      .sort(
+        (
+          a,
+          b
+        ) =>
+          a.name.localeCompare(
+            b.name,
+            getLocale(
+              language
+            )
+          )
       );
 
   const completedAppointments =
     appointments.filter(
-      (appointment) =>
+      (
+        appointment
+      ) =>
         appointment.status ===
         "completed"
     );
 
   const todayCompletedAppointments =
     completedAppointments.filter(
-      (appointment) =>
+      (
+        appointment
+      ) =>
         appointment.date ===
         todayKey
     );
@@ -1627,10 +2389,13 @@ export default function Home() {
   const sevenDaysAgo =
     useMemo(() => {
       const date =
-        new Date(today);
+        new Date(
+          today
+        );
 
       date.setDate(
-        date.getDate() - 6
+        date.getDate() -
+          6
       );
 
       return date;
@@ -1643,7 +2408,9 @@ export default function Home() {
 
   const weekCompletedAppointments =
     completedAppointments.filter(
-      (appointment) =>
+      (
+        appointment
+      ) =>
         appointment.date >=
           sevenDaysAgoKey &&
         appointment.date <=
@@ -1671,7 +2438,9 @@ export default function Home() {
 
   const currentMonthAppointments =
     appointments.filter(
-      (appointment) =>
+      (
+        appointment
+      ) =>
         appointment.date >=
           monthStartKey &&
         appointment.date <=
@@ -1680,7 +2449,9 @@ export default function Home() {
 
   const currentMonthCompletedAppointments =
     currentMonthAppointments.filter(
-      (appointment) =>
+      (
+        appointment
+      ) =>
         appointment.status ===
         "completed"
     );
@@ -1711,21 +2482,27 @@ export default function Home() {
 
   const monthScheduledCount =
     currentMonthAppointments.filter(
-      (appointment) =>
+      (
+        appointment
+      ) =>
         appointment.status ===
         "scheduled"
     ).length;
 
   const monthCancelledCount =
     currentMonthAppointments.filter(
-      (appointment) =>
+      (
+        appointment
+      ) =>
         appointment.status ===
         "cancelled"
     ).length;
 
   const monthNoShowCount =
     currentMonthAppointments.filter(
-      (appointment) =>
+      (
+        appointment
+      ) =>
         appointment.status ===
         "no-show"
     ).length;
@@ -1749,12 +2526,19 @@ export default function Home() {
             "Без услуги";
 
           if (
-            !accumulator[key]
+            !accumulator[
+              key
+            ]
           ) {
-            accumulator[key] = {
-              name: key,
-              count: 0,
-              income: 0,
+            accumulator[
+              key
+            ] = {
+              name:
+                key,
+              count:
+                0,
+              income:
+                0,
             };
           }
 
@@ -1774,25 +2558,35 @@ export default function Home() {
         },
         {}
       )
-    ).sort((a, b) => {
-      if (
-        b.count !== a.count
-      ) {
+    ).sort(
+      (
+        a,
+        b
+      ) => {
+        if (
+          b.count !==
+          a.count
+        ) {
+          return (
+            b.count -
+            a.count
+          );
+        }
+
         return (
-          b.count - a.count
+          b.income -
+          a.income
         );
       }
-
-      return (
-        b.income - a.income
-      );
-    });
+    );
 
   const reminderClient =
     reminderClientId !==
     null
       ? clients.find(
-          (client) =>
+          (
+            client
+          ) =>
             client.id ===
             reminderClientId
         )
@@ -1802,19 +2596,22 @@ export default function Home() {
     status: AppointmentStatus
   ) {
     if (
-      status === "completed"
+      status ===
+      "completed"
     ) {
       return t.completedStatus;
     }
 
     if (
-      status === "cancelled"
+      status ===
+      "cancelled"
     ) {
       return t.cancelledStatus;
     }
 
     if (
-      status === "no-show"
+      status ===
+      "no-show"
     ) {
       return t.noShowStatus;
     }
@@ -1826,14 +2623,18 @@ export default function Home() {
     amount: number
   ) {
     const newDate =
-      new Date(selectedDate);
+      new Date(
+        selectedDate
+      );
 
     newDate.setDate(
       newDate.getDate() +
         amount
     );
 
-    setSelectedDate(newDate);
+    setSelectedDate(
+      newDate
+    );
 
     setVisibleMonth(
       new Date(
@@ -1861,7 +2662,9 @@ export default function Home() {
     const current =
       new Date();
 
-    setSelectedDate(current);
+    setSelectedDate(
+      current
+    );
 
     setVisibleMonth(
       new Date(
@@ -1875,7 +2678,9 @@ export default function Home() {
   function selectMonthDate(
     date: Date
   ) {
-    setSelectedDate(date);
+    setSelectedDate(
+      date
+    );
 
     setVisibleMonth(
       new Date(
@@ -1885,17 +2690,23 @@ export default function Home() {
       )
     );
 
-    setCalendarView("day");
+    setCalendarView(
+      "day"
+    );
   }
 
   function getAppointmentsForDate(
     date: Date
   ) {
     const dateKey =
-      formatDateKey(date);
+      formatDateKey(
+        date
+      );
 
     return appointments.filter(
-      (appointment) =>
+      (
+        appointment
+      ) =>
         appointment.date ===
         dateKey
     );
@@ -1906,29 +2717,49 @@ export default function Home() {
       null
     );
 
-    setSelectedClientId("");
-    setSelectedServiceId("");
-    setAppointmentName("");
+    setSelectedClientId(
+      ""
+    );
+
+    setSelectedServiceId(
+      ""
+    );
+
+    setAppointmentName(
+      ""
+    );
 
     setAppointmentDate(
       selectedDateKey
     );
 
-    setAppointmentTime("");
-    setAppointmentService("");
+    setAppointmentTime(
+      ""
+    );
+
+    setAppointmentService(
+      ""
+    );
 
     setAppointmentDuration(
       "90"
     );
 
-    setAppointmentPrice("");
+    setAppointmentPrice(
+      ""
+    );
 
     setAppointmentStatus(
       "scheduled"
     );
 
-    setAppointmentError("");
-    setHasConflict(false);
+    setAppointmentError(
+      ""
+    );
+
+    setHasConflict(
+      false
+    );
   }
 
   function openNewAppointment(
@@ -1955,7 +2786,9 @@ export default function Home() {
     resetAppointmentForm();
 
     setSelectedClientId(
-      String(client.id)
+      String(
+        client.id
+      )
     );
 
     setAppointmentDate(
@@ -1966,8 +2799,13 @@ export default function Home() {
       false
     );
 
-    setActiveTab("calendar");
-    setCalendarView("day");
+    setActiveTab(
+      "calendar"
+    );
+
+    setCalendarView(
+      "day"
+    );
 
     setIsAppointmentModalOpen(
       true
@@ -2001,7 +2839,8 @@ export default function Home() {
 
     setAppointmentPrice(
       String(
-        appointment.price ?? 0
+        appointment.price ??
+          0
       )
     );
 
@@ -2033,16 +2872,26 @@ export default function Home() {
         )
       );
 
-      setAppointmentName("");
+      setAppointmentName(
+        ""
+      );
     } else {
-      setSelectedClientId("");
+      setSelectedClientId(
+        ""
+      );
+
       setAppointmentName(
         appointment.name
       );
     }
 
-    setAppointmentError("");
-    setHasConflict(false);
+    setAppointmentError(
+      ""
+    );
+
+    setHasConflict(
+      false
+    );
 
     setIsAppointmentModalOpen(
       true
@@ -2056,13 +2905,18 @@ export default function Home() {
     ignoreId: number | null
   ) {
     const newStart =
-      timeToMinutes(time);
+      timeToMinutes(
+        time
+      );
 
     const newEnd =
-      newStart + duration;
+      newStart +
+      duration;
 
     return appointments.find(
-      (appointment) => {
+      (
+        appointment
+      ) => {
         if (
           appointment.date !==
           date
@@ -2080,7 +2934,8 @@ export default function Home() {
         }
 
         if (
-          ignoreId !== null &&
+          ignoreId !==
+            null &&
           appointment.id ===
             ignoreId
         ) {
@@ -2109,7 +2964,9 @@ export default function Home() {
   async function actuallySaveAppointment() {
     const selectedClient =
       clients.find(
-        (client) =>
+        (
+          client
+        ) =>
           client.id ===
           Number(
             selectedClientId
@@ -2118,7 +2975,9 @@ export default function Home() {
 
     const selectedService =
       services.find(
-        (service) =>
+        (
+          service
+        ) =>
           service.id ===
           Number(
             selectedServiceId
@@ -2136,7 +2995,8 @@ export default function Home() {
 
     const price =
       Number(
-        appointmentPrice || 0
+        appointmentPrice ||
+          0
       );
 
     const appointmentId =
@@ -2145,14 +3005,20 @@ export default function Home() {
 
     const newAppointment: Appointment =
       {
-        id: appointmentId,
-        date: appointmentDate,
-        time: appointmentTime,
+        id:
+          appointmentId,
+
+        date:
+          appointmentDate,
+
+        time:
+          appointmentTime,
 
         clientId:
           selectedClient?.id,
 
-        name: finalName,
+        name:
+          finalName,
 
         serviceId:
           selectedService?.id,
@@ -2160,20 +3026,26 @@ export default function Home() {
         service:
           selectedService?.name ||
           appointmentService.trim() ||
-          (language === "uk"
+          (language ===
+          "uk"
             ? "Манікюр"
             : "Маникюр"),
 
         duration,
+
         price,
 
         status:
           appointmentStatus,
       };
 
-    const { error } =
+    const {
+      error,
+    } =
       await supabase
-        .from("appointments")
+        .from(
+          "appointments"
+        )
         .upsert(
           {
             id:
@@ -2209,12 +3081,17 @@ export default function Home() {
               newAppointment.status,
           },
           {
-            onConflict: "id",
+            onConflict:
+              "id",
           }
         );
 
-    if (error) {
-      console.error(error);
+    if (
+      error
+    ) {
+      console.error(
+        error
+      );
 
       window.alert(
         t.databaseSaveError
@@ -2233,7 +3110,9 @@ export default function Home() {
     ) {
       setAppointments(
         appointments.map(
-          (appointment) =>
+          (
+            appointment
+          ) =>
             appointment.id ===
             editingAppointmentId
               ? newAppointment
@@ -2259,12 +3138,19 @@ export default function Home() {
   }
 
   async function saveAppointment() {
-    setAppointmentError("");
-    setHasConflict(false);
+    setAppointmentError(
+      ""
+    );
+
+    setHasConflict(
+      false
+    );
 
     const selectedClient =
       clients.find(
-        (client) =>
+        (
+          client
+        ) =>
           client.id ===
           Number(
             selectedClientId
@@ -2275,7 +3161,9 @@ export default function Home() {
       selectedClient?.name ||
       appointmentName.trim();
 
-    if (!finalName) {
+    if (
+      !finalName
+    ) {
       setAppointmentError(
         t.clientRequired
       );
@@ -2283,7 +3171,9 @@ export default function Home() {
       return;
     }
 
-    if (!appointmentDate) {
+    if (
+      !appointmentDate
+    ) {
       setAppointmentError(
         t.dateRequired
       );
@@ -2291,7 +3181,9 @@ export default function Home() {
       return;
     }
 
-    if (!appointmentTime) {
+    if (
+      !appointmentTime
+    ) {
       setAppointmentError(
         t.timeRequired
       );
@@ -2318,7 +3210,9 @@ export default function Home() {
           editingAppointmentId
         );
 
-      if (conflict) {
+      if (
+        conflict
+      ) {
         const conflictStart =
           timeToMinutes(
             conflict.time
@@ -2329,16 +3223,14 @@ export default function Home() {
           conflict.duration;
 
         setAppointmentError(
-          `${t.conflict}: ${
-            conflict.name
-          }, ${
-            conflict.time
-          }–${minutesToTime(
+          `${t.conflict}: ${conflict.name}, ${conflict.time}–${minutesToTime(
             conflictEnd
           )}.`
         );
 
-        setHasConflict(true);
+        setHasConflict(
+          true
+        );
 
         return;
       }
@@ -2358,14 +3250,25 @@ export default function Home() {
       return;
     }
 
-    const { error } =
+    const {
+      error,
+    } =
       await supabase
-        .from("appointments")
+        .from(
+          "appointments"
+        )
         .delete()
-        .eq("id", id);
+        .eq(
+          "id",
+          id
+        );
 
-    if (error) {
-      console.error(error);
+    if (
+      error
+    ) {
+      console.error(
+        error
+      );
 
       window.alert(
         t.databaseDeleteError
@@ -2380,8 +3283,11 @@ export default function Home() {
 
     setAppointments(
       appointments.filter(
-        (appointment) =>
-          appointment.id !== id
+        (
+          appointment
+        ) =>
+          appointment.id !==
+          id
       )
     );
 
@@ -2395,11 +3301,25 @@ export default function Home() {
   }
 
   function resetClientForm() {
-    setEditingClientId(null);
-    setClientName("");
-    setClientPhone("");
-    setClientSocial("");
-    setClientNote("");
+    setEditingClientId(
+      null
+    );
+
+    setClientName(
+      ""
+    );
+
+    setClientPhone(
+      ""
+    );
+
+    setClientSocial(
+      ""
+    );
+
+    setClientNote(
+      ""
+    );
   }
 
   function openNewClient() {
@@ -2467,7 +3387,8 @@ export default function Home() {
 
     const newClient: Client =
       {
-        id: clientId,
+        id:
+          clientId,
 
         name:
           clientName.trim(),
@@ -2482,34 +3403,45 @@ export default function Home() {
           clientNote.trim(),
       };
 
-    const { error } =
+    const {
+      error,
+    } =
       await supabase
-        .from("clients")
+        .from(
+          "clients"
+        )
         .upsert(
           {
-            id: newClient.id,
-            name: newClient.name,
+            id:
+              newClient.id,
+
+            name:
+              newClient.name,
+
             phone:
               newClient.phone,
+
             social:
               newClient.social,
+
             note:
               newClient.note,
           },
           {
-            onConflict: "id",
+            onConflict:
+              "id",
           }
         );
 
-    if (error) {
-      console.error(error);
+    if (
+      error
+    ) {
+      console.error(
+        error
+      );
 
       window.alert(
         t.databaseSaveError
-      );
-
-      setDatabaseStatus(
-        "error"
       );
 
       return;
@@ -2519,34 +3451,24 @@ export default function Home() {
       editingClientId !==
       null
     ) {
-      const {
-        error:
-          appointmentsError,
-      } =
-        await supabase
-          .from(
-            "appointments"
-          )
-          .update({
-            name:
-              newClient.name,
-          })
-          .eq(
-            "client_id",
-            editingClientId
-          );
-
-      if (
-        appointmentsError
-      ) {
-        console.error(
-          appointmentsError
+      await supabase
+        .from(
+          "appointments"
+        )
+        .update({
+          name:
+            newClient.name,
+        })
+        .eq(
+          "client_id",
+          editingClientId
         );
-      }
 
       setClients(
         clients.map(
-          (client) =>
+          (
+            client
+          ) =>
             client.id ===
             editingClientId
               ? newClient
@@ -2556,11 +3478,14 @@ export default function Home() {
 
       setAppointments(
         appointments.map(
-          (appointment) =>
+          (
+            appointment
+          ) =>
             appointment.clientId ===
             editingClientId
               ? {
                   ...appointment,
+
                   name:
                     newClient.name,
                 }
@@ -2596,21 +3521,28 @@ export default function Home() {
       return;
     }
 
-    const { error } =
+    const {
+      error,
+    } =
       await supabase
-        .from("clients")
+        .from(
+          "clients"
+        )
         .delete()
-        .eq("id", id);
+        .eq(
+          "id",
+          id
+        );
 
-    if (error) {
-      console.error(error);
+    if (
+      error
+    ) {
+      console.error(
+        error
+      );
 
       window.alert(
         t.databaseDeleteError
-      );
-
-      setDatabaseStatus(
-        "error"
       );
 
       return;
@@ -2618,18 +3550,24 @@ export default function Home() {
 
     setClients(
       clients.filter(
-        (client) =>
-          client.id !== id
+        (
+          client
+        ) =>
+          client.id !==
+          id
       )
     );
 
     setAppointments(
       appointments.map(
-        (appointment) =>
+        (
+          appointment
+        ) =>
           appointment.clientId ===
           id
             ? {
                 ...appointment,
+
                 clientId:
                   undefined,
               }
@@ -2651,10 +3589,21 @@ export default function Home() {
   }
 
   function resetServiceForm() {
-    setEditingServiceId(null);
-    setServiceName("");
-    setServiceDuration("90");
-    setServicePrice("");
+    setEditingServiceId(
+      null
+    );
+
+    setServiceName(
+      ""
+    );
+
+    setServiceDuration(
+      "90"
+    );
+
+    setServicePrice(
+      ""
+    );
   }
 
   function openNewService() {
@@ -2706,7 +3655,8 @@ export default function Home() {
 
     const newService: Service =
       {
-        id: serviceId,
+        id:
+          serviceId,
 
         name:
           serviceName.trim(),
@@ -2718,13 +3668,18 @@ export default function Home() {
 
         price:
           Number(
-            servicePrice || 0
+            servicePrice ||
+              0
           ),
       };
 
-    const { error } =
+    const {
+      error,
+    } =
       await supabase
-        .from("services")
+        .from(
+          "services"
+        )
         .upsert(
           {
             id:
@@ -2740,19 +3695,20 @@ export default function Home() {
               newService.price,
           },
           {
-            onConflict: "id",
+            onConflict:
+              "id",
           }
         );
 
-    if (error) {
-      console.error(error);
+    if (
+      error
+    ) {
+      console.error(
+        error
+      );
 
       window.alert(
         t.databaseSaveError
-      );
-
-      setDatabaseStatus(
-        "error"
       );
 
       return;
@@ -2764,7 +3720,9 @@ export default function Home() {
     ) {
       setServices(
         services.map(
-          (service) =>
+          (
+            service
+          ) =>
             service.id ===
             editingServiceId
               ? newService
@@ -2800,21 +3758,28 @@ export default function Home() {
       return;
     }
 
-    const { error } =
+    const {
+      error,
+    } =
       await supabase
-        .from("services")
+        .from(
+          "services"
+        )
         .delete()
-        .eq("id", id);
+        .eq(
+          "id",
+          id
+        );
 
-    if (error) {
-      console.error(error);
+    if (
+      error
+    ) {
+      console.error(
+        error
+      );
 
       window.alert(
         t.databaseDeleteError
-      );
-
-      setDatabaseStatus(
-        "error"
       );
 
       return;
@@ -2822,18 +3787,24 @@ export default function Home() {
 
     setServices(
       services.filter(
-        (service) =>
-          service.id !== id
+        (
+          service
+        ) =>
+          service.id !==
+          id
       )
     );
 
     setAppointments(
       appointments.map(
-        (appointment) =>
+        (
+          appointment
+        ) =>
           appointment.serviceId ===
           id
             ? {
                 ...appointment,
+
                 serviceId:
                   undefined,
               }
@@ -2850,7 +3821,9 @@ export default function Home() {
     clientId: number
   ) {
     return appointments.filter(
-      (appointment) =>
+      (
+        appointment
+      ) =>
         appointment.clientId ===
         clientId
     ).length;
@@ -2864,18 +3837,24 @@ export default function Home() {
     ) {
       const client =
         clients.find(
-          (item) =>
+          (
+            item
+          ) =>
             item.id ===
             appointment.clientId
         );
 
-      if (client) {
+      if (
+        client
+      ) {
         return client;
       }
     }
 
     return clients.find(
-      (client) =>
+      (
+        client
+      ) =>
         client.name
           .trim()
           .toLowerCase() ===
@@ -2898,7 +3877,8 @@ export default function Home() {
     const clickedHour =
       workSettings.startHour +
       Math.floor(
-        y / HOUR_HEIGHT
+        y /
+          HOUR_HEIGHT
       );
 
     if (
@@ -2910,9 +3890,13 @@ export default function Home() {
       return;
     }
 
-    const time = `${String(
-      clickedHour
-    ).padStart(2, "0")}:00`;
+    const time =
+      `${String(
+        clickedHour
+      ).padStart(
+        2,
+        "0"
+      )}:00`;
 
     openNewAppointment(
       time
@@ -2920,8 +3904,13 @@ export default function Home() {
   }
 
   function clearAppointmentWarning() {
-    setAppointmentError("");
-    setHasConflict(false);
+    setAppointmentError(
+      ""
+    );
+
+    setHasConflict(
+      false
+    );
   }
 
   function handleServiceSelection(
@@ -2933,18 +3922,26 @@ export default function Home() {
 
     clearAppointmentWarning();
 
-    if (!serviceId) {
+    if (
+      !serviceId
+    ) {
       return;
     }
 
     const service =
       services.find(
-        (item) =>
+        (
+          item
+        ) =>
           item.id ===
-          Number(serviceId)
+          Number(
+            serviceId
+          )
       );
 
-    if (!service) {
+    if (
+      !service
+    ) {
       return;
     }
 
@@ -2978,8 +3975,11 @@ export default function Home() {
 
         workDays:
           workSettings.workDays.filter(
-            (item) =>
-              item !== day
+            (
+              item
+            ) =>
+              item !==
+              day
           ),
       });
     } else {
@@ -3001,7 +4001,9 @@ export default function Home() {
       appointment.clientId !==
       undefined
         ? clients.find(
-            (item) =>
+            (
+              item
+            ) =>
               item.id ===
               appointment.clientId
           )
@@ -3019,10 +4021,13 @@ export default function Home() {
       `Послуга: ${appointment.service}. ` +
       `Чекаю на вас ❤️`;
 
-    setReminderText(text);
+    setReminderText(
+      text
+    );
 
     setReminderClientId(
-      client?.id ?? null
+      client?.id ??
+        null
     );
 
     setReminderCopied(
@@ -3053,7 +4058,9 @@ export default function Home() {
   function openExternal(
     url: string
   ) {
-    if (!url) return;
+    if (!url) {
+      return;
+    }
 
     window.open(
       url,
@@ -3062,17 +4069,19 @@ export default function Home() {
     );
   }
 
-  if (!authChecked) {
+  if (
+    !authChecked
+  ) {
     return (
       <main
         className="flex h-dvh items-center justify-center bg-cover bg-center"
         style={{
           backgroundImage:
-            "linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.35)), url('/background.jpg')",
+            "linear-gradient(rgba(255,240,246,0.30), rgba(255,240,246,0.30)), url('/background.jpg')",
         }}
       >
-        <div className="rounded-3xl bg-white/95 px-8 py-7 text-center shadow-2xl backdrop-blur">
-          <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-neutral-300 border-t-black" />
+        <div className="rounded-3xl bg-rose-50/95 px-8 py-7 text-center shadow-2xl backdrop-blur">
+          <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-rose-200 border-t-black" />
 
           <p className="mt-4 font-semibold">
             Nails Calendar
@@ -3086,16 +4095,18 @@ export default function Home() {
     );
   }
 
-  if (!session) {
+  if (
+    !session
+  ) {
     return (
       <main
         className="flex h-dvh items-center justify-center bg-cover bg-center px-5"
         style={{
           backgroundImage:
-            "linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.45)), url('/background.jpg')",
+            "linear-gradient(rgba(255,235,243,0.42), rgba(255,235,243,0.42)), url('/background.jpg')",
         }}
       >
-        <div className="w-full max-w-sm rounded-3xl bg-white/95 p-6 shadow-2xl backdrop-blur-md">
+        <div className="w-full max-w-sm rounded-3xl bg-rose-50/95 p-6 shadow-2xl backdrop-blur-md">
           <div className="text-center">
             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-black text-2xl text-white">
               ✦
@@ -3111,7 +4122,9 @@ export default function Home() {
           </div>
 
           <form
-            onSubmit={handleLogin}
+            onSubmit={
+              handleLogin
+            }
             className="mt-7 space-y-4"
           >
             <div>
@@ -3123,16 +4136,23 @@ export default function Home() {
                 type="email"
                 autoComplete="email"
                 required
-                value={loginEmail}
-                onChange={(event) => {
+                value={
+                  loginEmail
+                }
+                onChange={(
+                  event
+                ) => {
                   setLoginEmail(
-                    event.target.value
+                    event.target
+                      .value
                   );
 
-                  setLoginError("");
+                  setLoginError(
+                    ""
+                  );
                 }}
                 placeholder="name@example.com"
-                className="w-full rounded-xl border border-neutral-300 bg-white px-4 py-3 text-black caret-black outline-none placeholder:text-neutral-400 focus:border-black"
+                className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3 text-black caret-black outline-none placeholder:text-neutral-400 focus:border-rose-400"
               />
             </div>
 
@@ -3145,28 +4165,39 @@ export default function Home() {
                 type="password"
                 autoComplete="current-password"
                 required
-                value={loginPassword}
-                onChange={(event) => {
+                value={
+                  loginPassword
+                }
+                onChange={(
+                  event
+                ) => {
                   setLoginPassword(
-                    event.target.value
+                    event.target
+                      .value
                   );
 
-                  setLoginError("");
+                  setLoginError(
+                    ""
+                  );
                 }}
                 placeholder="••••••••"
-                className="w-full rounded-xl border border-neutral-300 bg-white px-4 py-3 text-black caret-black outline-none placeholder:text-neutral-400 focus:border-black"
+                className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3 text-black caret-black outline-none placeholder:text-neutral-400 focus:border-rose-400"
               />
             </div>
 
             {loginError && (
               <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-                {loginError}
+                {
+                  loginError
+                }
               </div>
             )}
 
             <button
               type="submit"
-              disabled={loginLoading}
+              disabled={
+                loginLoading
+              }
               className="w-full rounded-xl bg-black px-4 py-4 font-medium text-white disabled:opacity-50"
             >
               {loginLoading
@@ -3183,24 +4214,27 @@ export default function Home() {
     );
   }
 
-  if (!isLoaded) {
+  if (
+    !isLoaded
+  ) {
     return (
       <main
         className="flex h-dvh items-center justify-center bg-cover bg-center"
         style={{
           backgroundImage:
-            "linear-gradient(rgba(255,255,255,0.25), rgba(255,255,255,0.25)), url('/background.jpg')",
+            "linear-gradient(rgba(255,240,246,0.35), rgba(255,240,246,0.35)), url('/background.jpg')",
         }}
       >
-        <div className="rounded-2xl bg-white/90 px-6 py-5 text-center shadow-xl backdrop-blur">
-          <div className="mx-auto h-7 w-7 animate-spin rounded-full border-2 border-neutral-300 border-t-black" />
+        <div className="rounded-2xl bg-rose-50/95 px-6 py-5 text-center shadow-xl backdrop-blur">
+          <div className="mx-auto h-7 w-7 animate-spin rounded-full border-2 border-rose-200 border-t-black" />
 
           <p className="mt-3 text-sm font-medium">
             Supabase
           </p>
 
           <p className="mt-1 text-xs text-neutral-500">
-            {language === "uk"
+            {language ===
+            "uk"
               ? "Завантаження даних..."
               : "Загрузка данных..."}
           </p>
@@ -3214,18 +4248,20 @@ export default function Home() {
       className="h-dvh overflow-hidden bg-cover bg-center text-neutral-900"
       style={{
         backgroundImage:
-          "linear-gradient(rgba(255,255,255,0.25), rgba(255,255,255,0.25)), url('/background.jpg')",
+          "linear-gradient(rgba(255,235,243,0.25), rgba(255,235,243,0.25)), url('/background.jpg')",
       }}
     >
-      <div className="mx-auto flex h-dvh max-w-md flex-col overflow-hidden bg-white/90 shadow-2xl backdrop-blur-[2px]">
-        {activeTab === "calendar" && (
+      <div className="mx-auto flex h-dvh max-w-md flex-col overflow-hidden bg-rose-50/95 shadow-2xl backdrop-blur-[2px]">
+        {activeTab ===
+          "calendar" && (
           <div className="flex min-h-0 flex-1 flex-col">
-            <header className="z-20 shrink-0 border-b border-neutral-200 bg-white/90 backdrop-blur-md">
+            <header className="z-20 shrink-0 border-b border-rose-200 bg-rose-50/95 backdrop-blur-md">
               <div className="px-5 pb-3 pt-4">
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="text-sm capitalize text-neutral-500">
-                      {calendarView === "day"
+                      {calendarView ===
+                      "day"
                         ? selectedDateIsToday
                           ? t.today
                           : formatWeekday(
@@ -3236,7 +4272,8 @@ export default function Home() {
                     </p>
 
                     <h1 className="text-2xl font-semibold capitalize">
-                      {calendarView === "day"
+                      {calendarView ===
+                      "day"
                         ? formatDateTitle(
                             selectedDate,
                             language
@@ -3248,23 +4285,31 @@ export default function Home() {
                     </h1>
 
                     <p className="mt-1 text-xs text-neutral-400">
-                      {calendarView === "day"
+                      {calendarView ===
+                      "day"
                         ? `${t.records}: ${selectedDayAppointments.length}`
                         : `${t.totalRecords}: ${
                             appointments.filter(
-                              (appointment) => {
+                              (
+                                appointment
+                              ) => {
                                 const [
                                   year,
                                   month,
                                 ] =
                                   appointment.date
-                                    .split("-")
-                                    .map(Number);
+                                    .split(
+                                      "-"
+                                    )
+                                    .map(
+                                      Number
+                                    );
 
                                 return (
                                   year ===
                                     visibleMonth.getFullYear() &&
-                                  month - 1 ===
+                                  month -
+                                    1 ===
                                     visibleMonth.getMonth()
                                 );
                               }
@@ -3277,13 +4322,13 @@ export default function Home() {
                     onClick={() =>
                       openNewAppointment()
                     }
-                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-black text-2xl text-white"
+                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-black text-2xl text-white shadow-sm"
                   >
                     +
                   </button>
                 </div>
 
-                <div className="mt-4 grid grid-cols-2 rounded-xl bg-neutral-100 p-1">
+                <div className="mt-4 grid grid-cols-2 rounded-xl bg-rose-100 p-1">
                   <button
                     onClick={() =>
                       setCalendarView(
@@ -3326,22 +4371,28 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-[48px_1fr_48px] items-center border-t border-neutral-100 px-3 py-2">
+              <div className="grid grid-cols-[48px_1fr_48px] items-center border-t border-rose-100 px-3 py-2">
                 <button
                   onClick={() =>
                     calendarView ===
                     "day"
-                      ? changeDay(-1)
-                      : changeMonth(-1)
+                      ? changeDay(
+                          -1
+                        )
+                      : changeMonth(
+                          -1
+                        )
                   }
-                  className="flex h-10 items-center justify-center rounded-xl text-2xl hover:bg-neutral-100"
+                  className="flex h-10 items-center justify-center rounded-xl text-2xl hover:bg-rose-100"
                 >
                   ‹
                 </button>
 
                 <button
-                  onClick={goToToday}
-                  className="mx-auto rounded-xl bg-neutral-100 px-4 py-2 text-sm font-medium"
+                  onClick={
+                    goToToday
+                  }
+                  className="mx-auto rounded-xl bg-rose-100 px-4 py-2 text-sm font-medium"
                 >
                   {calendarView ===
                   "day"
@@ -3357,10 +4408,14 @@ export default function Home() {
                   onClick={() =>
                     calendarView ===
                     "day"
-                      ? changeDay(1)
-                      : changeMonth(1)
+                      ? changeDay(
+                          1
+                        )
+                      : changeMonth(
+                          1
+                        )
                   }
-                  className="flex h-10 items-center justify-center rounded-xl text-2xl hover:bg-neutral-100"
+                  className="flex h-10 items-center justify-center rounded-xl text-2xl hover:bg-rose-100"
                 >
                   ›
                 </button>
@@ -3373,11 +4428,15 @@ export default function Home() {
                 {!selectedDateIsWorkDay && (
                   <div className="shrink-0 border-b border-orange-200 bg-orange-50 px-4 py-3">
                     <p className="text-sm font-medium text-orange-800">
-                      {t.dayOff}
+                      {
+                        t.dayOff
+                      }
                     </p>
 
                     <p className="mt-1 text-xs text-orange-600">
-                      {t.dayOffHint}
+                      {
+                        t.dayOffHint
+                      }
                     </p>
                   </div>
                 )}
@@ -3386,21 +4445,27 @@ export default function Home() {
                   <div
                     className="grid grid-cols-[70px_1fr]"
                     style={{
-                      height: `${calendarHeight}px`,
+                      height:
+                        `${calendarHeight}px`,
                     }}
                   >
-                    <div className="relative border-r border-neutral-200/70">
+                    <div className="relative border-r border-rose-200/80">
                       {hours.map(
-                        (hour) => (
+                        (
+                          hour
+                        ) => (
                           <div
-                            key={hour}
+                            key={
+                              hour
+                            }
                             className="absolute left-0 w-full px-3 text-sm text-neutral-500"
                             style={{
-                              top: `${
-                                (hour -
-                                  workSettings.startHour) *
-                                HOUR_HEIGHT
-                              }px`,
+                              top:
+                                `${
+                                  (hour -
+                                    workSettings.startHour) *
+                                  HOUR_HEIGHT
+                                }px`,
                             }}
                           >
                             {String(
@@ -3422,16 +4487,21 @@ export default function Home() {
                       }
                     >
                       {hours.map(
-                        (hour) => (
+                        (
+                          hour
+                        ) => (
                           <div
-                            key={hour}
-                            className="absolute left-0 right-0 border-t border-neutral-200/70"
+                            key={
+                              hour
+                            }
+                            className="absolute left-0 right-0 border-t border-rose-200/80"
                             style={{
-                              top: `${
-                                (hour -
-                                  workSettings.startHour) *
-                                HOUR_HEIGHT
-                              }px`,
+                              top:
+                                `${
+                                  (hour -
+                                    workSettings.startHour) *
+                                  HOUR_HEIGHT
+                                }px`,
                             }}
                           />
                         )
@@ -3458,7 +4528,8 @@ export default function Home() {
                             );
 
                           if (
-                            top < 0 ||
+                            top <
+                              0 ||
                             top >
                               calendarHeight
                           ) {
@@ -3483,8 +4554,11 @@ export default function Home() {
                                 appointment.status
                               )}`}
                               style={{
-                                top: `${top}px`,
-                                height: `${height}px`,
+                                top:
+                                  `${top}px`,
+
+                                height:
+                                  `${height}px`,
                               }}
                             >
                               <div className="flex items-center justify-between gap-2">
@@ -3563,7 +4637,7 @@ export default function Home() {
             {calendarView ===
               "month" && (
               <section className="min-h-0 flex-1 overflow-y-auto p-4">
-                <div className="rounded-2xl border border-neutral-300 bg-white/85 p-3 shadow-sm">
+                <div className="rounded-2xl border border-rose-200 bg-white/80 p-3 shadow-sm">
                   <div className="grid grid-cols-7 gap-1 pb-2">
                     {WEEKDAYS.map(
                       (
@@ -3587,7 +4661,9 @@ export default function Home() {
 
                   <div className="grid grid-cols-7 gap-1">
                     {monthDays.map(
-                      (item) => {
+                      (
+                        item
+                      ) => {
                         const dateKey =
                           formatDateKey(
                             item.date
@@ -3625,12 +4701,12 @@ export default function Home() {
                               isSelected
                                 ? "bg-black text-white"
                                 : isToday
-                                ? "border border-neutral-500 bg-neutral-200"
+                                ? "border border-rose-400 bg-rose-100"
                                 : !isWorkDay &&
                                   item.isCurrentMonth
-                                ? "bg-neutral-100 text-neutral-400"
+                                ? "bg-rose-50 text-neutral-400"
                                 : item.isCurrentMonth
-                                ? "hover:bg-neutral-100"
+                                ? "hover:bg-rose-50"
                                 : "text-neutral-300"
                             }`}
                           >
@@ -3681,8 +4757,12 @@ export default function Home() {
                           month,
                         ] =
                           appointment.date
-                            .split("-")
-                            .map(Number);
+                            .split(
+                              "-"
+                            )
+                            .map(
+                              Number
+                            );
 
                         return (
                           year ===
@@ -3694,7 +4774,10 @@ export default function Home() {
                       }
                     )
                     .sort(
-                      (a, b) =>
+                      (
+                        a,
+                        b
+                      ) =>
                         a.date ===
                         b.date
                           ? a.time.localeCompare(
@@ -3723,7 +4806,7 @@ export default function Home() {
                               "day"
                             );
                           }}
-                          className="w-full rounded-xl border border-neutral-300 bg-white/85 p-3 text-left"
+                          className="w-full rounded-xl border border-rose-200 bg-white/80 p-3 text-left shadow-sm"
                         >
                           <div className="flex justify-between gap-3">
                             <div>
@@ -3773,7 +4856,7 @@ export default function Home() {
         {activeTab ===
           "clients" && (
           <div className="flex min-h-0 flex-1 flex-col">
-            <header className="shrink-0 border-b border-neutral-200 bg-white/90 px-5 py-4">
+            <header className="shrink-0 border-b border-rose-200 bg-rose-50/95 px-5 py-4">
               <div className="flex justify-between">
                 <div>
                   <p className="text-sm text-neutral-500">
@@ -3783,11 +4866,16 @@ export default function Home() {
                   </p>
 
                   <h1 className="text-2xl font-semibold">
-                    {t.clients}
+                    {
+                      t.clients
+                    }
                   </h1>
 
                   <p className="mt-1 text-xs text-neutral-400">
-                    {t.total}:{" "}
+                    {
+                      t.total
+                    }
+                    :{" "}
                     {
                       clients.length
                     }
@@ -3819,16 +4907,18 @@ export default function Home() {
                 placeholder={
                   t.searchClient
                 }
-                className="mt-4 w-full rounded-xl border border-neutral-300 px-4 py-3"
+                className="mt-4 w-full rounded-xl border border-rose-200 bg-white px-4 py-3 outline-none focus:border-rose-400"
               />
             </header>
 
             <section className="min-h-0 flex-1 space-y-3 overflow-y-auto p-4">
               {clients.length ===
                 0 && (
-                <div className="rounded-2xl border border-dashed border-neutral-300 bg-white/80 p-8 text-center">
+                <div className="rounded-2xl border border-dashed border-rose-300 bg-white/70 p-8 text-center">
                   <p className="font-medium">
-                    {t.noClients}
+                    {
+                      t.noClients
+                    }
                   </p>
 
                   <p className="mt-2 text-sm text-neutral-500">
@@ -3843,17 +4933,17 @@ export default function Home() {
                 0 &&
                 filteredClients.length ===
                   0 && (
-                  <div className="rounded-2xl border border-dashed border-neutral-300 bg-white/80 p-8 text-center">
-                    <p>
-                      {
-                        t.nothingFound
-                      }
-                    </p>
+                  <div className="rounded-2xl border border-dashed border-rose-300 bg-white/70 p-8 text-center">
+                    {
+                      t.nothingFound
+                    }
                   </div>
                 )}
 
               {filteredClients.map(
-                (client) => (
+                (
+                  client
+                ) => (
                   <button
                     key={
                       client.id
@@ -3863,7 +4953,7 @@ export default function Home() {
                         client.id
                       )
                     }
-                    className="w-full rounded-2xl border border-neutral-400 bg-neutral-100/90 p-4 text-left shadow-md"
+                    className="w-full rounded-2xl border border-rose-300 bg-white/80 p-4 text-left shadow-md"
                   >
                     <div className="flex justify-between gap-4">
                       <div>
@@ -3890,7 +4980,7 @@ export default function Home() {
                         )}
                       </div>
 
-                      <span className="h-fit rounded-full bg-white px-3 py-1 text-xs">
+                      <span className="h-fit rounded-full bg-rose-100 px-3 py-1 text-xs">
                         {getClientAppointmentsCount(
                           client.id
                         )}
@@ -3906,7 +4996,7 @@ export default function Home() {
         {activeTab ===
           "analytics" && (
           <div className="flex min-h-0 flex-1 flex-col">
-            <header className="shrink-0 border-b border-neutral-200 bg-white/90 px-5 py-4">
+            <header className="shrink-0 border-b border-rose-200 bg-rose-50/95 px-5 py-4">
               <p className="text-sm text-neutral-500">
                 {
                   t.financeRecords
@@ -3914,7 +5004,9 @@ export default function Home() {
               </p>
 
               <h1 className="text-2xl font-semibold">
-                {t.analytics}
+                {
+                  t.analytics
+                }
               </h1>
 
               <p className="mt-1 text-xs text-neutral-400">
@@ -3926,7 +5018,7 @@ export default function Home() {
 
             <section className="min-h-0 flex-1 overflow-y-auto p-4">
               <div className="grid grid-cols-2 gap-3">
-                <div className="rounded-2xl border bg-white/85 p-4">
+                <div className="rounded-2xl border border-rose-200 bg-white/80 p-4">
                   <p className="text-xs text-neutral-500">
                     {
                       t.todayIncome
@@ -3934,7 +5026,9 @@ export default function Home() {
                   </p>
 
                   <p className="mt-2 text-2xl font-semibold">
-                    {todayIncome}{" "}
+                    {
+                      todayIncome
+                    }{" "}
                     грн
                   </p>
 
@@ -3948,7 +5042,7 @@ export default function Home() {
                   </p>
                 </div>
 
-                <div className="rounded-2xl border bg-white/85 p-4">
+                <div className="rounded-2xl border border-rose-200 bg-white/80 p-4">
                   <p className="text-xs text-neutral-500">
                     {
                       t.sevenDays
@@ -3956,7 +5050,9 @@ export default function Home() {
                   </p>
 
                   <p className="mt-2 text-2xl font-semibold">
-                    {weekIncome}{" "}
+                    {
+                      weekIncome
+                    }{" "}
                     грн
                   </p>
 
@@ -3971,7 +5067,7 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="mt-3 rounded-2xl border border-neutral-400 bg-neutral-100 p-5">
+              <div className="mt-3 rounded-2xl border border-rose-300 bg-rose-100/80 p-5">
                 <p className="text-sm text-neutral-500">
                   {
                     t.currentMonthIncome
@@ -3979,7 +5075,9 @@ export default function Home() {
                 </p>
 
                 <p className="mt-2 text-3xl font-semibold">
-                  {monthIncome}{" "}
+                  {
+                    monthIncome
+                  }{" "}
                   грн
                 </p>
 
@@ -3994,7 +5092,7 @@ export default function Home() {
               </div>
 
               <div className="mt-3 grid grid-cols-2 gap-3">
-                <div className="rounded-2xl bg-white/85 p-4">
+                <div className="rounded-2xl bg-white/80 p-4">
                   <p className="text-xs text-neutral-500">
                     {
                       t.averageCheck
@@ -4009,8 +5107,8 @@ export default function Home() {
                   </p>
                 </div>
 
-                <div className="rounded-2xl bg-blue-50 p-4">
-                  <p className="text-xs text-blue-600">
+                <div className="rounded-2xl bg-rose-100 p-4">
+                  <p className="text-xs text-rose-700">
                     {
                       t.scheduled
                     }
@@ -4039,7 +5137,9 @@ export default function Home() {
 
                 <div className="rounded-2xl bg-orange-50 p-4">
                   <p className="text-xs text-orange-600">
-                    {t.noShow}
+                    {
+                      t.noShow
+                    }
                   </p>
 
                   <p className="mt-2 text-xl font-semibold">
@@ -4060,7 +5160,7 @@ export default function Home() {
                 <div className="mt-3 space-y-2">
                   {serviceStats.length ===
                     0 && (
-                    <div className="rounded-2xl border border-dashed p-6 text-center text-sm text-neutral-500">
+                    <div className="rounded-2xl border border-dashed border-rose-300 bg-white/70 p-6 text-center text-sm text-neutral-500">
                       {
                         t.noCompleted
                       }
@@ -4076,7 +5176,7 @@ export default function Home() {
                         key={
                           service.name
                         }
-                        className="rounded-2xl border bg-white/85 p-4"
+                        className="rounded-2xl border border-rose-200 bg-white/80 p-4"
                       >
                         <div className="flex justify-between">
                           <div>
@@ -4118,25 +5218,33 @@ export default function Home() {
         {activeTab ===
           "settings" && (
           <div className="flex min-h-0 flex-1 flex-col">
-            <header className="shrink-0 border-b border-neutral-200 bg-white/90 px-5 py-4">
+            <header className="shrink-0 border-b border-rose-200 bg-rose-50/95 px-5 py-4">
               <p className="text-sm text-neutral-500">
-                {t.app}
+                {
+                  t.app
+                }
               </p>
 
               <h1 className="text-2xl font-semibold">
-                {t.settings}
+                {
+                  t.settings
+                }
               </h1>
             </header>
 
             <section className="min-h-0 flex-1 overflow-y-auto p-5">
               <div>
                 <h2 className="text-lg font-semibold">
-                  {t.account}
+                  {
+                    t.account
+                  }
                 </h2>
 
-                <div className="mt-3 rounded-2xl border border-neutral-300 bg-white/85 p-4">
+                <div className="mt-3 rounded-2xl border border-rose-200 bg-white/80 p-4">
                   <p className="text-xs text-neutral-500">
-                    {t.signedInAs}
+                    {
+                      t.signedInAs
+                    }
                   </p>
 
                   <p className="mt-1 break-all text-sm font-medium">
@@ -4160,7 +5268,9 @@ export default function Home() {
 
               <div className="mt-7">
                 <h2 className="text-lg font-semibold">
-                  {t.database}
+                  {
+                    t.database
+                  }
                 </h2>
 
                 <div
@@ -4171,7 +5281,7 @@ export default function Home() {
                       : databaseStatus ===
                         "error"
                       ? "border-red-200 bg-red-50"
-                      : "border-neutral-300 bg-white"
+                      : "border-rose-200 bg-white/80"
                   }`}
                 >
                   <span
@@ -4200,7 +5310,9 @@ export default function Home() {
 
               <div className="mt-7">
                 <h2 className="text-lg font-semibold">
-                  {t.language}
+                  {
+                    t.language
+                  }
                 </h2>
 
                 <p className="mt-1 text-sm text-neutral-500">
@@ -4209,7 +5321,7 @@ export default function Home() {
                   }
                 </p>
 
-                <div className="mt-4 grid grid-cols-2 gap-2 rounded-2xl border border-neutral-300 bg-white/85 p-2">
+                <div className="mt-4 grid grid-cols-2 gap-2 rounded-2xl border border-rose-200 bg-white/80 p-2">
                   <button
                     onClick={() =>
                       setLanguage(
@@ -4220,7 +5332,7 @@ export default function Home() {
                       language ===
                       "ru"
                         ? "bg-black text-white"
-                        : "bg-neutral-100 text-neutral-500"
+                        : "bg-rose-50 text-neutral-500"
                     }`}
                   >
                     Русский
@@ -4236,7 +5348,7 @@ export default function Home() {
                       language ===
                       "uk"
                         ? "bg-black text-white"
-                        : "bg-neutral-100 text-neutral-500"
+                        : "bg-rose-50 text-neutral-500"
                     }`}
                   >
                     Українська
@@ -4257,7 +5369,7 @@ export default function Home() {
                   }
                 </p>
 
-                <div className="mt-4 rounded-2xl border border-neutral-300 bg-white/85 p-4">
+                <div className="mt-4 rounded-2xl border border-rose-200 bg-white/80 p-4">
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <label className="mb-1 block text-xs text-neutral-500">
@@ -4275,8 +5387,7 @@ export default function Home() {
                         ) => {
                           const hour =
                             Number(
-                              event
-                                .target
+                              event.target
                                 .value
                             );
 
@@ -4296,7 +5407,7 @@ export default function Home() {
                             }
                           );
                         }}
-                        className="w-full rounded-xl border border-neutral-300 px-3 py-3"
+                        className="w-full rounded-xl border border-rose-200 bg-white px-3 py-3"
                       >
                         {Array.from(
                           {
@@ -4354,14 +5465,13 @@ export default function Home() {
 
                               endHour:
                                 Number(
-                                  event
-                                    .target
+                                  event.target
                                     .value
                                 ),
                             }
                           )
                         }
-                        className="w-full rounded-xl border border-neutral-300 px-3 py-3"
+                        className="w-full rounded-xl border border-rose-200 bg-white px-3 py-3"
                       >
                         {Array.from(
                           {
@@ -4440,7 +5550,7 @@ export default function Home() {
                               className={`rounded-xl py-3 text-xs font-medium ${
                                 active
                                   ? "bg-black text-white"
-                                  : "bg-neutral-100 text-neutral-400"
+                                  : "bg-rose-100 text-neutral-400"
                               }`}
                             >
                               {
@@ -4486,7 +5596,7 @@ export default function Home() {
                 <div className="mt-4 space-y-3">
                   {services.length ===
                     0 && (
-                    <div className="rounded-2xl border border-dashed p-6 text-center text-sm text-neutral-500">
+                    <div className="rounded-2xl border border-dashed border-rose-300 bg-white/70 p-6 text-center text-sm text-neutral-500">
                       {
                         t.addFirstService
                       }
@@ -4501,7 +5611,7 @@ export default function Home() {
                         key={
                           service.id
                         }
-                        className="rounded-2xl border border-neutral-300 bg-white/85 p-4"
+                        className="rounded-2xl border border-rose-200 bg-white/80 p-4"
                       >
                         <p className="font-semibold">
                           {
@@ -4530,7 +5640,7 @@ export default function Home() {
                                 service
                               )
                             }
-                            className="rounded-lg border px-3 py-2 text-xs"
+                            className="rounded-lg border border-rose-200 bg-white px-3 py-2 text-xs"
                           >
                             {
                               t.edit
@@ -4559,7 +5669,7 @@ export default function Home() {
           </div>
         )}
 
-        <nav className="z-40 grid shrink-0 grid-cols-4 border-t border-neutral-200 bg-white/95 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]">
+        <nav className="z-40 grid shrink-0 grid-cols-4 border-t border-rose-200 bg-rose-50/95 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] backdrop-blur-md">
           <button
             onClick={() =>
               setActiveTab(
@@ -4573,7 +5683,9 @@ export default function Home() {
                 : "text-neutral-400"
             }`}
           >
-            {t.calendar}
+            {
+              t.calendar
+            }
           </button>
 
           <button
@@ -4589,7 +5701,9 @@ export default function Home() {
                 : "text-neutral-400"
             }`}
           >
-            {t.clients}
+            {
+              t.clients
+            }
           </button>
 
           <button
@@ -4605,7 +5719,9 @@ export default function Home() {
                 : "text-neutral-400"
             }`}
           >
-            {t.analytics}
+            {
+              t.analytics
+            }
           </button>
 
           <button
@@ -4621,13 +5737,15 @@ export default function Home() {
                 : "text-neutral-400"
             }`}
           >
-            {t.settings}
+            {
+              t.settings
+            }
           </button>
         </nav>
 
         {isAppointmentModalOpen && (
           <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40">
-            <div className="max-h-[90dvh] w-full max-w-md overflow-y-auto rounded-t-3xl bg-white p-5">
+            <div className="max-h-[90dvh] w-full max-w-md overflow-y-auto rounded-t-3xl bg-rose-50 p-5">
               <div className="mb-5 flex justify-between gap-4">
                 <div>
                   <h2 className="text-xl font-semibold">
@@ -4652,7 +5770,9 @@ export default function Home() {
                   }
                   className="text-sm text-neutral-500"
                 >
-                  {t.close}
+                  {
+                    t.close
+                  }
                 </button>
               </div>
 
@@ -4674,16 +5794,14 @@ export default function Home() {
                         event
                       ) => {
                         setSelectedClientId(
-                          event
-                            .target
+                          event.target
                             .value
                         );
 
                         clearAppointmentWarning();
 
                         if (
-                          event
-                            .target
+                          event.target
                             .value
                         ) {
                           setAppointmentName(
@@ -4691,7 +5809,7 @@ export default function Home() {
                           );
                         }
                       }}
-                      className="w-full rounded-xl border border-neutral-300 px-4 py-3"
+                      className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
                     >
                       <option value="">
                         {
@@ -4753,12 +5871,11 @@ export default function Home() {
                         event
                       ) =>
                         setAppointmentName(
-                          event
-                            .target
+                          event.target
                             .value
                         )
                       }
-                      className="w-full rounded-xl border border-neutral-300 px-4 py-3"
+                      className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
                     />
                   </div>
                 )}
@@ -4780,12 +5897,11 @@ export default function Home() {
                         event
                       ) =>
                         handleServiceSelection(
-                          event
-                            .target
+                          event.target
                             .value
                         )
                       }
-                      className="w-full rounded-xl border border-neutral-300 px-4 py-3"
+                      className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
                     >
                       <option value="">
                         {
@@ -4836,20 +5952,22 @@ export default function Home() {
                         event
                       ) =>
                         setAppointmentService(
-                          event
-                            .target
+                          event.target
                             .value
                         )
                       }
-                      className="w-full rounded-xl border border-neutral-300 px-4 py-3"
+                      className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
                     />
                   </div>
                 )}
 
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
+                {/* FIX: на iPhone дата и время идут друг под другом */}
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <div className="min-w-0">
                     <label className="mb-1 block text-sm text-neutral-500">
-                      {t.date}
+                      {
+                        t.date
+                      }
                     </label>
 
                     <input
@@ -4861,18 +5979,19 @@ export default function Home() {
                         event
                       ) =>
                         setAppointmentDate(
-                          event
-                            .target
+                          event.target
                             .value
                         )
                       }
-                      className="w-full rounded-xl border border-neutral-300 px-3 py-3"
+                      className="min-w-0 w-full rounded-xl border border-rose-200 bg-white px-3 py-3"
                     />
                   </div>
 
-                  <div>
+                  <div className="min-w-0">
                     <label className="mb-1 block text-sm text-neutral-500">
-                      {t.time}
+                      {
+                        t.time
+                      }
                     </label>
 
                     <input
@@ -4884,12 +6003,11 @@ export default function Home() {
                         event
                       ) =>
                         setAppointmentTime(
-                          event
-                            .target
+                          event.target
                             .value
                         )
                       }
-                      className="w-full rounded-xl border border-neutral-300 px-3 py-3"
+                      className="min-w-0 w-full rounded-xl border border-rose-200 bg-white px-3 py-3"
                     />
                   </div>
                 </div>
@@ -4909,48 +6027,48 @@ export default function Home() {
                       event
                     ) =>
                       setAppointmentDuration(
-                        event
-                          .target
+                        event.target
                           .value
                       )
                     }
-                    className="w-full rounded-xl border border-neutral-300 px-4 py-3"
+                    className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
                   >
-                    <option value="30">
-                      30{" "}
-                      {t.minutes}
-                    </option>
-
-                    <option value="60">
-                      60{" "}
-                      {t.minutes}
-                    </option>
-
-                    <option value="90">
-                      90{" "}
-                      {t.minutes}
-                    </option>
-
-                    <option value="120">
-                      120{" "}
-                      {t.minutes}
-                    </option>
-
-                    <option value="150">
-                      150{" "}
-                      {t.minutes}
-                    </option>
-
-                    <option value="180">
-                      180{" "}
-                      {t.minutes}
-                    </option>
+                    {[
+                      30,
+                      60,
+                      90,
+                      120,
+                      150,
+                      180,
+                    ].map(
+                      (
+                        minutes
+                      ) => (
+                        <option
+                          key={
+                            minutes
+                          }
+                          value={
+                            minutes
+                          }
+                        >
+                          {
+                            minutes
+                          }{" "}
+                          {
+                            t.minutes
+                          }
+                        </option>
+                      )
+                    )}
                   </select>
                 </div>
 
                 <div>
                   <label className="mb-1 block text-sm text-neutral-500">
-                    {t.price}
+                    {
+                      t.price
+                    }
                   </label>
 
                   <input
@@ -4963,12 +6081,11 @@ export default function Home() {
                       event
                     ) =>
                       setAppointmentPrice(
-                        event
-                          .target
+                        event.target
                           .value
                       )
                     }
-                    className="w-full rounded-xl border border-neutral-300 px-4 py-3"
+                    className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
                   />
                 </div>
 
@@ -4987,12 +6104,11 @@ export default function Home() {
                       event
                     ) =>
                       setAppointmentStatus(
-                        event
-                          .target
+                        event.target
                           .value as AppointmentStatus
                       )
                     }
-                    className="w-full rounded-xl border border-neutral-300 px-4 py-3"
+                    className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
                   >
                     <option value="scheduled">
                       {
@@ -5061,7 +6177,7 @@ export default function Home() {
                         editingAppointmentId
                       )
                     }
-                    className="w-full rounded-xl bg-red-50 px-4 py-4 text-red-600"
+                    className="w-full rounded-xl bg-red-50 px-4 py-4 font-medium text-red-600"
                   >
                     {
                       t.deleteAppointment
@@ -5075,7 +6191,7 @@ export default function Home() {
 
         {isClientModalOpen && (
           <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40">
-            <div className="max-h-[90dvh] w-full max-w-md overflow-y-auto rounded-t-3xl bg-white p-5">
+            <div className="max-h-[90dvh] w-full max-w-md overflow-y-auto rounded-t-3xl bg-rose-50 p-5">
               <div className="flex justify-between">
                 <h2 className="text-xl font-semibold">
                   {editingClientId !==
@@ -5092,98 +6208,83 @@ export default function Home() {
                   }
                   className="text-sm text-neutral-500"
                 >
-                  {t.close}
+                  {
+                    t.close
+                  }
                 </button>
               </div>
 
               <div className="mt-5 space-y-4">
-                <div>
-                  <label className="mb-1 block text-sm text-neutral-500">
-                    {t.name}
-                  </label>
+                <input
+                  value={
+                    clientName
+                  }
+                  onChange={(
+                    event
+                  ) =>
+                    setClientName(
+                      event.target
+                        .value
+                    )
+                  }
+                  placeholder={
+                    t.name
+                  }
+                  className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
+                />
 
-                  <input
-                    value={
-                      clientName
-                    }
-                    onChange={(
-                      event
-                    ) =>
-                      setClientName(
-                        event.target
-                          .value
-                      )
-                    }
-                    className="w-full rounded-xl border px-4 py-3"
-                  />
-                </div>
+                <input
+                  value={
+                    clientPhone
+                  }
+                  onChange={(
+                    event
+                  ) =>
+                    setClientPhone(
+                      event.target
+                        .value
+                    )
+                  }
+                  placeholder={
+                    t.phone
+                  }
+                  className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
+                />
 
-                <div>
-                  <label className="mb-1 block text-sm text-neutral-500">
-                    {t.phone}
-                  </label>
+                <input
+                  value={
+                    clientSocial
+                  }
+                  onChange={(
+                    event
+                  ) =>
+                    setClientSocial(
+                      event.target
+                        .value
+                    )
+                  }
+                  placeholder="@username"
+                  className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
+                />
 
-                  <input
-                    value={
-                      clientPhone
-                    }
-                    onChange={(
-                      event
-                    ) =>
-                      setClientPhone(
-                        event.target
-                          .value
-                      )
-                    }
-                    className="w-full rounded-xl border px-4 py-3"
-                  />
-                </div>
-
-                <div>
-                  <label className="mb-1 block text-sm text-neutral-500">
-                    {
-                      t.social
-                    }
-                  </label>
-
-                  <input
-                    value={
-                      clientSocial
-                    }
-                    onChange={(
-                      event
-                    ) =>
-                      setClientSocial(
-                        event.target
-                          .value
-                      )
-                    }
-                    placeholder="@username"
-                    className="w-full rounded-xl border px-4 py-3"
-                  />
-                </div>
-
-                <div>
-                  <label className="mb-1 block text-sm text-neutral-500">
-                    {t.note}
-                  </label>
-
-                  <textarea
-                    value={
-                      clientNote
-                    }
-                    onChange={(
-                      event
-                    ) =>
-                      setClientNote(
-                        event.target
-                          .value
-                      )
-                    }
-                    rows={3}
-                    className="w-full rounded-xl border px-4 py-3"
-                  />
-                </div>
+                <textarea
+                  value={
+                    clientNote
+                  }
+                  onChange={(
+                    event
+                  ) =>
+                    setClientNote(
+                      event.target
+                        .value
+                    )
+                  }
+                  placeholder={
+                    t.note
+                  }
+                  rows={3}
+                  className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
+                />
 
                 <button
                   onClick={
@@ -5191,7 +6292,9 @@ export default function Home() {
                   }
                   className="w-full rounded-xl bg-black px-4 py-4 text-white"
                 >
-                  {t.save}
+                  {
+                    t.save
+                  }
                 </button>
               </div>
             </div>
@@ -5201,7 +6304,7 @@ export default function Home() {
         {isClientDetailsOpen &&
           selectedClientDetails && (
             <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40">
-              <div className="max-h-[92dvh] w-full max-w-md overflow-y-auto rounded-t-3xl bg-white p-5">
+              <div className="max-h-[92dvh] w-full max-w-md overflow-y-auto rounded-t-3xl bg-rose-50 p-5">
                 <div className="flex justify-between gap-4">
                   <div>
                     <p className="text-sm text-neutral-500">
@@ -5225,11 +6328,13 @@ export default function Home() {
                     }
                     className="text-sm text-neutral-500"
                   >
-                    {t.close}
+                    {
+                      t.close
+                    }
                   </button>
                 </div>
 
-                <div className="mt-5 rounded-2xl border border-neutral-300 bg-neutral-100 p-4">
+                <div className="mt-5 rounded-2xl border border-rose-200 bg-white/80 p-4">
                   <p className="font-medium">
                     {selectedClientDetails.phone ||
                       t.phoneMissing}
@@ -5244,7 +6349,7 @@ export default function Home() {
                   )}
 
                   {selectedClientDetails.note && (
-                    <p className="mt-3 rounded-xl bg-white p-3 text-sm">
+                    <p className="mt-3 rounded-xl bg-rose-50 p-3 text-sm">
                       {
                         selectedClientDetails.note
                       }
@@ -5282,7 +6387,7 @@ export default function Home() {
                               )
                             )
                           }
-                          className="rounded-xl border border-neutral-300 bg-white px-3 py-3 text-sm font-medium"
+                          className="rounded-xl border border-rose-200 bg-white px-3 py-3 text-sm font-medium"
                         >
                           {
                             t.telegram
@@ -5307,7 +6412,7 @@ export default function Home() {
                               )
                             )
                           }
-                          className="rounded-xl border border-neutral-300 bg-white px-3 py-3 text-sm font-medium"
+                          className="rounded-xl border border-rose-200 bg-white px-3 py-3 text-sm font-medium"
                         >
                           {
                             t.instagram
@@ -5318,7 +6423,7 @@ export default function Home() {
                 </div>
 
                 <div className="mt-4 grid grid-cols-2 gap-3">
-                  <div className="rounded-2xl bg-neutral-100 p-4">
+                  <div className="rounded-2xl bg-white/80 p-4">
                     <p className="text-xs text-neutral-500">
                       {
                         t.totalAppointments
@@ -5332,7 +6437,7 @@ export default function Home() {
                     </p>
                   </div>
 
-                  <div className="rounded-2xl bg-neutral-100 p-4">
+                  <div className="rounded-2xl bg-white/80 p-4">
                     <p className="text-xs text-neutral-500">
                       {
                         t.futureAppointmentsCount
@@ -5366,7 +6471,7 @@ export default function Home() {
                       selectedClientDetails
                     )
                   }
-                  className="mt-3 w-full rounded-xl border px-4 py-3"
+                  className="mt-3 w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
                 >
                   {
                     t.editClientButton
@@ -5383,7 +6488,7 @@ export default function Home() {
                   <div className="mt-3 space-y-2">
                     {futureClientAppointments.length ===
                       0 && (
-                      <p className="rounded-xl bg-neutral-100 p-4 text-sm text-neutral-500">
+                      <p className="rounded-xl bg-white/70 p-4 text-sm text-neutral-500">
                         {
                           t.noFutureAppointments
                         }
@@ -5398,7 +6503,7 @@ export default function Home() {
                           key={
                             appointment.id
                           }
-                          className="rounded-xl border border-neutral-300 p-3"
+                          className="rounded-xl border border-rose-200 bg-white/80 p-3"
                         >
                           <div className="flex justify-between gap-3">
                             <div>
@@ -5446,7 +6551,7 @@ export default function Home() {
                                   appointment
                                 )
                               }
-                              className="mt-3 w-full rounded-xl bg-neutral-100 px-3 py-2 text-sm font-medium"
+                              className="mt-3 w-full rounded-xl bg-rose-100 px-3 py-2 text-sm font-medium"
                             >
                               {
                                 t.remind
@@ -5469,7 +6574,7 @@ export default function Home() {
                   <div className="mt-3 space-y-2">
                     {pastClientAppointments.length ===
                       0 && (
-                      <p className="rounded-xl bg-neutral-100 p-4 text-sm text-neutral-500">
+                      <p className="rounded-xl bg-white/70 p-4 text-sm text-neutral-500">
                         {
                           t.noHistory
                         }
@@ -5484,7 +6589,7 @@ export default function Home() {
                           key={
                             appointment.id
                           }
-                          className="rounded-xl border border-neutral-300 p-3"
+                          className="rounded-xl border border-rose-200 bg-white/80 p-3"
                         >
                           <div className="flex justify-between gap-3">
                             <div>
@@ -5541,8 +6646,8 @@ export default function Home() {
 
         {isServiceModalOpen && (
           <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40">
-            <div className="w-full max-w-md rounded-t-3xl bg-white p-5">
-              <div className="flex justify-between gap-3">
+            <div className="w-full max-w-md rounded-t-3xl bg-rose-50 p-5">
+              <div className="flex justify-between">
                 <h2 className="text-xl font-semibold">
                   {editingServiceId !==
                   null
@@ -5558,111 +6663,94 @@ export default function Home() {
                   }
                   className="text-sm text-neutral-500"
                 >
-                  {t.close}
+                  {
+                    t.close
+                  }
                 </button>
               </div>
 
               <div className="mt-5 space-y-4">
-                <div>
-                  <label className="mb-1 block text-sm text-neutral-500">
-                    {
-                      t.serviceName
-                    }
-                  </label>
+                <input
+                  value={
+                    serviceName
+                  }
+                  onChange={(
+                    event
+                  ) =>
+                    setServiceName(
+                      event.target
+                        .value
+                    )
+                  }
+                  placeholder={
+                    t.serviceName
+                  }
+                  className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
+                />
 
-                  <input
-                    value={
-                      serviceName
-                    }
-                    onChange={(
-                      event
-                    ) =>
-                      setServiceName(
-                        event.target
-                          .value
-                      )
-                    }
-                    className="w-full rounded-xl border px-4 py-3"
-                  />
-                </div>
+                <select
+                  value={
+                    serviceDuration
+                  }
+                  onChange={(
+                    event
+                  ) =>
+                    setServiceDuration(
+                      event.target
+                        .value
+                    )
+                  }
+                  className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
+                >
+                  {[
+                    30,
+                    60,
+                    90,
+                    120,
+                    150,
+                    180,
+                  ].map(
+                    (
+                      minutes
+                    ) => (
+                      <option
+                        key={
+                          minutes
+                        }
+                        value={
+                          minutes
+                        }
+                      >
+                        {
+                          minutes
+                        }{" "}
+                        {
+                          t.minutes
+                        }
+                      </option>
+                    )
+                  )}
+                </select>
 
-                <div>
-                  <label className="mb-1 block text-sm text-neutral-500">
-                    {
-                      t.serviceDuration
-                    }
-                  </label>
-
-                  <select
-                    value={
-                      serviceDuration
-                    }
-                    onChange={(
-                      event
-                    ) =>
-                      setServiceDuration(
-                        event.target
-                          .value
-                      )
-                    }
-                    className="w-full rounded-xl border px-4 py-3"
-                  >
-                    <option value="30">
-                      30{" "}
-                      {t.minutes}
-                    </option>
-
-                    <option value="60">
-                      60{" "}
-                      {t.minutes}
-                    </option>
-
-                    <option value="90">
-                      90{" "}
-                      {t.minutes}
-                    </option>
-
-                    <option value="120">
-                      120{" "}
-                      {t.minutes}
-                    </option>
-
-                    <option value="150">
-                      150{" "}
-                      {t.minutes}
-                    </option>
-
-                    <option value="180">
-                      180{" "}
-                      {t.minutes}
-                    </option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="mb-1 block text-sm text-neutral-500">
-                    {
-                      t.servicePrice
-                    }
-                  </label>
-
-                  <input
-                    type="number"
-                    min="0"
-                    value={
-                      servicePrice
-                    }
-                    onChange={(
-                      event
-                    ) =>
-                      setServicePrice(
-                        event.target
-                          .value
-                      )
-                    }
-                    className="w-full rounded-xl border px-4 py-3"
-                  />
-                </div>
+                <input
+                  type="number"
+                  min="0"
+                  value={
+                    servicePrice
+                  }
+                  onChange={(
+                    event
+                  ) =>
+                    setServicePrice(
+                      event.target
+                        .value
+                    )
+                  }
+                  placeholder={
+                    t.servicePrice
+                  }
+                  className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
+                />
 
                 <button
                   onClick={
@@ -5670,7 +6758,9 @@ export default function Home() {
                   }
                   className="w-full rounded-xl bg-black px-4 py-4 text-white"
                 >
-                  {t.save}
+                  {
+                    t.save
+                  }
                 </button>
               </div>
             </div>
@@ -5679,7 +6769,7 @@ export default function Home() {
 
         {isReminderModalOpen && (
           <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/50">
-            <div className="w-full max-w-md rounded-t-3xl bg-white p-5">
+            <div className="w-full max-w-md rounded-t-3xl bg-rose-50 p-5">
               <div className="flex justify-between gap-4">
                 <div>
                   <h2 className="text-xl font-semibold">
@@ -5703,7 +6793,9 @@ export default function Home() {
                   }
                   className="text-sm text-neutral-500"
                 >
-                  {t.close}
+                  {
+                    t.close
+                  }
                 </button>
               </div>
 
@@ -5724,7 +6816,7 @@ export default function Home() {
                   );
                 }}
                 rows={7}
-                className="mt-5 w-full resize-none rounded-2xl border border-neutral-300 bg-neutral-50 p-4 outline-none focus:border-black"
+                className="mt-5 w-full resize-none rounded-2xl border border-rose-200 bg-white p-4 outline-none focus:border-rose-400"
               />
 
               <button
@@ -5756,7 +6848,7 @@ export default function Home() {
                           )
                         )
                       }
-                      className="rounded-xl border border-neutral-300 px-3 py-3 text-sm font-medium"
+                      className="rounded-xl border border-rose-200 bg-white px-3 py-3 text-sm font-medium"
                     >
                       {
                         t.openTelegram
@@ -5780,7 +6872,7 @@ export default function Home() {
                           )
                         )
                       }
-                      className="rounded-xl border border-neutral-300 px-3 py-3 text-sm font-medium"
+                      className="rounded-xl border border-rose-200 bg-white px-3 py-3 text-sm font-medium"
                     >
                       {
                         t.openInstagram
