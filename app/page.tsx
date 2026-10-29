@@ -156,8 +156,7 @@ const translations = {
     records: "Записей",
 
     clientBase: "База клиентов",
-    searchClient:
-      "Поиск по имени, телефону, Telegram...",
+    searchClient: "Поиск по имени, телефону, Telegram...",
     noClients: "Клиентов пока нет",
 
     financeRecords: "Финансы и записи",
@@ -250,10 +249,8 @@ const translations = {
     conflict: "Это время пересекается с записью",
 
     deleteAppointmentConfirm: "Удалить эту запись?",
-
     deleteClientConfirm:
       "Удалить клиента? Его записи останутся в календаре.",
-
     deleteServiceConfirm: "Удалить эту услугу?",
   },
 
@@ -266,16 +263,14 @@ const translations = {
     today: "Сьогодні",
     currentMonth: "Поточний місяць",
     returnToday: "Повернутися на сьогодні",
-    returnCurrentMonth:
-      "Повернутися на поточний місяць",
+    returnCurrentMonth: "Повернутися на поточний місяць",
 
     day: "День",
     month: "Місяць",
     records: "Записів",
 
     clientBase: "База клієнтів",
-    searchClient:
-      "Пошук за ім'ям, телефоном, Telegram...",
+    searchClient: "Пошук за ім'ям, телефоном, Telegram...",
     noClients: "Клієнтів поки немає",
 
     financeRecords: "Фінанси та записи",
@@ -365,17 +360,12 @@ const translations = {
     dateRequired: "Вкажи дату.",
     timeRequired: "Вкажи час.",
 
-    conflict:
-      "Цей час перетинається із записом",
+    conflict: "Цей час перетинається із записом",
 
-    deleteAppointmentConfirm:
-      "Видалити цей запис?",
-
+    deleteAppointmentConfirm: "Видалити цей запис?",
     deleteClientConfirm:
       "Видалити клієнта? Його записи залишаться в календарі.",
-
-    deleteServiceConfirm:
-      "Видалити цю послугу?",
+    deleteServiceConfirm: "Видалити цю послугу?",
   },
 };
 
@@ -509,10 +499,10 @@ function formatDurationLabel(
   const hours =
     Math.floor(minutes / 60);
 
-  const hasHalfHour =
+  const half =
     minutes % 60 === 30;
 
-  if (hasHalfHour) {
+  if (half) {
     return `${hours}:30`;
   }
 
@@ -570,7 +560,9 @@ function getAppointmentHeight(
 function safeArray<T>(
   value: string | null
 ): T[] {
-  if (!value) return [];
+  if (!value) {
+    return [];
+  }
 
   try {
     const parsed =
@@ -588,7 +580,9 @@ function safeObject<T>(
   value: string | null,
   fallback: T
 ): T {
-  if (!value) return fallback;
+  if (!value) {
+    return fallback;
+  }
 
   try {
     return JSON.parse(
@@ -615,18 +609,9 @@ function cleanUsername(
       ""
     )
     .replace(/^t\.me\//, "")
-    .replace(
-      /^telegram\.me\//,
-      ""
-    )
-    .replace(
-      /^instagram\.com\//,
-      ""
-    )
-    .replace(
-      /^www\.instagram\.com\//,
-      ""
-    )
+    .replace(/^telegram\.me\//, "")
+    .replace(/^instagram\.com\//, "")
+    .replace(/^www\.instagram\.com\//, "")
     .replace(/^@/, "")
     .split("/")[0]
     .split("?")[0];
@@ -687,15 +672,53 @@ function normalizeClient(
     phone: client.phone ?? "",
 
     telegram:
-      client.telegram ??
+      client.telegram?.trim() ||
       legacyTelegram,
 
     instagram:
-      client.instagram ??
+      client.instagram?.trim() ||
       legacyInstagram,
 
     note: client.note ?? "",
   };
+}
+
+function getWeekDates(
+  date: Date
+) {
+  const current =
+    new Date(date);
+
+  const day =
+    current.getDay();
+
+  const diffToMonday =
+    day === 0
+      ? -6
+      : 1 - day;
+
+  const monday =
+    new Date(current);
+
+  monday.setDate(
+    current.getDate() +
+      diffToMonday
+  );
+
+  return Array.from(
+    { length: 7 },
+    (_, index) => {
+      const item =
+        new Date(monday);
+
+      item.setDate(
+        monday.getDate() +
+          index
+      );
+
+      return item;
+    }
+  );
 }
 
 function getMonthCalendarDays(
@@ -747,7 +770,6 @@ function getMonthCalendarDays(
         month,
         1 - index
       ),
-
       isCurrentMonth: false,
     });
   }
@@ -763,7 +785,6 @@ function getMonthCalendarDays(
         month,
         day
       ),
-
       isCurrentMonth: true,
     });
   }
@@ -783,7 +804,6 @@ function getMonthCalendarDays(
         month + 1,
         day
       ),
-
       isCurrentMonth: false,
     });
   }
@@ -794,49 +814,37 @@ function getMonthCalendarDays(
 function getStatusBadgeClass(
   status: AppointmentStatus
 ) {
-  if (
-    status === "completed"
-  ) {
-    return "border-green-300 bg-green-50 text-green-700";
+  if (status === "completed") {
+    return "border-emerald-200 bg-emerald-50/90 text-emerald-700";
   }
 
-  if (
-    status === "cancelled"
-  ) {
-    return "border-red-300 bg-red-50 text-red-700";
+  if (status === "cancelled") {
+    return "border-rose-200 bg-rose-50/90 text-rose-700";
   }
 
-  if (
-    status === "no-show"
-  ) {
-    return "border-orange-300 bg-orange-50 text-orange-700";
+  if (status === "no-show") {
+    return "border-amber-200 bg-amber-50/90 text-amber-700";
   }
 
-  return "border-sky-300 bg-sky-50 text-sky-700";
+  return "border-sky-200 bg-sky-50/90 text-sky-700";
 }
 
-function getAppointmentCardClass(
+function getAppointmentAccentClass(
   status: AppointmentStatus
 ) {
-  if (
-    status === "completed"
-  ) {
-    return "border-green-400 bg-green-50/95";
+  if (status === "completed") {
+    return "bg-emerald-400";
   }
 
-  if (
-    status === "cancelled"
-  ) {
-    return "border-red-400 bg-red-50/95";
+  if (status === "cancelled") {
+    return "bg-rose-400";
   }
 
-  if (
-    status === "no-show"
-  ) {
-    return "border-orange-400 bg-orange-50/95";
+  if (status === "no-show") {
+    return "bg-amber-400";
   }
 
-  return "border-sky-400 bg-sky-50/95";
+  return "bg-fuchsia-400";
 }
 
 function sumPrices(
@@ -1403,7 +1411,9 @@ export default function Home() {
         syncingRef.current =
           false;
 
-        setIsSyncing(false);
+        setIsSyncing(
+          false
+        );
 
         if (
           queue.length === 0
@@ -1428,9 +1438,7 @@ export default function Home() {
         operation
       );
 
-      setIsOnline(
-        false
-      );
+      setIsOnline(false);
 
       setDatabaseStatus(
         "offline"
@@ -1540,11 +1548,8 @@ export default function Home() {
       )
     );
 
-    const online =
-      navigator.onLine;
-
     setIsOnline(
-      online
+      navigator.onLine
     );
 
     const queue =
@@ -1760,27 +1765,21 @@ export default function Home() {
                 id: Number(
                   row.id
                 ),
-
                 name:
                   row.name ??
                   "",
-
                 phone:
                   row.phone ??
                   "",
-
                 telegram:
                   row.telegram ??
-                  undefined,
-
+                  "",
                 instagram:
                   row.instagram ??
-                  undefined,
-
+                  "",
                 social:
                   row.social ??
                   "",
-
                 note:
                   row.note ??
                   "",
@@ -1796,17 +1795,14 @@ export default function Home() {
               id: Number(
                 row.id
               ),
-
               name:
                 row.name ??
                 "",
-
               duration:
                 Number(
                   row.duration ??
                     90
                 ),
-
               price:
                 Number(
                   row.price ??
@@ -1824,11 +1820,9 @@ export default function Home() {
               id: Number(
                 row.id
               ),
-
               date:
                 row.date ??
                 "",
-
               time:
                 String(
                   row.time ??
@@ -1837,7 +1831,6 @@ export default function Home() {
                   0,
                   5
                 ),
-
               clientId:
                 row.client_id !==
                   null &&
@@ -1847,11 +1840,9 @@ export default function Home() {
                       row.client_id
                     )
                   : undefined,
-
               name:
                 row.name ??
                 "",
-
               serviceId:
                 row.service_id !==
                   null &&
@@ -1861,23 +1852,19 @@ export default function Home() {
                       row.service_id
                     )
                   : undefined,
-
               service:
                 row.service ??
                 "",
-
               duration:
                 Number(
                   row.duration ??
                     90
                 ),
-
               price:
                 Number(
                   row.price ??
                     0
                 ),
-
               status:
                 (row.status ??
                   "scheduled") as AppointmentStatus,
@@ -2205,6 +2192,11 @@ export default function Home() {
       visibleMonth
     );
 
+  const weekDates =
+    getWeekDates(
+      selectedDate
+    );
+
   const filteredClients =
     [...clients]
       .filter(
@@ -2516,17 +2508,17 @@ export default function Home() {
     if (
       !isOnline
     ) {
-      return "border-orange-300 bg-orange-50 text-orange-700";
+      return "border-orange-300 bg-orange-50/90 text-orange-700";
     }
 
     if (
       isSyncing ||
       pendingCount > 0
     ) {
-      return "border-amber-300 bg-amber-50 text-amber-700";
+      return "border-amber-300 bg-amber-50/90 text-amber-700";
     }
 
-    return "border-green-300 bg-green-50 text-green-700";
+    return "border-emerald-300 bg-emerald-50/90 text-emerald-700";
   }
 
   function statusLabel(
@@ -3197,16 +3189,12 @@ export default function Home() {
       const changedAppointments =
         appointments
           .filter(
-            (
-              appointment
-            ) =>
+            (appointment) =>
               appointment.clientId ===
               editingClientId
           )
           .map(
-            (
-              appointment
-            ) => ({
+            (appointment) => ({
               ...appointment,
               name:
                 client.name,
@@ -3216,9 +3204,7 @@ export default function Home() {
       setAppointments(
         (current) =>
           current.map(
-            (
-              appointment
-            ) => {
+            (appointment) => {
               const changed =
                 changedAppointments.find(
                   (item) =>
@@ -3319,8 +3305,6 @@ export default function Home() {
 
         note:
           client.note,
-
-        social: "",
       },
     });
 
@@ -3571,29 +3555,37 @@ export default function Home() {
       event.clientY -
       rect.top;
 
-    const hour =
-      workSettings.startHour +
-      Math.floor(
-        y /
-          HOUR_HEIGHT
+    const minutesFromStart =
+      Math.max(
+        0,
+        Math.round(
+          (y /
+            HOUR_HEIGHT) *
+            2
+        ) *
+          30
       );
 
+    const totalMinutes =
+      workSettings.startHour *
+        60 +
+      minutesFromStart;
+
+    const endMinutes =
+      workSettings.endHour *
+      60;
+
     if (
-      hour <
-        workSettings.startHour ||
-      hour >=
-        workSettings.endHour
+      totalMinutes >=
+      endMinutes
     ) {
       return;
     }
 
     openNewAppointment(
-      `${String(
-        hour
-      ).padStart(
-        2,
-        "0"
-      )}:00`
+      minutesToTime(
+        totalMinutes
+      )
     );
   }
 
@@ -3773,7 +3765,7 @@ export default function Home() {
           APP_BACKGROUND_STYLE
         }
       >
-        <div className="rounded-3xl bg-rose-50/80 px-8 py-7 shadow-xl">
+        <div className="rounded-[28px] border border-white/70 bg-white/60 px-8 py-7 shadow-xl backdrop-blur-xl">
           Nails
         </div>
       </main>
@@ -3792,7 +3784,7 @@ export default function Home() {
           onSubmit={
             handleLogin
           }
-          className="w-full max-w-sm rounded-3xl bg-rose-50/80 p-6 shadow-2xl backdrop-blur-md"
+          className="w-full max-w-sm rounded-[30px] border border-white/70 bg-white/60 p-6 shadow-[0_20px_60px_rgba(110,70,90,0.18)] backdrop-blur-xl"
         >
           <h1 className="text-center text-2xl font-semibold">
             Nails
@@ -3812,7 +3804,7 @@ export default function Home() {
               )
             }
             placeholder="Email"
-            className="mt-6 h-12 w-full rounded-xl border border-rose-200 bg-white px-3 text-black"
+            className="mt-6 h-12 w-full rounded-2xl border border-white/80 bg-white/80 px-4 text-black shadow-sm"
           />
 
           <input
@@ -3829,11 +3821,11 @@ export default function Home() {
               )
             }
             placeholder="Пароль"
-            className="mt-3 h-12 w-full rounded-xl border border-rose-200 bg-white px-3 text-black"
+            className="mt-3 h-12 w-full rounded-2xl border border-white/80 bg-white/80 px-4 text-black shadow-sm"
           />
 
           {loginError && (
-            <div className="mt-3 rounded-xl bg-red-50 p-3 text-sm text-red-700">
+            <div className="mt-3 rounded-2xl bg-red-50 p-3 text-sm text-red-700">
               {loginError}
             </div>
           )}
@@ -3842,7 +3834,7 @@ export default function Home() {
             disabled={
               loginLoading
             }
-            className="mt-4 h-12 w-full rounded-xl bg-black font-medium text-white"
+            className="mt-4 h-12 w-full rounded-2xl bg-neutral-900 font-medium text-white shadow-lg"
           >
             {loginLoading
               ? "..."
@@ -3861,7 +3853,7 @@ export default function Home() {
           APP_BACKGROUND_STYLE
         }
       >
-        <div className="rounded-3xl bg-rose-50/80 px-8 py-7 shadow-xl">
+        <div className="rounded-[28px] border border-white/70 bg-white/60 px-8 py-7 shadow-xl backdrop-blur-xl">
           Загрузка...
         </div>
       </main>
@@ -3875,296 +3867,385 @@ export default function Home() {
         APP_BACKGROUND_STYLE
       }
     >
-      <div className="mx-auto flex h-dvh max-w-md flex-col overflow-hidden bg-rose-50/45 shadow-2xl backdrop-blur-[1px]">
+      <div className="mx-auto flex h-dvh max-w-md flex-col overflow-hidden bg-rose-50/20 backdrop-blur-[1px]">
 
         {activeTab ===
           "calendar" && (
-          <div className="flex min-h-0 flex-1 flex-col">
-            <header className="shrink-0 border-b border-neutral-600/60 bg-rose-50/70 px-5 pb-3 pt-4 backdrop-blur-md">
-              <div className="flex items-start justify-between">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <p className="text-sm capitalize text-neutral-500">
-                      {selectedDateIsToday
-                        ? t.today
-                        : formatWeekday(
-                            selectedDate,
-                            language
-                          )}
+          <div className="relative flex min-h-0 flex-1 flex-col">
+            <header className="shrink-0 px-3 pb-2 pt-3">
+              <div className="rounded-[28px] border border-white/70 bg-white/55 p-4 shadow-[0_12px_40px_rgba(120,80,95,0.12)] backdrop-blur-xl">
+
+                <div className="flex items-center justify-between">
+                  <button
+                    onClick={() =>
+                      calendarView ===
+                      "day"
+                        ? changeDay(
+                            -1
+                          )
+                        : changeMonth(
+                            -1
+                          )
+                    }
+                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white/65 text-2xl shadow-sm"
+                  >
+                    ‹
+                  </button>
+
+                  <button
+                    onClick={
+                      goToday
+                    }
+                    className="min-w-0 px-3 text-center"
+                  >
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-neutral-400">
+                      {calendarView ===
+                      "day"
+                        ? selectedDateIsToday
+                          ? t.today
+                          : formatWeekday(
+                              selectedDate,
+                              language
+                            )
+                        : t.calendar}
                     </p>
 
-                    <span
-                      className={`rounded-full border px-2 py-0.5 text-[10px] font-medium ${connectionClass()}`}
-                    >
-                      {connectionLabel()}
-                    </span>
-                  </div>
+                    <h1 className="mt-0.5 truncate text-[22px] font-semibold capitalize tracking-tight">
+                      {calendarView ===
+                      "day"
+                        ? formatDateTitle(
+                            selectedDate,
+                            language
+                          )
+                        : formatMonthTitle(
+                            visibleMonth,
+                            language
+                          )}
+                    </h1>
+                  </button>
 
-                  <h1 className="text-2xl font-semibold capitalize">
-                    {calendarView ===
-                    "day"
-                      ? formatDateTitle(
-                          selectedDate,
-                          language
-                        )
-                      : formatMonthTitle(
-                          visibleMonth,
-                          language
-                        )}
-                  </h1>
-
-                  <p className="mt-1 text-xs text-neutral-500">
-                    {t.records}:{" "}
-                    {
-                      selectedDayAppointments.length
+                  <button
+                    onClick={() =>
+                      calendarView ===
+                      "day"
+                        ? changeDay(
+                            1
+                          )
+                        : changeMonth(
+                            1
+                          )
                     }
-                  </p>
+                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white/65 text-2xl shadow-sm"
+                  >
+                    ›
+                  </button>
                 </div>
 
-                <button
-                  onClick={() =>
-                    openNewAppointment()
-                  }
-                  className="flex h-11 w-11 items-center justify-center rounded-full bg-black text-2xl text-white"
-                >
-                  +
-                </button>
-              </div>
-
-              <div className="mt-4 grid grid-cols-2 rounded-xl bg-rose-100/70 p-1">
-                <button
-                  onClick={() =>
-                    setCalendarView(
-                      "day"
-                    )
-                  }
-                  className={`rounded-lg py-2 text-sm ${
-                    calendarView ===
-                    "day"
-                      ? "bg-white shadow-sm"
-                      : "text-neutral-500"
-                  }`}
-                >
-                  {t.day}
-                </button>
-
-                <button
-                  onClick={() =>
-                    setCalendarView(
-                      "month"
-                    )
-                  }
-                  className={`rounded-lg py-2 text-sm ${
-                    calendarView ===
-                    "month"
-                      ? "bg-white shadow-sm"
-                      : "text-neutral-500"
-                  }`}
-                >
-                  {t.month}
-                </button>
-              </div>
-
-              <div className="mt-3 grid grid-cols-[48px_1fr_48px] items-center">
-                <button
-                  onClick={() =>
-                    calendarView ===
-                    "day"
-                      ? changeDay(
-                          -1
+                <div className="mt-4 flex items-center justify-between gap-2">
+                  <div className="flex rounded-2xl bg-white/40 p-1">
+                    <button
+                      onClick={() =>
+                        setCalendarView(
+                          "day"
                         )
-                      : changeMonth(
-                          -1
+                      }
+                      className={`rounded-xl px-4 py-2 text-xs font-medium transition ${
+                        calendarView ===
+                        "day"
+                          ? "bg-white text-neutral-900 shadow-sm"
+                          : "text-neutral-500"
+                      }`}
+                    >
+                      {
+                        t.day
+                      }
+                    </button>
+
+                    <button
+                      onClick={() =>
+                        setCalendarView(
+                          "month"
                         )
-                  }
-                  className="text-2xl"
-                >
-                  ‹
-                </button>
-
-                <button
-                  onClick={
-                    goToday
-                  }
-                  className="mx-auto rounded-xl bg-rose-100/70 px-4 py-2 text-sm"
-                >
-                  {calendarView ===
-                  "day"
-                    ? selectedDateIsToday
-                      ? t.today
-                      : t.returnToday
-                    : visibleMonthIsCurrent
-                    ? t.currentMonth
-                    : t.returnCurrentMonth}
-                </button>
-
-                <button
-                  onClick={() =>
-                    calendarView ===
-                    "day"
-                      ? changeDay(
-                          1
-                        )
-                      : changeMonth(
-                          1
-                        )
-                  }
-                  className="text-2xl"
-                >
-                  ›
-                </button>
-              </div>
-            </header>
-
-            {calendarView ===
-              "day" && (
-              <section className="min-h-0 flex-1 overflow-y-auto">
-                <div
-                  className="grid grid-cols-[70px_1fr]"
-                  style={{
-                    height: `${calendarHeight}px`,
-                  }}
-                >
-                  <div className="relative">
-
-                    <div
-                      className="absolute -bottom-[3px] right-0 top-0 z-20 w-[6px]"
-                      style={{
-                        background:
-                          "linear-gradient(to right, rgba(145,145,145,0.42) 0%, rgba(205,205,205,0.7) 30%, rgba(255,255,255,0.98) 45%, rgba(255,255,255,0.98) 55%, rgba(205,205,205,0.7) 70%, rgba(145,145,145,0.42) 100%)",
-                      }}
-                    />
-
-                    {hours.map(
-                      (
-                        hour
-                      ) => (
-                        <div
-                          key={
-                            hour
-                          }
-                          className="absolute left-0 w-full px-3 text-sm text-neutral-600"
-                          style={{
-                            top: `${
-                              (hour -
-                                workSettings.startHour) *
-                              HOUR_HEIGHT
-                            }px`,
-                          }}
-                        >
-                          {String(
-                            hour
-                          ).padStart(
-                            2,
-                            "0"
-                          )}
-                          :00
-                        </div>
-                      )
-                    )}
+                      }
+                      className={`rounded-xl px-4 py-2 text-xs font-medium transition ${
+                        calendarView ===
+                        "month"
+                          ? "bg-white text-neutral-900 shadow-sm"
+                          : "text-neutral-500"
+                      }`}
+                    >
+                      {
+                        t.month
+                      }
+                    </button>
                   </div>
 
-                  <div
-                    className="relative"
-                    onClick={
-                      handleCalendarClick
-                    }
+                  <span
+                    className={`rounded-full border px-3 py-1.5 text-[10px] font-medium ${connectionClass()}`}
                   >
-                    {hours.map(
-                      (
-                        hour
-                      ) => (
-                        <div
-                          key={
-                            hour
-                          }
-                          className="absolute -left-[3px] right-0 h-[6px]"
-                          style={{
-                            top: `${
-                              (hour -
-                                workSettings.startHour) *
-                              HOUR_HEIGHT
-                            }px`,
-                            background:
-                              "linear-gradient(to bottom, rgba(145,145,145,0.42) 0%, rgba(205,205,205,0.7) 30%, rgba(255,255,255,0.98) 45%, rgba(255,255,255,0.98) 55%, rgba(205,205,205,0.7) 70%, rgba(145,145,145,0.42) 100%)",
-                          }}
-                        />
-                      )
-                    )}
+                    {
+                      connectionLabel()
+                    }
+                  </span>
+                </div>
 
-                    {selectedDayAppointments.map(
+                {calendarView ===
+                  "day" && (
+                  <div className="mt-4 grid grid-cols-7 gap-1">
+                    {weekDates.map(
                       (
-                        appointment
+                        date
                       ) => {
-                        const top =
-                          getAppointmentTop(
-                            appointment.time,
-                            workSettings.startHour
+                        const dateKey =
+                          formatDateKey(
+                            date
                           );
 
-                        const height =
-                          getAppointmentHeight(
-                            appointment.duration
-                          );
+                        const selected =
+                          dateKey ===
+                          selectedDateKey;
+
+                        const count =
+                          appointments.filter(
+                            (
+                              appointment
+                            ) =>
+                              appointment.date ===
+                              dateKey
+                          ).length;
 
                         return (
                           <button
                             key={
-                              appointment.id
+                              dateKey
                             }
-                            onClick={(
-                              event
-                            ) => {
-                              event.stopPropagation();
+                            onClick={() => {
+                              setSelectedDate(
+                                date
+                              );
 
-                              openEditAppointment(
-                                appointment
+                              setVisibleMonth(
+                                new Date(
+                                  date.getFullYear(),
+                                  date.getMonth(),
+                                  1
+                                )
                               );
                             }}
-                            className={`absolute left-2 right-2 z-10 overflow-hidden rounded-2xl border p-3 text-left shadow-md ${getAppointmentCardClass(
-                              appointment.status
-                            )}`}
-                            style={{
-                              top: `${top}px`,
-                              height: `${height}px`,
-                            }}
+                            className={`relative flex min-w-0 flex-col items-center rounded-2xl px-1 py-2 transition ${
+                              selected
+                                ? "bg-rose-200/80 shadow-sm"
+                                : "bg-white/15"
+                            }`}
                           >
-                            <div className="flex justify-between gap-2">
-                              <span className="font-medium">
+                            <span className="text-[9px] font-medium capitalize text-neutral-500">
+                              {new Intl.DateTimeFormat(
+                                getLocale(
+                                  language
+                                ),
                                 {
-                                  appointment.time
+                                  weekday:
+                                    "short",
                                 }
-                              </span>
+                              ).format(
+                                date
+                              )}
+                            </span>
 
-                              <span
-                                className={`rounded-full border px-2 py-0.5 text-[10px] ${getStatusBadgeClass(
-                                  appointment.status
-                                )}`}
-                              >
-                                {statusLabel(
-                                  appointment.status
-                                )}
-                              </span>
-                            </div>
-
-                            <p className="mt-1 truncate font-semibold">
+                            <span
+                              className={`mt-1 text-base font-semibold ${
+                                selected
+                                  ? "text-neutral-950"
+                                  : "text-neutral-600"
+                              }`}
+                            >
                               {
-                                appointment.name
+                                date.getDate()
                               }
-                            </p>
+                            </span>
 
-                            {height >=
-                              70 && (
-                              <p className="mt-1 truncate text-sm text-neutral-600">
-                                {
-                                  appointment.service
-                                }
-                              </p>
+                            {count >
+                              0 && (
+                              <span className="absolute bottom-1 h-1 w-1 rounded-full bg-rose-500" />
                             )}
                           </button>
                         );
                       }
                     )}
+                  </div>
+                )}
+              </div>
+            </header>
+
+            {calendarView ===
+              "day" && (
+              <section className="min-h-0 flex-1 overflow-y-auto px-3 pb-3">
+                <div className="relative min-h-full overflow-hidden rounded-[30px] border border-white/70 bg-white/42 shadow-[0_12px_45px_rgba(105,75,90,0.10)] backdrop-blur-md">
+                  <div
+                    className="grid grid-cols-[62px_1fr]"
+                    style={{
+                      height: `${calendarHeight}px`,
+                    }}
+                  >
+                    <div className="relative bg-white/10">
+                      {hours.map(
+                        (
+                          hour
+                        ) => (
+                          <div
+                            key={
+                              hour
+                            }
+                            className="absolute left-0 right-0 pr-3 text-right text-[11px] font-medium text-neutral-500"
+                            style={{
+                              top: `${
+                                (hour -
+                                  workSettings.startHour) *
+                                  HOUR_HEIGHT -
+                                7
+                              }px`,
+                            }}
+                          >
+                            {String(
+                              hour
+                            ).padStart(
+                              2,
+                              "0"
+                            )}
+                            :00
+                          </div>
+                        )
+                      )}
+                    </div>
+
+                    <div
+                      className="relative"
+                      onClick={
+                        handleCalendarClick
+                      }
+                    >
+                      <div className="absolute bottom-0 left-0 top-0 w-px bg-white/80 shadow-[1px_0_2px_rgba(110,90,100,0.18)]" />
+
+                      {hours.map(
+                        (
+                          hour
+                        ) => (
+                          <div
+                            key={
+                              hour
+                            }
+                            className="absolute left-0 right-0 h-px bg-white/80 shadow-[0_1px_1px_rgba(110,90,100,0.18)]"
+                            style={{
+                              top: `${
+                                (hour -
+                                  workSettings.startHour) *
+                                HOUR_HEIGHT
+                              }px`,
+                            }}
+                          />
+                        )
+                      )}
+
+                      {selectedDayAppointments.map(
+                        (
+                          appointment
+                        ) => {
+                          const top =
+                            getAppointmentTop(
+                              appointment.time,
+                              workSettings.startHour
+                            );
+
+                          const height =
+                            getAppointmentHeight(
+                              appointment.duration
+                            );
+
+                          const endTime =
+                            minutesToTime(
+                              timeToMinutes(
+                                appointment.time
+                              ) +
+                                appointment.duration
+                            );
+
+                          return (
+                            <button
+                              key={
+                                appointment.id
+                              }
+                              onClick={(
+                                event
+                              ) => {
+                                event.stopPropagation();
+
+                                openEditAppointment(
+                                  appointment
+                                );
+                              }}
+                              className="absolute left-3 right-3 z-10 overflow-hidden rounded-[20px] border border-white/90 bg-white/75 text-left shadow-[0_8px_24px_rgba(120,85,100,0.14)] backdrop-blur-xl transition active:scale-[0.99]"
+                              style={{
+                                top: `${top + 6}px`,
+                                height: `${Math.max(
+                                  height -
+                                    12,
+                                  54
+                                )}px`,
+                              }}
+                            >
+                              <div
+                                className={`absolute bottom-0 left-0 top-0 w-[5px] ${getAppointmentAccentClass(
+                                  appointment.status
+                                )}`}
+                              />
+
+                              <div className="flex h-full flex-col justify-center px-4 pl-5">
+                                <div className="flex items-start justify-between gap-3">
+                                  <div className="min-w-0">
+                                    <p className="truncate text-[14px] font-semibold text-neutral-900">
+                                      {
+                                        appointment.name
+                                      }
+                                    </p>
+
+                                    <p className="mt-0.5 truncate text-[11px] text-neutral-500">
+                                      {
+                                        appointment.service
+                                      }
+                                    </p>
+                                  </div>
+
+                                  <div className="shrink-0 text-right">
+                                    <p className="text-[10px] font-medium text-neutral-500">
+                                      {
+                                        appointment.time
+                                      }{" "}
+                                      –{" "}
+                                      {
+                                        endTime
+                                      }
+                                    </p>
+
+                                    {height >=
+                                      76 && (
+                                      <span
+                                        className={`mt-1 inline-block rounded-full border px-2 py-0.5 text-[8px] ${getStatusBadgeClass(
+                                          appointment.status
+                                        )}`}
+                                      >
+                                        {statusLabel(
+                                          appointment.status
+                                        )}
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            </button>
+                          );
+                        }
+                      )}
+                    </div>
                   </div>
                 </div>
               </section>
@@ -4172,8 +4253,8 @@ export default function Home() {
 
             {calendarView ===
               "month" && (
-              <section className="min-h-0 flex-1 overflow-y-auto p-4">
-                <div className="rounded-2xl bg-white/65 p-3 backdrop-blur-sm">
+              <section className="min-h-0 flex-1 overflow-y-auto px-3 pb-3">
+                <div className="rounded-[30px] border border-white/70 bg-white/50 p-3 shadow-[0_12px_45px_rgba(105,75,90,0.10)] backdrop-blur-xl">
                   <div className="grid grid-cols-7 gap-1">
                     {WEEKDAYS.map(
                       (
@@ -4183,7 +4264,7 @@ export default function Home() {
                           key={
                             day.value
                           }
-                          className="py-2 text-center text-xs text-neutral-500"
+                          className="py-2 text-center text-[10px] font-medium text-neutral-400"
                         >
                           {
                             day[
@@ -4238,15 +4319,15 @@ export default function Home() {
                                 "day"
                               );
                             }}
-                            className={`min-h-[62px] rounded-xl p-2 ${
+                            className={`relative min-h-[58px] rounded-2xl p-2 transition ${
                               selected
-                                ? "bg-black text-white"
+                                ? "bg-rose-200/90 shadow-sm"
                                 : item.isCurrentMonth
-                                ? "bg-white/50"
+                                ? "bg-white/40"
                                 : "text-neutral-300"
                             }`}
                           >
-                            <div>
+                            <div className="text-sm font-medium">
                               {
                                 item.date.getDate()
                               }
@@ -4254,11 +4335,7 @@ export default function Home() {
 
                             {count >
                               0 && (
-                              <div className="mt-1 text-xs">
-                                {
-                                  count
-                                }
-                              </div>
+                              <div className="absolute bottom-2 left-1/2 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-rose-500" />
                             )}
                           </button>
                         );
@@ -4268,61 +4345,72 @@ export default function Home() {
                 </div>
               </section>
             )}
+
+            <button
+              onClick={() =>
+                openNewAppointment()
+              }
+              className="absolute bottom-4 right-5 z-30 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-rose-400 to-pink-500 text-3xl font-light text-white shadow-[0_12px_30px_rgba(225,100,145,0.38)] transition active:scale-95"
+            >
+              +
+            </button>
           </div>
         )}
 
         {activeTab ===
           "clients" && (
           <div className="flex min-h-0 flex-1 flex-col">
-            <header className="shrink-0 bg-rose-50/70 px-5 py-4 backdrop-blur-md">
-              <div className="flex justify-between">
-                <div>
-                  <p className="text-sm text-neutral-500">
-                    {
-                      t.clientBase
-                    }
-                  </p>
+            <header className="shrink-0 px-4 pb-2 pt-4">
+              <div className="rounded-[28px] border border-white/70 bg-white/55 p-4 shadow-[0_12px_40px_rgba(120,80,95,0.12)] backdrop-blur-xl">
+                <div className="flex justify-between">
+                  <div>
+                    <p className="text-xs font-medium text-neutral-400">
+                      {
+                        t.clientBase
+                      }
+                    </p>
 
-                  <h1 className="text-2xl font-semibold">
-                    {
-                      t.clients
+                    <h1 className="mt-1 text-2xl font-semibold">
+                      {
+                        t.clients
+                      }
+                    </h1>
+                  </div>
+
+                  <button
+                    onClick={
+                      openNewClient
                     }
-                  </h1>
+                    className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-rose-400 to-pink-500 text-2xl text-white shadow-lg"
+                  >
+                    +
+                  </button>
                 </div>
 
-                <button
-                  onClick={
-                    openNewClient
+                <input
+                  value={
+                    clientSearch
                   }
-                  className="flex h-11 w-11 items-center justify-center rounded-full bg-black text-2xl text-white"
-                >
-                  +
-                </button>
+                  onChange={(
+                    event
+                  ) =>
+                    setClientSearch(
+                      event.target
+                        .value
+                    )
+                  }
+                  placeholder={
+                    t.searchClient
+                  }
+                  className="mt-4 h-12 w-full rounded-2xl border border-white/80 bg-white/75 px-4 shadow-sm outline-none"
+                />
               </div>
-
-              <input
-                value={
-                  clientSearch
-                }
-                onChange={(
-                  event
-                ) =>
-                  setClientSearch(
-                    event.target
-                      .value
-                  )
-                }
-                placeholder={
-                  t.searchClient
-                }
-                className="mt-4 h-12 w-full rounded-xl border border-rose-200 bg-white/90 px-3"
-              />
             </header>
 
-            <section className="min-h-0 flex-1 space-y-3 overflow-y-auto p-4">
+            <section className="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 pb-4">
               {filteredClients.length ===
                 0 && (
-                <div className="rounded-2xl bg-white/60 p-6 text-center text-neutral-500">
+                <div className="rounded-[24px] border border-white/70 bg-white/55 p-6 text-center text-neutral-500 backdrop-blur-lg">
                   {
                     t.noClients
                   }
@@ -4346,7 +4434,7 @@ export default function Home() {
                         true
                       );
                     }}
-                    className="w-full rounded-2xl border border-rose-200 bg-white/70 p-4 text-left shadow-sm"
+                    className="w-full rounded-[22px] border border-white/80 bg-white/65 p-4 text-left shadow-[0_6px_20px_rgba(120,85,100,0.10)] backdrop-blur-lg"
                   >
                     <div className="flex justify-between gap-3">
                       <div className="min-w-0">
@@ -4383,7 +4471,7 @@ export default function Home() {
                         )}
                       </div>
 
-                      <span className="h-fit shrink-0 rounded-full bg-rose-100 px-3 py-1 text-xs">
+                      <span className="h-fit shrink-0 rounded-full bg-rose-100/90 px-3 py-1 text-xs text-rose-600">
                         {
                           appointments.filter(
                             (
@@ -4405,21 +4493,23 @@ export default function Home() {
         {activeTab ===
           "analytics" && (
           <div className="flex min-h-0 flex-1 flex-col">
-            <header className="shrink-0 bg-rose-50/70 px-5 py-4">
-              <p className="text-sm text-neutral-500">
-                {
-                  t.financeRecords
-                }
-              </p>
+            <header className="shrink-0 px-4 pb-2 pt-4">
+              <div className="rounded-[28px] border border-white/70 bg-white/55 p-4 shadow-[0_12px_40px_rgba(120,80,95,0.12)] backdrop-blur-xl">
+                <p className="text-xs font-medium text-neutral-400">
+                  {
+                    t.financeRecords
+                  }
+                </p>
 
-              <h1 className="text-2xl font-semibold">
-                {
-                  t.analytics
-                }
-              </h1>
+                <h1 className="mt-1 text-2xl font-semibold">
+                  {
+                    t.analytics
+                  }
+                </h1>
+              </div>
             </header>
 
-            <section className="min-h-0 flex-1 overflow-y-auto p-4">
+            <section className="min-h-0 flex-1 overflow-y-auto px-4 pb-4">
               <div className="grid grid-cols-2 gap-3">
                 <StatCard
                   label={
@@ -4505,7 +4595,7 @@ export default function Home() {
                       key={
                         service.name
                       }
-                      className="rounded-2xl bg-white/70 p-4"
+                      className="rounded-[22px] border border-white/80 bg-white/65 p-4 shadow-sm backdrop-blur-lg"
                     >
                       <div className="flex justify-between">
                         <div>
@@ -4540,340 +4630,348 @@ export default function Home() {
         {activeTab ===
           "settings" && (
           <div className="flex min-h-0 flex-1 flex-col">
-            <header className="shrink-0 bg-rose-50/70 px-5 py-4">
-              <h1 className="text-2xl font-semibold">
-                {
-                  t.settings
-                }
-              </h1>
+            <header className="shrink-0 px-4 pb-2 pt-4">
+              <div className="rounded-[28px] border border-white/70 bg-white/55 p-4 shadow-[0_12px_40px_rgba(120,80,95,0.12)] backdrop-blur-xl">
+                <h1 className="text-2xl font-semibold">
+                  {
+                    t.settings
+                  }
+                </h1>
+              </div>
             </header>
 
-            <section className="min-h-0 flex-1 overflow-y-auto p-5">
-              <h2 className="font-semibold">
-                {
-                  t.sync
-                }
-              </h2>
-
-              <div
-                className={`mt-3 rounded-2xl border p-4 ${connectionClass()}`}
-              >
-                <p className="font-medium">
-                  {
-                    connectionLabel()
-                  }
-                </p>
-
-                {pendingCount >
-                  0 && (
-                  <p className="mt-1 text-xs">
-                    В очереди:{" "}
-                    {
-                      pendingCount
-                    }
-                  </p>
-                )}
-              </div>
-
-              <h2 className="mt-7 font-semibold">
-                {
-                  t.language
-                }
-              </h2>
-
-              <div className="mt-3 grid grid-cols-2 gap-2">
-                <button
-                  onClick={() =>
-                    setLanguage(
-                      "ru"
-                    )
-                  }
-                  className={`h-12 rounded-xl ${
-                    language ===
-                    "ru"
-                      ? "bg-black text-white"
-                      : "bg-white/70"
-                  }`}
-                >
-                  Русский
-                </button>
-
-                <button
-                  onClick={() =>
-                    setLanguage(
-                      "uk"
-                    )
-                  }
-                  className={`h-12 rounded-xl ${
-                    language ===
-                    "uk"
-                      ? "bg-black text-white"
-                      : "bg-white/70"
-                  }`}
-                >
-                  Українська
-                </button>
-              </div>
-
-              <h2 className="mt-7 font-semibold">
-                {
-                  t.workSchedule
-                }
-              </h2>
-
-              <div className="mt-3 grid grid-cols-2 gap-3">
-                <div>
-                  <p className="mb-1 text-xs text-neutral-500">
-                    {
-                      t.startDay
-                    }
-                  </p>
-
-                  <select
-                    value={
-                      workSettings.startHour
-                    }
-                    onChange={(
-                      event
-                    ) =>
-                      setWorkSettings(
-                        {
-                          ...workSettings,
-
-                          startHour:
-                            Number(
-                              event.target.value
-                            ),
-                        }
-                      )
-                    }
-                    className="h-12 w-full rounded-xl bg-white px-3"
-                  >
-                    {Array.from(
-                      {
-                        length:
-                          18,
-                      },
-                      (
-                        _,
-                        index
-                      ) =>
-                        index +
-                        6
-                    ).map(
-                      (
-                        hour
-                      ) => (
-                        <option
-                          key={
-                            hour
-                          }
-                          value={
-                            hour
-                          }
-                        >
-                          {String(
-                            hour
-                          ).padStart(
-                            2,
-                            "0"
-                          )}
-                          :00
-                        </option>
-                      )
-                    )}
-                  </select>
-                </div>
-
-                <div>
-                  <p className="mb-1 text-xs text-neutral-500">
-                    {
-                      t.endDay
-                    }
-                  </p>
-
-                  <select
-                    value={
-                      workSettings.endHour
-                    }
-                    onChange={(
-                      event
-                    ) =>
-                      setWorkSettings(
-                        {
-                          ...workSettings,
-
-                          endHour:
-                            Number(
-                              event.target.value
-                            ),
-                        }
-                      )
-                    }
-                    className="h-12 w-full rounded-xl bg-white px-3"
-                  >
-                    {Array.from(
-                      {
-                        length:
-                          18,
-                      },
-                      (
-                        _,
-                        index
-                      ) =>
-                        index +
-                        7
-                    ).map(
-                      (
-                        hour
-                      ) => (
-                        <option
-                          key={
-                            hour
-                          }
-                          value={
-                            hour
-                          }
-                        >
-                          {hour ===
-                          24
-                            ? "24:00"
-                            : `${String(
-                                hour
-                              ).padStart(
-                                2,
-                                "0"
-                              )}:00`}
-                        </option>
-                      )
-                    )}
-                  </select>
-                </div>
-              </div>
-
-              <p className="mt-4 text-xs text-neutral-500">
-                {
-                  t.workDays
-                }
-              </p>
-
-              <div className="mt-2 grid grid-cols-7 gap-1">
-                {WEEKDAYS.map(
-                  (
-                    day
-                  ) => (
-                    <button
-                      key={
-                        day.value
-                      }
-                      onClick={() =>
-                        toggleWorkDay(
-                          day.value
-                        )
-                      }
-                      className={`h-11 rounded-xl text-xs ${
-                        workSettings.workDays.includes(
-                          day.value
-                        )
-                          ? "bg-black text-white"
-                          : "bg-white/60"
-                      }`}
-                    >
-                      {
-                        day[
-                          language
-                        ]
-                      }
-                    </button>
-                  )
-                )}
-              </div>
-
-              <div className="mt-7 flex items-center justify-between">
+            <section className="min-h-0 flex-1 overflow-y-auto px-4 pb-4">
+              <div className="rounded-[24px] border border-white/70 bg-white/55 p-4 backdrop-blur-lg">
                 <h2 className="font-semibold">
                   {
-                    t.services
+                    t.sync
                   }
                 </h2>
 
-                <button
-                  onClick={
-                    openNewService
-                  }
-                  className="flex h-10 w-10 items-center justify-center rounded-full bg-black text-xl text-white"
+                <div
+                  className={`mt-3 rounded-2xl border p-4 ${connectionClass()}`}
                 >
-                  +
-                </button>
+                  <p className="font-medium">
+                    {
+                      connectionLabel()
+                    }
+                  </p>
+
+                  {pendingCount >
+                    0 && (
+                    <p className="mt-1 text-xs">
+                      В очереди:{" "}
+                      {
+                        pendingCount
+                      }
+                    </p>
+                  )}
+                </div>
               </div>
 
-              <div className="mt-3 space-y-2">
-                {services.map(
-                  (
-                    service
-                  ) => (
-                    <div
-                      key={
-                        service.id
+              <div className="mt-3 rounded-[24px] border border-white/70 bg-white/55 p-4 backdrop-blur-lg">
+                <h2 className="font-semibold">
+                  {
+                    t.language
+                  }
+                </h2>
+
+                <div className="mt-3 grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() =>
+                      setLanguage(
+                        "ru"
+                      )
+                    }
+                    className={`h-12 rounded-2xl ${
+                      language ===
+                      "ru"
+                        ? "bg-neutral-900 text-white"
+                        : "bg-white/70"
+                    }`}
+                  >
+                    Русский
+                  </button>
+
+                  <button
+                    onClick={() =>
+                      setLanguage(
+                        "uk"
+                      )
+                    }
+                    className={`h-12 rounded-2xl ${
+                      language ===
+                      "uk"
+                        ? "bg-neutral-900 text-white"
+                        : "bg-white/70"
+                    }`}
+                  >
+                    Українська
+                  </button>
+                </div>
+              </div>
+
+              <div className="mt-3 rounded-[24px] border border-white/70 bg-white/55 p-4 backdrop-blur-lg">
+                <h2 className="font-semibold">
+                  {
+                    t.workSchedule
+                  }
+                </h2>
+
+                <div className="mt-3 grid grid-cols-2 gap-3">
+                  <div>
+                    <p className="mb-1 text-xs text-neutral-500">
+                      {
+                        t.startDay
                       }
-                      className="rounded-2xl bg-white/70 p-4"
+                    </p>
+
+                    <select
+                      value={
+                        workSettings.startHour
+                      }
+                      onChange={(
+                        event
+                      ) =>
+                        setWorkSettings(
+                          {
+                            ...workSettings,
+
+                            startHour:
+                              Number(
+                                event.target.value
+                              ),
+                          }
+                        )
+                      }
+                      className="h-12 w-full rounded-2xl border border-white/70 bg-white/75 px-3"
                     >
-                      <p className="font-semibold">
+                      {Array.from(
                         {
-                          service.name
+                          length:
+                            18,
+                        },
+                        (
+                          _,
+                          index
+                        ) =>
+                          index +
+                          6
+                      ).map(
+                        (
+                          hour
+                        ) => (
+                          <option
+                            key={
+                              hour
+                            }
+                            value={
+                              hour
+                            }
+                          >
+                            {String(
+                              hour
+                            ).padStart(
+                              2,
+                              "0"
+                            )}
+                            :00
+                          </option>
+                        )
+                      )}
+                    </select>
+                  </div>
+
+                  <div>
+                    <p className="mb-1 text-xs text-neutral-500">
+                      {
+                        t.endDay
+                      }
+                    </p>
+
+                    <select
+                      value={
+                        workSettings.endHour
+                      }
+                      onChange={(
+                        event
+                      ) =>
+                        setWorkSettings(
+                          {
+                            ...workSettings,
+
+                            endHour:
+                              Number(
+                                event.target.value
+                              ),
+                          }
+                        )
+                      }
+                      className="h-12 w-full rounded-2xl border border-white/70 bg-white/75 px-3"
+                    >
+                      {Array.from(
+                        {
+                          length:
+                            18,
+                        },
+                        (
+                          _,
+                          index
+                        ) =>
+                          index +
+                          7
+                      ).map(
+                        (
+                          hour
+                        ) => (
+                          <option
+                            key={
+                              hour
+                            }
+                            value={
+                              hour
+                            }
+                          >
+                            {hour ===
+                            24
+                              ? "24:00"
+                              : `${String(
+                                  hour
+                                ).padStart(
+                                  2,
+                                  "0"
+                                )}:00`}
+                          </option>
+                        )
+                      )}
+                    </select>
+                  </div>
+                </div>
+
+                <p className="mt-4 text-xs text-neutral-500">
+                  {
+                    t.workDays
+                  }
+                </p>
+
+                <div className="mt-2 grid grid-cols-7 gap-1">
+                  {WEEKDAYS.map(
+                    (
+                      day
+                    ) => (
+                      <button
+                        key={
+                          day.value
                         }
-                      </p>
+                        onClick={() =>
+                          toggleWorkDay(
+                            day.value
+                          )
+                        }
+                        className={`h-11 rounded-xl text-xs ${
+                          workSettings.workDays.includes(
+                            day.value
+                          )
+                            ? "bg-neutral-900 text-white"
+                            : "bg-white/65"
+                        }`}
+                      >
+                        {
+                          day[
+                            language
+                          ]
+                        }
+                      </button>
+                    )
+                  )}
+                </div>
+              </div>
 
-                      <p className="mt-1 text-sm text-neutral-500">
-                        {
-                          service.duration
-                        }{" "}
-                        {
-                          t.minutes
-                        }{" "}
-                        ·{" "}
-                        {
-                          service.price
-                        }{" "}
-                        грн
-                      </p>
+              <div className="mt-3 rounded-[24px] border border-white/70 bg-white/55 p-4 backdrop-blur-lg">
+                <div className="flex items-center justify-between">
+                  <h2 className="font-semibold">
+                    {
+                      t.services
+                    }
+                  </h2>
 
-                      <div className="mt-3 flex gap-2">
-                        <button
-                          onClick={() =>
-                            openEditService(
-                              service
-                            )
-                          }
-                          className="h-10 rounded-lg bg-white px-3 text-xs"
-                        >
+                  <button
+                    onClick={
+                      openNewService
+                    }
+                    className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-rose-400 to-pink-500 text-xl text-white shadow-md"
+                  >
+                    +
+                  </button>
+                </div>
+
+                <div className="mt-3 space-y-2">
+                  {services.map(
+                    (
+                      service
+                    ) => (
+                      <div
+                        key={
+                          service.id
+                        }
+                        className="rounded-2xl bg-white/70 p-4"
+                      >
+                        <p className="font-semibold">
                           {
-                            t.edit
+                            service.name
                           }
-                        </button>
+                        </p>
 
-                        <button
-                          onClick={() =>
-                            deleteService(
-                              service.id
-                            )
-                          }
-                          className="h-10 rounded-lg bg-red-50 px-3 text-xs text-red-600"
-                        >
+                        <p className="mt-1 text-sm text-neutral-500">
+                          {formatDurationLabel(
+                            service.duration,
+                            language
+                          )}{" "}
+                          ·{" "}
                           {
-                            t.delete
-                          }
-                        </button>
+                            service.price
+                          }{" "}
+                          грн
+                        </p>
+
+                        <div className="mt-3 flex gap-2">
+                          <button
+                            onClick={() =>
+                              openEditService(
+                                service
+                              )
+                            }
+                            className="h-10 rounded-xl bg-white px-3 text-xs"
+                          >
+                            {
+                              t.edit
+                            }
+                          </button>
+
+                          <button
+                            onClick={() =>
+                              deleteService(
+                                service.id
+                              )
+                            }
+                            className="h-10 rounded-xl bg-red-50 px-3 text-xs text-red-600"
+                          >
+                            {
+                              t.delete
+                            }
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                  )
-                )}
+                    )
+                  )}
+                </div>
               </div>
 
               <button
                 onClick={
                   handleLogout
                 }
-                className="mt-7 h-12 w-full rounded-xl bg-red-50 text-red-600"
+                className="mt-3 h-12 w-full rounded-2xl bg-red-50/90 text-red-600"
               >
                 {
                   t.logout
@@ -4883,8 +4981,9 @@ export default function Home() {
           </div>
         )}
 
-        <nav className="shrink-0 bg-rose-50/80 px-3 pb-3 pt-2 backdrop-blur-md">
-          <div className="grid grid-cols-4 gap-2">
+        <nav className="shrink-0 px-3 pb-3 pt-2">
+          <div className="grid grid-cols-4 gap-1 rounded-[28px] border border-white/75 bg-white/62 p-2 shadow-[0_12px_40px_rgba(110,75,90,0.16)] backdrop-blur-xl">
+
             <NavButton
               active={
                 activeTab ===
@@ -5018,7 +5117,6 @@ export default function Home() {
                     cy="12"
                     r="3"
                   />
-
                   <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.8 2.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21h-4v-.1a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1L4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9A1.7 1.7 0 0 0 3 14H3v-4h.1a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9L4.2 7 7 4.2l.1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.6V3h4v.1a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1L19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.1v4H21a1.7 1.7 0 0 0-1.6 1Z" />
                 </svg>
               }
@@ -5027,6 +5125,7 @@ export default function Home() {
                 t.settings
               }
             </NavButton>
+
           </div>
         </nav>
 
@@ -5076,7 +5175,7 @@ export default function Home() {
                         );
                       }
                     }}
-                    className="h-12 w-full rounded-xl border border-rose-200 bg-white px-3"
+                    className="h-12 w-full rounded-2xl border border-white/80 bg-white/80 px-3 shadow-sm"
                   >
                     <option value="">
                       {
@@ -5122,7 +5221,7 @@ export default function Home() {
                   placeholder={
                     t.clientName
                   }
-                  className="h-12 w-full rounded-xl border border-rose-200 bg-white px-3"
+                  className="h-12 w-full rounded-2xl border border-white/80 bg-white/80 px-3 shadow-sm"
                 />
               )}
 
@@ -5147,7 +5246,7 @@ export default function Home() {
                           .value
                       )
                     }
-                    className="h-12 w-full rounded-xl border border-rose-200 bg-white px-3"
+                    className="h-12 w-full rounded-2xl border border-white/80 bg-white/80 px-3 shadow-sm"
                   >
                     <option value="">
                       {
@@ -5198,7 +5297,7 @@ export default function Home() {
                   placeholder={
                     t.serviceName
                   }
-                  className="h-12 w-full rounded-xl border border-rose-200 bg-white px-3"
+                  className="h-12 w-full rounded-2xl border border-white/80 bg-white/80 px-3 shadow-sm"
                 />
               )}
 
@@ -5223,7 +5322,7 @@ export default function Home() {
                           .value
                       )
                     }
-                    className="block h-12 w-full min-w-0 appearance-none rounded-xl border border-rose-200 bg-white px-3 py-0 text-base leading-[48px] text-black"
+                    className="block h-12 w-full min-w-0 appearance-none rounded-2xl border border-white/80 bg-white/80 px-3 py-0 text-base leading-[48px] text-black shadow-sm"
                   />
                 </div>
 
@@ -5247,7 +5346,7 @@ export default function Home() {
                           .value
                       )
                     }
-                    className="block h-12 w-full min-w-0 appearance-none rounded-xl border border-rose-200 bg-white px-3 py-0 text-base leading-[48px] text-black"
+                    className="block h-12 w-full min-w-0 appearance-none rounded-2xl border border-white/80 bg-white/80 px-3 py-0 text-base leading-[48px] text-black shadow-sm"
                   />
                 </div>
               </div>
@@ -5264,7 +5363,7 @@ export default function Home() {
                       .value
                   )
                 }
-                className="h-12 w-full rounded-xl border border-rose-200 bg-white px-3"
+                className="h-12 w-full rounded-2xl border border-white/80 bg-white/80 px-3 shadow-sm"
               >
                 {Array.from(
                   {
@@ -5316,7 +5415,7 @@ export default function Home() {
                 placeholder={
                   t.price
                 }
-                className="h-12 w-full rounded-xl border border-rose-200 bg-white px-3"
+                className="h-12 w-full rounded-2xl border border-white/80 bg-white/80 px-3 shadow-sm"
               />
 
               <select
@@ -5331,7 +5430,7 @@ export default function Home() {
                       .value as AppointmentStatus
                   )
                 }
-                className="h-12 w-full rounded-xl border border-rose-200 bg-white px-3"
+                className="h-12 w-full rounded-2xl border border-white/80 bg-white/80 px-3 shadow-sm"
               >
                 <option value="scheduled">
                   {
@@ -5385,7 +5484,7 @@ export default function Home() {
                         );
                       }
                     }}
-                    className="h-12 w-full rounded-xl bg-sky-50 font-medium text-sky-700"
+                    className="h-12 w-full rounded-2xl bg-sky-50 font-medium text-sky-700"
                   >
                     {
                       t.remindClient
@@ -5394,7 +5493,7 @@ export default function Home() {
                 )}
 
               {appointmentError && (
-                <div className="rounded-xl bg-red-50 p-3 text-sm text-red-700">
+                <div className="rounded-2xl bg-red-50 p-3 text-sm text-red-700">
                   {
                     appointmentError
                   }
@@ -5404,7 +5503,7 @@ export default function Home() {
                       onClick={
                         actuallySaveAppointment
                       }
-                      className="mt-3 h-12 w-full rounded-xl bg-white"
+                      className="mt-3 h-12 w-full rounded-2xl bg-white"
                     >
                       {
                         t.forceSave
@@ -5418,7 +5517,7 @@ export default function Home() {
                 onClick={
                   saveAppointment
                 }
-                className="h-12 w-full rounded-xl bg-black font-medium text-white"
+                className="h-12 w-full rounded-2xl bg-neutral-900 font-medium text-white shadow-lg"
               >
                 {editingAppointmentId !==
                 null
@@ -5434,7 +5533,7 @@ export default function Home() {
                       editingAppointmentId
                     )
                   }
-                  className="h-12 w-full rounded-xl bg-red-50 text-red-600"
+                  className="h-12 w-full rounded-2xl bg-red-50 text-red-600"
                 >
                   {
                     t.deleteAppointment
@@ -5461,13 +5560,11 @@ export default function Home() {
             </h2>
 
             <div className="mt-5 space-y-3">
-              <div>
-                <label className="mb-1 block text-sm text-neutral-500">
-                  {
-                    t.name
-                  }
-                </label>
-
+              <FieldLabel
+                label={
+                  t.name
+                }
+              >
                 <input
                   value={
                     clientName
@@ -5483,17 +5580,15 @@ export default function Home() {
                   placeholder={
                     t.name
                   }
-                  className="h-12 w-full rounded-xl border border-rose-200 bg-white px-3 text-base"
+                  className="h-12 w-full rounded-2xl border border-white/80 bg-white/80 px-3 text-base shadow-sm"
                 />
-              </div>
+              </FieldLabel>
 
-              <div>
-                <label className="mb-1 block text-sm text-neutral-500">
-                  {
-                    t.phone
-                  }
-                </label>
-
+              <FieldLabel
+                label={
+                  t.phone
+                }
+              >
                 <input
                   value={
                     clientPhone
@@ -5508,15 +5603,11 @@ export default function Home() {
                   }
                   placeholder="+380..."
                   inputMode="tel"
-                  className="h-12 w-full rounded-xl border border-rose-200 bg-white px-3 text-base"
+                  className="h-12 w-full rounded-2xl border border-white/80 bg-white/80 px-3 text-base shadow-sm"
                 />
-              </div>
+              </FieldLabel>
 
-              <div>
-                <label className="mb-1 block text-sm text-neutral-500">
-                  Telegram
-                </label>
-
+              <FieldLabel label="Telegram">
                 <input
                   value={
                     clientTelegram
@@ -5532,15 +5623,11 @@ export default function Home() {
                   placeholder="@user"
                   autoCapitalize="none"
                   autoCorrect="off"
-                  className="h-12 w-full rounded-xl border border-rose-200 bg-white px-3 text-base"
+                  className="h-12 w-full rounded-2xl border border-white/80 bg-white/80 px-3 text-base shadow-sm"
                 />
-              </div>
+              </FieldLabel>
 
-              <div>
-                <label className="mb-1 block text-sm text-neutral-500">
-                  Instagram
-                </label>
-
+              <FieldLabel label="Instagram">
                 <input
                   value={
                     clientInstagram
@@ -5556,17 +5643,15 @@ export default function Home() {
                   placeholder="user"
                   autoCapitalize="none"
                   autoCorrect="off"
-                  className="h-12 w-full rounded-xl border border-rose-200 bg-white px-3 text-base"
+                  className="h-12 w-full rounded-2xl border border-white/80 bg-white/80 px-3 text-base shadow-sm"
                 />
-              </div>
+              </FieldLabel>
 
-              <div>
-                <label className="mb-1 block text-sm text-neutral-500">
-                  {
-                    t.note
-                  }
-                </label>
-
+              <FieldLabel
+                label={
+                  t.note
+                }
+              >
                 <textarea
                   value={
                     clientNote
@@ -5583,15 +5668,15 @@ export default function Home() {
                     t.note
                   }
                   rows={3}
-                  className="w-full resize-none rounded-xl border border-rose-200 bg-white p-3 text-base"
+                  className="w-full resize-none rounded-2xl border border-white/80 bg-white/80 p-3 text-base shadow-sm"
                 />
-              </div>
+              </FieldLabel>
 
               <button
                 onClick={
                   saveClient
                 }
-                className="h-12 w-full rounded-xl bg-black font-medium text-white"
+                className="h-12 w-full rounded-2xl bg-neutral-900 font-medium text-white shadow-lg"
               >
                 {
                   t.save
@@ -5617,44 +5702,35 @@ export default function Home() {
               </h2>
 
               <div className="mt-4 space-y-2">
-                <div className="flex h-12 items-center rounded-xl bg-white/70 px-3">
-                  <span className="w-24 shrink-0 text-xs text-neutral-400">
-                    {
-                      t.phone
-                    }
-                  </span>
+                <InfoRow
+                  label={
+                    t.phone
+                  }
+                  value={
+                    selectedClient.phone ||
+                    "—"
+                  }
+                />
 
-                  <span className="truncate text-sm">
-                    {selectedClient.phone ||
-                      "—"}
-                  </span>
-                </div>
+                <InfoRow
+                  label="Telegram"
+                  value={
+                    selectedClient.telegram ||
+                    "—"
+                  }
+                />
 
-                <div className="flex h-12 items-center rounded-xl bg-white/70 px-3">
-                  <span className="w-24 shrink-0 text-xs text-neutral-400">
-                    Telegram
-                  </span>
-
-                  <span className="truncate text-sm">
-                    {selectedClient.telegram ||
-                      "—"}
-                  </span>
-                </div>
-
-                <div className="flex h-12 items-center rounded-xl bg-white/70 px-3">
-                  <span className="w-24 shrink-0 text-xs text-neutral-400">
-                    Instagram
-                  </span>
-
-                  <span className="truncate text-sm">
-                    {selectedClient.instagram ||
-                      "—"}
-                  </span>
-                </div>
+                <InfoRow
+                  label="Instagram"
+                  value={
+                    selectedClient.instagram ||
+                    "—"
+                  }
+                />
               </div>
 
               {selectedClient.note && (
-                <p className="mt-3 rounded-xl bg-white/70 p-3 text-sm">
+                <p className="mt-3 rounded-2xl bg-white/70 p-3 text-sm">
                   {
                     selectedClient.note
                   }
@@ -5668,7 +5744,7 @@ export default function Home() {
                       /[^+\d]/g,
                       ""
                     )}`}
-                    className="flex h-12 flex-1 items-center justify-center rounded-xl bg-black text-center text-sm font-medium text-white"
+                    className="flex h-12 flex-1 items-center justify-center rounded-2xl bg-neutral-900 text-center text-sm font-medium text-white"
                   >
                     {
                       t.call
@@ -5686,7 +5762,7 @@ export default function Home() {
                         "_blank"
                       )
                     }
-                    className="h-12 flex-1 rounded-xl bg-white text-sm font-medium"
+                    className="h-12 flex-1 rounded-2xl bg-white/80 text-sm font-medium shadow-sm"
                   >
                     Telegram
                   </button>
@@ -5702,7 +5778,7 @@ export default function Home() {
                         "_blank"
                       )
                     }
-                    className="h-12 flex-1 rounded-xl bg-white text-sm font-medium"
+                    className="h-12 flex-1 rounded-2xl bg-white/80 text-sm font-medium shadow-sm"
                   >
                     Instagram
                   </button>
@@ -5741,7 +5817,7 @@ export default function Home() {
                     true
                   );
                 }}
-                className="mt-4 h-12 w-full rounded-xl bg-black font-medium text-white"
+                className="mt-4 h-12 w-full rounded-2xl bg-neutral-900 font-medium text-white shadow-lg"
               >
                 {
                   t.bookClient
@@ -5754,7 +5830,7 @@ export default function Home() {
                     selectedClient
                   )
                 }
-                className="mt-2 h-12 w-full rounded-xl bg-white font-medium"
+                className="mt-2 h-12 w-full rounded-2xl bg-white/80 font-medium shadow-sm"
               >
                 {
                   t.editClientButton
@@ -5776,7 +5852,7 @@ export default function Home() {
                       key={
                         appointment.id
                       }
-                      className="rounded-xl bg-white/70 p-3"
+                      className="rounded-2xl bg-white/70 p-3 shadow-sm"
                     >
                       <p className="font-medium">
                         {formatFullDate(
@@ -5801,7 +5877,7 @@ export default function Home() {
                             appointment
                           )
                         }
-                        className="mt-3 h-10 rounded-lg bg-sky-50 px-4 text-sm font-medium text-sky-700"
+                        className="mt-3 h-10 rounded-xl bg-sky-50 px-4 text-sm font-medium text-sky-700"
                       >
                         {
                           t.remind
@@ -5827,7 +5903,7 @@ export default function Home() {
                       key={
                         appointment.id
                       }
-                      className="rounded-xl bg-white/70 p-3 text-sm"
+                      className="rounded-2xl bg-white/70 p-3 text-sm shadow-sm"
                     >
                       {formatFullDate(
                         appointment.date,
@@ -5848,7 +5924,7 @@ export default function Home() {
                     selectedClient.id
                   )
                 }
-                className="mt-6 h-12 w-full rounded-xl bg-red-50 text-red-600"
+                className="mt-6 h-12 w-full rounded-2xl bg-red-50 text-red-600"
               >
                 {
                   t.deleteClient
@@ -5888,7 +5964,7 @@ export default function Home() {
                 placeholder={
                   t.serviceName
                 }
-                className="h-12 w-full rounded-xl border border-rose-200 bg-white px-3"
+                className="h-12 w-full rounded-2xl border border-white/80 bg-white/80 px-3 shadow-sm"
               />
 
               <select
@@ -5903,7 +5979,7 @@ export default function Home() {
                       .value
                   )
                 }
-                className="h-12 w-full rounded-xl border border-rose-200 bg-white px-3"
+                className="h-12 w-full rounded-2xl border border-white/80 bg-white/80 px-3 shadow-sm"
               >
                 {Array.from(
                   {
@@ -5955,14 +6031,14 @@ export default function Home() {
                 placeholder={
                   t.servicePrice
                 }
-                className="h-12 w-full rounded-xl border border-rose-200 bg-white px-3"
+                className="h-12 w-full rounded-2xl border border-white/80 bg-white/80 px-3 shadow-sm"
               />
 
               <button
                 onClick={
                   saveService
                 }
-                className="h-12 w-full rounded-xl bg-black font-medium text-white"
+                className="h-12 w-full rounded-2xl bg-neutral-900 font-medium text-white shadow-lg"
               >
                 {
                   t.save
@@ -6007,7 +6083,7 @@ export default function Home() {
                 );
               }}
               rows={7}
-              className="mt-5 w-full resize-none rounded-xl border border-rose-200 bg-white p-3 text-base"
+              className="mt-5 w-full resize-none rounded-2xl border border-white/80 bg-white/80 p-3 text-base shadow-sm"
             />
 
             {(reminderClient?.telegram ||
@@ -6018,7 +6094,7 @@ export default function Home() {
                     onClick={
                       openTelegramReminder
                     }
-                    className="h-12 flex-1 rounded-xl bg-sky-50 text-sm font-semibold text-sky-700"
+                    className="h-12 flex-1 rounded-2xl bg-sky-50 text-sm font-semibold text-sky-700"
                   >
                     Telegram
                   </button>
@@ -6029,7 +6105,7 @@ export default function Home() {
                     onClick={
                       openInstagramReminder
                     }
-                    className="h-12 flex-1 rounded-xl bg-rose-100 text-sm font-semibold text-rose-700"
+                    className="h-12 flex-1 rounded-2xl bg-rose-100 text-sm font-semibold text-rose-700"
                   >
                     Instagram
                   </button>
@@ -6041,7 +6117,7 @@ export default function Home() {
               onClick={
                 copyReminder
               }
-              className="mt-2 h-12 w-full rounded-xl bg-black font-medium text-white"
+              className="mt-2 h-12 w-full rounded-2xl bg-neutral-900 font-medium text-white shadow-lg"
             >
               {reminderCopied
                 ? t.copied
@@ -6049,6 +6125,7 @@ export default function Home() {
             </button>
           </Modal>
         )}
+
       </div>
     </main>
   );
@@ -6070,10 +6147,10 @@ function NavButton({
       onClick={
         onClick
       }
-      className={`flex h-[58px] min-w-0 flex-col items-center justify-center gap-1 rounded-2xl border text-[10px] font-medium transition-all ${
+      className={`flex h-[58px] min-w-0 flex-col items-center justify-center gap-1 rounded-[20px] text-[10px] font-medium transition-all ${
         active
-          ? "border-neutral-900 bg-neutral-900 text-white shadow-md"
-          : "border-white/70 bg-white/65 text-neutral-500 shadow-sm"
+          ? "bg-rose-100/90 text-rose-500 shadow-sm"
+          : "text-neutral-500"
       }`}
     >
       <span className="flex h-6 items-center justify-center">
@@ -6111,21 +6188,21 @@ function StatCard({
       "bg-white/65",
 
     blue:
-      "bg-sky-50/90",
+      "bg-sky-50/80",
 
     green:
-      "bg-green-50/90",
+      "bg-emerald-50/80",
 
     red:
-      "bg-red-50/90",
+      "bg-rose-50/80",
 
     orange:
-      "bg-orange-50/90",
+      "bg-amber-50/80",
   };
 
   return (
     <div
-      className={`rounded-2xl p-4 ${tones[tone]}`}
+      className={`rounded-[22px] border border-white/75 p-4 shadow-[0_6px_20px_rgba(120,85,100,0.08)] backdrop-blur-lg ${tones[tone]}`}
     >
       <p className="text-xs text-neutral-500">
         {
@@ -6142,6 +6219,52 @@ function StatCard({
   );
 }
 
+function FieldLabel({
+  label,
+  children,
+}: {
+  label: string;
+  children: ReactNode;
+}) {
+  return (
+    <div>
+      <label className="mb-1 block text-sm text-neutral-500">
+        {
+          label
+        }
+      </label>
+
+      {
+        children
+      }
+    </div>
+  );
+}
+
+function InfoRow({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="flex h-12 items-center rounded-2xl bg-white/70 px-3 shadow-sm">
+      <span className="w-24 shrink-0 text-xs text-neutral-400">
+        {
+          label
+        }
+      </span>
+
+      <span className="truncate text-sm">
+        {
+          value
+        }
+      </span>
+    </div>
+  );
+}
+
 function Modal({
   children,
   onClose,
@@ -6150,14 +6273,17 @@ function Modal({
   onClose: () => void;
 }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40">
-      <div className="max-h-[92dvh] w-full max-w-md overflow-y-auto rounded-t-3xl bg-rose-50/95 p-5 backdrop-blur-md">
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/30 backdrop-blur-[2px]">
+      <div className="max-h-[92dvh] w-full max-w-md overflow-y-auto rounded-t-[32px] border-t border-white/80 bg-rose-50/90 p-5 shadow-[0_-20px_60px_rgba(80,50,65,0.18)] backdrop-blur-xl">
+
+        <div className="mx-auto mb-2 h-1.5 w-10 rounded-full bg-neutral-300/80" />
+
         <div className="flex justify-end">
           <button
             onClick={
               onClose
             }
-            className="flex h-9 w-9 items-center justify-center rounded-full text-sm text-neutral-500"
+            className="flex h-9 w-9 items-center justify-center rounded-full bg-white/60 text-sm text-neutral-500"
           >
             ✕
           </button>
