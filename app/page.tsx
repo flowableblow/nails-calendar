@@ -65,6 +65,9 @@ const DEFAULT_WORK_SETTINGS: WorkSettings = {
   workDays: [0, 1, 2, 3, 4, 5, 6],
 };
 
+const FIELD_CLASS =
+  "h-[50px] min-h-[50px] max-h-[50px] w-full min-w-0 rounded-xl border border-rose-200 bg-white px-4 text-base text-black outline-none focus:border-rose-400";
+
 const WEEKDAYS = [
   { value: 1, ru: "Пн", uk: "Пн" },
   { value: 2, ru: "Вт", uk: "Вт" },
@@ -465,7 +468,6 @@ function cleanUsername(value: string) {
   username = username.replace(/^instagram\.com\//, "");
   username = username.replace(/^www\.instagram\.com\//, "");
   username = username.replace(/^@/, "");
-
   username = username.split("/")[0];
   username = username.split("?")[0];
 
@@ -570,6 +572,7 @@ export default function Home() {
     useState<DatabaseStatus>("connecting");
 
   const [activeTab, setActiveTab] = useState<Tab>("calendar");
+
   const [calendarView, setCalendarView] =
     useState<CalendarView>("day");
 
@@ -641,9 +644,11 @@ export default function Home() {
   const [clientSearch, setClientSearch] = useState("");
 
   const [reminderText, setReminderText] = useState("");
+
   const [reminderClientId, setReminderClientId] = useState<number | null>(
     null
   );
+
   const [reminderCopied, setReminderCopied] = useState(false);
 
   useEffect(() => {
@@ -1101,9 +1106,7 @@ export default function Home() {
 
   const sevenDaysAgo = useMemo(() => {
     const date = new Date(today);
-
     date.setDate(date.getDate() - 6);
-
     return date;
   }, [today]);
 
@@ -1210,7 +1213,6 @@ export default function Home() {
 
   function changeDay(amount: number) {
     const newDate = new Date(selectedDate);
-
     newDate.setDate(newDate.getDate() + amount);
 
     setSelectedDate(newDate);
@@ -1296,6 +1298,7 @@ export default function Home() {
 
   function openEditAppointment(appointment: Appointment) {
     setEditingAppointmentId(appointment.id);
+
     setAppointmentDate(appointment.date);
     setAppointmentTime(appointment.time);
     setAppointmentService(appointment.service);
@@ -1421,9 +1424,7 @@ export default function Home() {
     }
 
     setDatabaseStatus("connected");
-
     setIsAppointmentModalOpen(false);
-
     resetAppointmentForm();
   }
 
@@ -1485,9 +1486,7 @@ export default function Home() {
   }
 
   async function deleteAppointment(id: number) {
-    if (!window.confirm(t.deleteAppointmentConfirm)) {
-      return;
-    }
+    if (!window.confirm(t.deleteAppointmentConfirm)) return;
 
     const { error } = await supabase
       .from("appointments")
@@ -1583,10 +1582,7 @@ export default function Home() {
       setAppointments(
         appointments.map((appointment) =>
           appointment.clientId === editingClientId
-            ? {
-                ...appointment,
-                name: newClient.name,
-              }
+            ? { ...appointment, name: newClient.name }
             : appointment
         )
       );
@@ -1600,9 +1596,7 @@ export default function Home() {
   }
 
   async function deleteClient(id: number) {
-    if (!window.confirm(t.deleteClientConfirm)) {
-      return;
-    }
+    if (!window.confirm(t.deleteClientConfirm)) return;
 
     const { error } = await supabase
       .from("clients")
@@ -1620,10 +1614,7 @@ export default function Home() {
     setAppointments(
       appointments.map((appointment) =>
         appointment.clientId === id
-          ? {
-              ...appointment,
-              clientId: undefined,
-            }
+          ? { ...appointment, clientId: undefined }
           : appointment
       )
     );
@@ -1698,9 +1689,7 @@ export default function Home() {
   }
 
   async function deleteService(id: number) {
-    if (!window.confirm(t.deleteServiceConfirm)) {
-      return;
-    }
+    if (!window.confirm(t.deleteServiceConfirm)) return;
 
     const { error } = await supabase
       .from("services")
@@ -1718,10 +1707,7 @@ export default function Home() {
     setAppointments(
       appointments.map((appointment) =>
         appointment.serviceId === id
-          ? {
-              ...appointment,
-              serviceId: undefined,
-            }
+          ? { ...appointment, serviceId: undefined }
           : appointment
       )
     );
@@ -1891,10 +1877,7 @@ export default function Home() {
             </p>
           </div>
 
-          <form
-            onSubmit={handleLogin}
-            className="mt-7 space-y-4"
-          >
+          <form onSubmit={handleLogin} className="mt-7 space-y-4">
             <div>
               <label className="mb-1 block text-sm text-neutral-500">
                 Email
@@ -1910,7 +1893,7 @@ export default function Home() {
                   setLoginError("");
                 }}
                 placeholder="name@example.com"
-                className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3 text-black caret-black outline-none placeholder:text-neutral-400 focus:border-rose-400"
+                className={FIELD_CLASS}
               />
             </div>
 
@@ -1929,7 +1912,7 @@ export default function Home() {
                   setLoginError("");
                 }}
                 placeholder="••••••••"
-                className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3 text-black caret-black outline-none placeholder:text-neutral-400 focus:border-rose-400"
+                className={FIELD_CLASS}
               />
             </div>
 
@@ -2403,7 +2386,7 @@ export default function Home() {
                 value={clientSearch}
                 onChange={(event) => setClientSearch(event.target.value)}
                 placeholder={t.searchClient}
-                className="mt-4 w-full rounded-xl border border-rose-200 bg-white px-4 py-3 outline-none focus:border-rose-400"
+                className={`mt-4 ${FIELD_CLASS}`}
               />
             </header>
 
@@ -2483,10 +2466,6 @@ export default function Home() {
                   <p className="mt-2 text-2xl font-semibold">
                     {todayIncome} грн
                   </p>
-
-                  <p className="mt-1 text-xs text-neutral-400">
-                    {todayCompletedAppointments.length} {t.completed}
-                  </p>
                 </div>
 
                 <div className="rounded-2xl border border-rose-200 bg-white/80 p-4">
@@ -2496,10 +2475,6 @@ export default function Home() {
 
                   <p className="mt-2 text-2xl font-semibold">
                     {weekIncome} грн
-                  </p>
-
-                  <p className="mt-1 text-xs text-neutral-400">
-                    {weekCompletedAppointments.length} {t.completed}
                   </p>
                 </div>
               </div>
@@ -2511,11 +2486,6 @@ export default function Home() {
 
                 <p className="mt-2 text-3xl font-semibold">
                   {monthIncome} грн
-                </p>
-
-                <p className="mt-2 text-sm text-neutral-500">
-                  {currentMonthCompletedAppointments.length}{" "}
-                  {t.completed}
                 </p>
               </div>
 
@@ -2664,10 +2634,6 @@ export default function Home() {
               <div className="mt-7">
                 <h2 className="text-lg font-semibold">{t.language}</h2>
 
-                <p className="mt-1 text-sm text-neutral-500">
-                  {t.languageHint}
-                </p>
-
                 <div className="mt-4 grid grid-cols-2 gap-2 rounded-2xl border border-rose-200 bg-white/80 p-2">
                   <button
                     onClick={() => setLanguage("ru")}
@@ -2698,10 +2664,6 @@ export default function Home() {
                   {t.workSchedule}
                 </h2>
 
-                <p className="mt-1 text-sm text-neutral-500">
-                  {t.workScheduleHint}
-                </p>
-
                 <div className="mt-4 rounded-2xl border border-rose-200 bg-white/80 p-4">
                   <div className="grid grid-cols-2 gap-3">
                     <div>
@@ -2723,7 +2685,7 @@ export default function Home() {
                             ),
                           });
                         }}
-                        className="w-full rounded-xl border border-rose-200 bg-white px-3 py-3"
+                        className={FIELD_CLASS}
                       >
                         {Array.from(
                           { length: 18 },
@@ -2749,7 +2711,7 @@ export default function Home() {
                             endHour: Number(event.target.value),
                           })
                         }
-                        className="w-full rounded-xl border border-rose-200 bg-white px-3 py-3"
+                        className={FIELD_CLASS}
                       >
                         {Array.from(
                           { length: 18 },
@@ -2770,11 +2732,7 @@ export default function Home() {
                   </div>
 
                   <div className="mt-5">
-                    <p className="text-xs text-neutral-500">
-                      {t.workDays}
-                    </p>
-
-                    <div className="mt-2 grid grid-cols-7 gap-1">
+                    <div className="grid grid-cols-7 gap-1">
                       {WEEKDAYS.map((day) => {
                         const active = workSettings.workDays.includes(
                           day.value
@@ -2818,12 +2776,6 @@ export default function Home() {
                 </div>
 
                 <div className="mt-4 space-y-3">
-                  {services.length === 0 && (
-                    <div className="rounded-2xl border border-dashed border-rose-300 bg-white/70 p-6 text-center text-sm text-neutral-500">
-                      {t.addFirstService}
-                    </div>
-                  )}
-
                   {services.map((service) => (
                     <div
                       key={service.id}
@@ -2940,13 +2892,11 @@ export default function Home() {
                       onChange={(event) => {
                         setSelectedClientId(event.target.value);
 
-                        clearAppointmentWarning();
-
                         if (event.target.value) {
                           setAppointmentName("");
                         }
                       }}
-                      className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
+                      className={FIELD_CLASS}
                     >
                       <option value="">{t.manualName}</option>
 
@@ -2978,7 +2928,7 @@ export default function Home() {
                       onChange={(event) =>
                         setAppointmentName(event.target.value)
                       }
-                      className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
+                      className={FIELD_CLASS}
                     />
                   </div>
                 )}
@@ -2994,7 +2944,7 @@ export default function Home() {
                       onChange={(event) =>
                         handleServiceSelection(event.target.value)
                       }
-                      className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
+                      className={FIELD_CLASS}
                     >
                       <option value="">{t.manualService}</option>
 
@@ -3018,46 +2968,40 @@ export default function Home() {
                       onChange={(event) =>
                         setAppointmentService(event.target.value)
                       }
-                      className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
+                      className={FIELD_CLASS}
                     />
                   </div>
                 )}
 
-                <div className="space-y-4">
-  <div className="w-full">
-    <label className="mb-1 block text-sm text-neutral-500">
-      {t.date}
-    </label>
+                <div>
+                  <label className="mb-1 block text-sm text-neutral-500">
+                    {t.date}
+                  </label>
 
-    <div className="h-[50px] w-full overflow-hidden rounded-xl border border-rose-200 bg-white">
-      <input
-        type="date"
-        value={appointmentDate}
-        onChange={(event) =>
-          setAppointmentDate(event.target.value)
-        }
-        className="block h-full w-full min-w-0 appearance-none border-0 bg-transparent px-4 py-0 text-base text-black outline-none"
-      />
-    </div>
-  </div>
+                  <input
+                    type="date"
+                    value={appointmentDate}
+                    onChange={(event) =>
+                      setAppointmentDate(event.target.value)
+                    }
+                    className={`${FIELD_CLASS} appearance-none`}
+                  />
+                </div>
 
-  <div className="w-full">
-    <label className="mb-1 block text-sm text-neutral-500">
-      {t.time}
-    </label>
+                <div>
+                  <label className="mb-1 block text-sm text-neutral-500">
+                    {t.time}
+                  </label>
 
-    <div className="h-[50px] w-full overflow-hidden rounded-xl border border-rose-200 bg-white">
-      <input
-        type="time"
-        value={appointmentTime}
-        onChange={(event) =>
-          setAppointmentTime(event.target.value)
-        }
-        className="block h-full w-full min-w-0 appearance-none border-0 bg-transparent px-4 py-0 text-base text-black outline-none"
-      />
-    </div>
-  </div>
-</div>
+                  <input
+                    type="time"
+                    value={appointmentTime}
+                    onChange={(event) =>
+                      setAppointmentTime(event.target.value)
+                    }
+                    className={`${FIELD_CLASS} appearance-none`}
+                  />
+                </div>
 
                 <div>
                   <label className="mb-1 block text-sm text-neutral-500">
@@ -3069,7 +3013,7 @@ export default function Home() {
                     onChange={(event) =>
                       setAppointmentDuration(event.target.value)
                     }
-                    className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
+                    className={FIELD_CLASS}
                   >
                     {[30, 60, 90, 120, 150, 180].map((minutes) => (
                       <option key={minutes} value={minutes}>
@@ -3091,7 +3035,7 @@ export default function Home() {
                     onChange={(event) =>
                       setAppointmentPrice(event.target.value)
                     }
-                    className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
+                    className={FIELD_CLASS}
                   />
                 </div>
 
@@ -3107,23 +3051,12 @@ export default function Home() {
                         event.target.value as AppointmentStatus
                       )
                     }
-                    className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
+                    className={FIELD_CLASS}
                   >
-                    <option value="scheduled">
-                      {t.scheduledStatus}
-                    </option>
-
-                    <option value="completed">
-                      {t.completedStatus}
-                    </option>
-
-                    <option value="cancelled">
-                      {t.cancelledStatus}
-                    </option>
-
-                    <option value="no-show">
-                      {t.noShowStatus}
-                    </option>
+                    <option value="scheduled">{t.scheduledStatus}</option>
+                    <option value="completed">{t.completedStatus}</option>
+                    <option value="cancelled">{t.cancelledStatus}</option>
+                    <option value="no-show">{t.noShowStatus}</option>
                   </select>
                 </div>
 
@@ -3187,7 +3120,7 @@ export default function Home() {
                   value={clientName}
                   onChange={(event) => setClientName(event.target.value)}
                   placeholder={t.name}
-                  className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
+                  className={FIELD_CLASS}
                 />
 
                 <input
@@ -3196,7 +3129,7 @@ export default function Home() {
                     setClientPhone(event.target.value)
                   }
                   placeholder={t.phone}
-                  className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
+                  className={FIELD_CLASS}
                 />
 
                 <input
@@ -3205,7 +3138,7 @@ export default function Home() {
                     setClientSocial(event.target.value)
                   }
                   placeholder="@username"
-                  className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
+                  className={FIELD_CLASS}
                 />
 
                 <textarea
@@ -3223,239 +3156,6 @@ export default function Home() {
                   {t.save}
                 </button>
               </div>
-            </div>
-          </div>
-        )}
-
-        {isClientDetailsOpen && selectedClientDetails && (
-          <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40">
-            <div className="max-h-[92dvh] w-full max-w-md overflow-y-auto rounded-t-3xl bg-rose-50 p-5">
-              <div className="flex justify-between gap-4">
-                <div>
-                  <p className="text-sm text-neutral-500">
-                    {t.clientCard}
-                  </p>
-
-                  <h2 className="mt-1 text-2xl font-semibold">
-                    {selectedClientDetails.name}
-                  </h2>
-                </div>
-
-                <button
-                  onClick={() => setIsClientDetailsOpen(false)}
-                  className="text-sm text-neutral-500"
-                >
-                  {t.close}
-                </button>
-              </div>
-
-              <div className="mt-5 rounded-2xl border border-rose-200 bg-white/80 p-4">
-                <p className="font-medium">
-                  {selectedClientDetails.phone || t.phoneMissing}
-                </p>
-
-                {selectedClientDetails.social && (
-                  <p className="mt-2 text-sm text-neutral-500">
-                    {selectedClientDetails.social}
-                  </p>
-                )}
-
-                {selectedClientDetails.note && (
-                  <p className="mt-3 rounded-xl bg-rose-50 p-3 text-sm">
-                    {selectedClientDetails.note}
-                  </p>
-                )}
-
-                <div className="mt-4 grid grid-cols-2 gap-2">
-                  {selectedClientDetails.phone && (
-                    <a
-                      href={getPhoneUrl(selectedClientDetails.phone)}
-                      className="rounded-xl bg-black px-3 py-3 text-center text-sm font-medium text-white"
-                    >
-                      {t.call}
-                    </a>
-                  )}
-
-                  {selectedClientDetails.social &&
-                    (getSocialType(selectedClientDetails.social) ===
-                      "telegram" ||
-                      getSocialType(selectedClientDetails.social) ===
-                        "unknown") && (
-                      <button
-                        onClick={() =>
-                          openExternal(
-                            getTelegramUrl(selectedClientDetails.social)
-                          )
-                        }
-                        className="rounded-xl border border-rose-200 bg-white px-3 py-3 text-sm font-medium"
-                      >
-                        {t.telegram}
-                      </button>
-                    )}
-
-                  {selectedClientDetails.social &&
-                    (getSocialType(selectedClientDetails.social) ===
-                      "instagram" ||
-                      getSocialType(selectedClientDetails.social) ===
-                        "unknown") && (
-                      <button
-                        onClick={() =>
-                          openExternal(
-                            getInstagramUrl(selectedClientDetails.social)
-                          )
-                        }
-                        className="rounded-xl border border-rose-200 bg-white px-3 py-3 text-sm font-medium"
-                      >
-                        {t.instagram}
-                      </button>
-                    )}
-                </div>
-              </div>
-
-              <div className="mt-4 grid grid-cols-2 gap-3">
-                <div className="rounded-2xl bg-white/80 p-4">
-                  <p className="text-xs text-neutral-500">
-                    {t.totalAppointments}
-                  </p>
-
-                  <p className="mt-1 text-2xl font-semibold">
-                    {selectedClientAppointments.length}
-                  </p>
-                </div>
-
-                <div className="rounded-2xl bg-white/80 p-4">
-                  <p className="text-xs text-neutral-500">
-                    {t.futureAppointmentsCount}
-                  </p>
-
-                  <p className="mt-1 text-2xl font-semibold">
-                    {futureClientAppointments.length}
-                  </p>
-                </div>
-              </div>
-
-              <button
-                onClick={() =>
-                  openNewAppointmentForClient(selectedClientDetails)
-                }
-                className="mt-4 w-full rounded-xl bg-black px-4 py-4 text-white"
-              >
-                {t.bookClient}
-              </button>
-
-              <button
-                onClick={() => openEditClient(selectedClientDetails)}
-                className="mt-3 w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
-              >
-                {t.editClientButton}
-              </button>
-
-              <div className="mt-6">
-                <h3 className="text-lg font-semibold">
-                  {t.futureAppointments}
-                </h3>
-
-                <div className="mt-3 space-y-2">
-                  {futureClientAppointments.length === 0 && (
-                    <p className="rounded-xl bg-white/70 p-4 text-sm text-neutral-500">
-                      {t.noFutureAppointments}
-                    </p>
-                  )}
-
-                  {futureClientAppointments.map((appointment) => (
-                    <div
-                      key={appointment.id}
-                      className="rounded-xl border border-rose-200 bg-white/80 p-3"
-                    >
-                      <div className="flex justify-between gap-3">
-                        <div>
-                          <p className="font-medium">
-                            {formatFullDate(
-                              appointment.date,
-                              language
-                            )}
-                          </p>
-
-                          <p className="mt-1 text-sm text-neutral-500">
-                            {appointment.time} · {appointment.service}
-                          </p>
-
-                          <p className="mt-1 text-sm font-medium">
-                            {appointment.price} грн
-                          </p>
-                        </div>
-
-                        <span
-                          className={`h-fit rounded-full border px-2 py-1 text-[10px] ${getStatusBadgeClass(
-                            appointment.status
-                          )}`}
-                        >
-                          {getStatusLabel(appointment.status)}
-                        </span>
-                      </div>
-
-                      {appointment.status === "scheduled" && (
-                        <button
-                          onClick={() => openReminder(appointment)}
-                          className="mt-3 w-full rounded-xl bg-rose-100 px-3 py-2 text-sm font-medium"
-                        >
-                          {t.remind}
-                        </button>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="mt-6">
-                <h3 className="text-lg font-semibold">{t.history}</h3>
-
-                <div className="mt-3 space-y-2">
-                  {pastClientAppointments.length === 0 && (
-                    <p className="rounded-xl bg-white/70 p-4 text-sm text-neutral-500">
-                      {t.noHistory}
-                    </p>
-                  )}
-
-                  {pastClientAppointments.map((appointment) => (
-                    <div
-                      key={appointment.id}
-                      className="rounded-xl border border-rose-200 bg-white/80 p-3"
-                    >
-                      <div className="flex justify-between gap-3">
-                        <div>
-                          <p className="font-medium">
-                            {formatFullDate(
-                              appointment.date,
-                              language
-                            )}
-                          </p>
-
-                          <p className="mt-1 text-sm text-neutral-500">
-                            {appointment.service} · {appointment.price}{" "}
-                            грн
-                          </p>
-                        </div>
-
-                        <span
-                          className={`h-fit rounded-full border px-2 py-1 text-[10px] ${getStatusBadgeClass(
-                            appointment.status
-                          )}`}
-                        >
-                          {getStatusLabel(appointment.status)}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <button
-                onClick={() => deleteClient(selectedClientDetails.id)}
-                className="mt-6 w-full rounded-xl bg-red-50 px-4 py-3 text-red-600"
-              >
-                {t.deleteClient}
-              </button>
             </div>
           </div>
         )}
@@ -3483,7 +3183,7 @@ export default function Home() {
                   value={serviceName}
                   onChange={(event) => setServiceName(event.target.value)}
                   placeholder={t.serviceName}
-                  className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
+                  className={FIELD_CLASS}
                 />
 
                 <select
@@ -3491,7 +3191,7 @@ export default function Home() {
                   onChange={(event) =>
                     setServiceDuration(event.target.value)
                   }
-                  className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
+                  className={FIELD_CLASS}
                 >
                   {[30, 60, 90, 120, 150, 180].map((minutes) => (
                     <option key={minutes} value={minutes}>
@@ -3508,7 +3208,7 @@ export default function Home() {
                     setServicePrice(event.target.value)
                   }
                   placeholder={t.servicePrice}
-                  className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
+                  className={FIELD_CLASS}
                 />
 
                 <button
@@ -3561,33 +3261,25 @@ export default function Home() {
 
               {reminderClient?.social && (
                 <div className="mt-3 grid grid-cols-2 gap-2">
-                  {(getSocialType(reminderClient.social) === "telegram" ||
-                    getSocialType(reminderClient.social) === "unknown") && (
-                    <button
-                      onClick={() =>
-                        openExternal(
-                          getTelegramUrl(reminderClient.social)
-                        )
-                      }
-                      className="rounded-xl border border-rose-200 bg-white px-3 py-3 text-sm font-medium"
-                    >
-                      {t.openTelegram}
-                    </button>
-                  )}
+                  <button
+                    onClick={() =>
+                      openExternal(getTelegramUrl(reminderClient.social))
+                    }
+                    className="rounded-xl border border-rose-200 bg-white px-3 py-3 text-sm font-medium"
+                  >
+                    {t.openTelegram}
+                  </button>
 
-                  {(getSocialType(reminderClient.social) === "instagram" ||
-                    getSocialType(reminderClient.social) === "unknown") && (
-                    <button
-                      onClick={() =>
-                        openExternal(
-                          getInstagramUrl(reminderClient.social)
-                        )
-                      }
-                      className="rounded-xl border border-rose-200 bg-white px-3 py-3 text-sm font-medium"
-                    >
-                      {t.openInstagram}
-                    </button>
-                  )}
+                  <button
+                    onClick={() =>
+                      openExternal(
+                        getInstagramUrl(reminderClient.social)
+                      )
+                    }
+                    className="rounded-xl border border-rose-200 bg-white px-3 py-3 text-sm font-medium"
+                  >
+                    {t.openInstagram}
+                  </button>
                 </div>
               )}
             </div>
