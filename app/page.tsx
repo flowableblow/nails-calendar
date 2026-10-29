@@ -65,6 +65,15 @@ const DEFAULT_WORK_SETTINGS: WorkSettings = {
   workDays: [0, 1, 2, 3, 4, 5, 6],
 };
 
+const APP_BACKGROUND_STYLE = {
+  backgroundImage:
+    "linear-gradient(rgba(248,233,238,0.88), rgba(248,233,238,0.88)), url('/bg-man.png')",
+  backgroundRepeat: "no-repeat",
+  backgroundPosition: "center top",
+  backgroundSize: "60% auto",
+  backgroundColor: "#f8e9ee",
+};
+
 const WEEKDAYS = [
   { value: 1, ru: "Пн", uk: "Пн" },
   { value: 2, ru: "Вт", uk: "Вт" },
@@ -205,7 +214,6 @@ const translations = {
 
     newService: "Новая услуга",
     editService: "Редактировать услугу",
-    serviceDuration: "Длительность",
     servicePrice: "Цена, грн",
 
     minutes: "мин.",
@@ -354,7 +362,6 @@ const translations = {
 
     newService: "Нова послуга",
     editService: "Редагувати послугу",
-    serviceDuration: "Тривалість",
     servicePrice: "Ціна, грн",
 
     minutes: "хв.",
@@ -465,9 +472,7 @@ function getMonthCalendarDays(date: Date) {
 
   let firstWeekday = firstDay.getDay();
 
-  if (firstWeekday === 0) {
-    firstWeekday = 7;
-  }
+  if (firstWeekday === 0) firstWeekday = 7;
 
   const daysBefore = firstWeekday - 1;
   const daysInMonth = lastDay.getDate();
@@ -527,23 +532,18 @@ function cleanUsername(value: string) {
 
 function getTelegramUrl(social: string) {
   const username = cleanUsername(social);
-
   return username ? `https://t.me/${username}` : "";
 }
 
 function getInstagramUrl(social: string) {
   const username = cleanUsername(social);
-
   return username ? `https://instagram.com/${username}` : "";
 }
 
 function getSocialType(social: string) {
   const normalized = social.toLowerCase();
 
-  if (
-    normalized.includes("t.me") ||
-    normalized.includes("telegram")
-  ) {
+  if (normalized.includes("t.me") || normalized.includes("telegram")) {
     return "telegram";
   }
 
@@ -563,7 +563,6 @@ function safeParseArray<T>(value: string | null): T[] {
 
   try {
     const parsed = JSON.parse(value);
-
     return Array.isArray(parsed) ? parsed : [];
   } catch {
     return [];
@@ -620,14 +619,12 @@ export default function Home() {
   const [loginLoading, setLoginLoading] = useState(false);
 
   const [language, setLanguage] = useState<Language>("uk");
-
   const t = translations[language];
 
   const [databaseStatus, setDatabaseStatus] =
     useState<DatabaseStatus>("connecting");
 
   const [activeTab, setActiveTab] = useState<Tab>("calendar");
-
   const [calendarView, setCalendarView] =
     useState<CalendarView>("day");
 
@@ -699,11 +696,9 @@ export default function Home() {
   const [clientSearch, setClientSearch] = useState("");
 
   const [reminderText, setReminderText] = useState("");
-
   const [reminderClientId, setReminderClientId] = useState<number | null>(
     null
   );
-
   const [reminderCopied, setReminderCopied] = useState(false);
 
   useEffect(() => {
@@ -996,9 +991,7 @@ export default function Home() {
   }, [language, workSettings, isLoaded]);
 
   useEffect(() => {
-    if (!session || !isLoaded || databaseStatus !== "connected") {
-      return;
-    }
+    if (!session || !isLoaded || databaseStatus !== "connected") return;
 
     const timer = window.setTimeout(async () => {
       const { error } = await supabase.from("settings").upsert(
@@ -1107,10 +1100,7 @@ export default function Home() {
               appointment.clientId === selectedClientDetailsId
           )
           .sort((a, b) => {
-            if (a.date !== b.date) {
-              return a.date.localeCompare(b.date);
-            }
-
+            if (a.date !== b.date) return a.date.localeCompare(b.date);
             return a.time.localeCompare(b.time);
           })
       : [];
@@ -1128,10 +1118,7 @@ export default function Home() {
         appointment.status !== "scheduled"
     )
     .sort((a, b) => {
-      if (a.date !== b.date) {
-        return b.date.localeCompare(a.date);
-      }
-
+      if (a.date !== b.date) return b.date.localeCompare(a.date);
       return b.time.localeCompare(a.time);
     });
 
@@ -1161,9 +1148,7 @@ export default function Home() {
 
   const sevenDaysAgo = useMemo(() => {
     const date = new Date(today);
-
     date.setDate(date.getDate() - 6);
-
     return date;
   }, [today]);
 
@@ -1248,10 +1233,7 @@ export default function Home() {
       {}
     )
   ).sort((a, b) => {
-    if (b.count !== a.count) {
-      return b.count - a.count;
-    }
-
+    if (b.count !== a.count) return b.count - a.count;
     return b.income - a.income;
   });
 
@@ -1498,19 +1480,16 @@ export default function Home() {
 
     if (!finalName) {
       setAppointmentError(t.clientRequired);
-
       return;
     }
 
     if (!appointmentDate) {
       setAppointmentError(t.dateRequired);
-
       return;
     }
 
     if (!appointmentTime) {
       setAppointmentError(t.timeRequired);
-
       return;
     }
 
@@ -1547,9 +1526,7 @@ export default function Home() {
   }
 
   async function deleteAppointment(id: number) {
-    if (!window.confirm(t.deleteAppointmentConfirm)) {
-      return;
-    }
+    if (!window.confirm(t.deleteAppointmentConfirm)) return;
 
     const { error } = await supabase
       .from("appointments")
@@ -1581,13 +1558,11 @@ export default function Home() {
 
   function openNewClient() {
     resetClientForm();
-
     setIsClientModalOpen(true);
   }
 
   function openClientDetails(clientId: number) {
     setSelectedClientDetailsId(clientId);
-
     setIsClientDetailsOpen(true);
   }
 
@@ -1604,9 +1579,7 @@ export default function Home() {
   }
 
   async function saveClient() {
-    if (!clientName.trim()) {
-      return;
-    }
+    if (!clientName.trim()) return;
 
     const clientId = editingClientId ?? Date.now();
 
@@ -1632,7 +1605,6 @@ export default function Home() {
     if (error) {
       console.error(error);
       window.alert(t.databaseSaveError);
-
       return;
     }
 
@@ -1670,9 +1642,7 @@ export default function Home() {
   }
 
   async function deleteClient(id: number) {
-    if (!window.confirm(t.deleteClientConfirm)) {
-      return;
-    }
+    if (!window.confirm(t.deleteClientConfirm)) return;
 
     const { error } = await supabase
       .from("clients")
@@ -1682,7 +1652,6 @@ export default function Home() {
     if (error) {
       console.error(error);
       window.alert(t.databaseDeleteError);
-
       return;
     }
 
@@ -1713,24 +1682,19 @@ export default function Home() {
 
   function openNewService() {
     resetServiceForm();
-
     setIsServiceModalOpen(true);
   }
 
   function openEditService(service: Service) {
     setEditingServiceId(service.id);
-
     setServiceName(service.name);
     setServiceDuration(String(service.duration));
     setServicePrice(String(service.price));
-
     setIsServiceModalOpen(true);
   }
 
   async function saveService() {
-    if (!serviceName.trim()) {
-      return;
-    }
+    if (!serviceName.trim()) return;
 
     const serviceId = editingServiceId ?? Date.now();
 
@@ -1756,7 +1720,6 @@ export default function Home() {
     if (error) {
       console.error(error);
       window.alert(t.databaseSaveError);
-
       return;
     }
 
@@ -1776,9 +1739,7 @@ export default function Home() {
   }
 
   async function deleteService(id: number) {
-    if (!window.confirm(t.deleteServiceConfirm)) {
-      return;
-    }
+    if (!window.confirm(t.deleteServiceConfirm)) return;
 
     const { error } = await supabase
       .from("services")
@@ -1788,7 +1749,6 @@ export default function Home() {
     if (error) {
       console.error(error);
       window.alert(t.databaseDeleteError);
-
       return;
     }
 
@@ -1820,9 +1780,7 @@ export default function Home() {
         (item) => item.id === appointment.clientId
       );
 
-      if (client) {
-        return client;
-      }
+      if (client) return client;
     }
 
     return clients.find(
@@ -1836,7 +1794,6 @@ export default function Home() {
     event: React.MouseEvent<HTMLDivElement>
   ) {
     const rect = event.currentTarget.getBoundingClientRect();
-
     const y = event.clientY - rect.top;
 
     const clickedHour =
@@ -1863,17 +1820,13 @@ export default function Home() {
     setSelectedServiceId(serviceId);
     clearAppointmentWarning();
 
-    if (!serviceId) {
-      return;
-    }
+    if (!serviceId) return;
 
     const service = services.find(
       (item) => item.id === Number(serviceId)
     );
 
-    if (!service) {
-      return;
-    }
+    if (!service) return;
 
     setAppointmentService(service.name);
     setAppointmentDuration(String(service.duration));
@@ -1919,27 +1872,21 @@ export default function Home() {
   }
 
   function openReminderForEditingAppointment() {
-    if (editingAppointmentId === null) {
-      return;
-    }
+    if (editingAppointmentId === null) return;
 
     const appointment = appointments.find(
       (item) => item.id === editingAppointmentId
     );
 
-    if (!appointment) {
-      return;
-    }
+    if (!appointment) return;
 
     setIsAppointmentModalOpen(false);
-
     openReminder(appointment);
   }
 
   async function copyReminder() {
     try {
       await navigator.clipboard.writeText(reminderText);
-
       setReminderCopied(true);
     } catch {
       window.alert(reminderText);
@@ -1947,9 +1894,7 @@ export default function Home() {
   }
 
   function openExternal(url: string) {
-    if (!url) {
-      return;
-    }
+    if (!url) return;
 
     window.open(url, "_blank", "noopener,noreferrer");
   }
@@ -1957,13 +1902,10 @@ export default function Home() {
   if (!authChecked) {
     return (
       <main
-        className="flex h-dvh items-center justify-center bg-cover bg-center"
-        style={{
-          backgroundImage:
-            "linear-gradient(rgba(255,240,246,0.30), rgba(255,240,246,0.30)), url('/background.jpg')",
-        }}
+        className="flex h-dvh items-center justify-center"
+        style={APP_BACKGROUND_STYLE}
       >
-        <div className="rounded-3xl bg-rose-50/95 px-8 py-7 text-center shadow-2xl backdrop-blur">
+        <div className="rounded-3xl bg-rose-50/90 px-8 py-7 text-center shadow-2xl backdrop-blur-md">
           <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-rose-200 border-t-black" />
 
           <p className="mt-4 font-semibold">
@@ -1981,13 +1923,10 @@ export default function Home() {
   if (!session) {
     return (
       <main
-        className="flex h-dvh items-center justify-center bg-cover bg-center px-5"
-        style={{
-          backgroundImage:
-            "linear-gradient(rgba(255,235,243,0.42), rgba(255,235,243,0.42)), url('/background.jpg')",
-        }}
+        className="flex h-dvh items-center justify-center px-5"
+        style={APP_BACKGROUND_STYLE}
       >
-        <div className="w-full max-w-sm rounded-3xl bg-rose-50/95 p-6 shadow-2xl backdrop-blur-md">
+        <div className="w-full max-w-sm rounded-3xl bg-rose-50/88 p-6 shadow-2xl backdrop-blur-md">
           <div className="text-center">
             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-black text-2xl text-white">
               ✦
@@ -2021,7 +1960,7 @@ export default function Home() {
                   setLoginError("");
                 }}
                 placeholder="name@example.com"
-                className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3 text-black caret-black outline-none placeholder:text-neutral-400 focus:border-rose-400"
+                className="w-full rounded-xl border border-rose-200 bg-white/90 px-4 py-3 text-black caret-black outline-none placeholder:text-neutral-400 focus:border-rose-400"
               />
             </div>
 
@@ -2040,7 +1979,7 @@ export default function Home() {
                   setLoginError("");
                 }}
                 placeholder="••••••••"
-                className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3 text-black caret-black outline-none placeholder:text-neutral-400 focus:border-rose-400"
+                className="w-full rounded-xl border border-rose-200 bg-white/90 px-4 py-3 text-black caret-black outline-none placeholder:text-neutral-400 focus:border-rose-400"
               />
             </div>
 
@@ -2066,13 +2005,10 @@ export default function Home() {
   if (!isLoaded) {
     return (
       <main
-        className="flex h-dvh items-center justify-center bg-cover bg-center"
-        style={{
-          backgroundImage:
-            "linear-gradient(rgba(255,240,246,0.35), rgba(255,240,246,0.35)), url('/background.jpg')",
-        }}
+        className="flex h-dvh items-center justify-center"
+        style={APP_BACKGROUND_STYLE}
       >
-        <div className="rounded-2xl bg-rose-50/95 px-6 py-5 text-center shadow-xl backdrop-blur">
+        <div className="rounded-2xl bg-rose-50/90 px-6 py-5 text-center shadow-xl backdrop-blur-md">
           <div className="mx-auto h-7 w-7 animate-spin rounded-full border-2 border-rose-200 border-t-black" />
 
           <p className="mt-3 text-sm font-medium">
@@ -2091,17 +2027,14 @@ export default function Home() {
 
   return (
     <main
-      className="h-dvh overflow-hidden bg-cover bg-center text-neutral-900"
-      style={{
-        backgroundImage:
-          "linear-gradient(rgba(255,235,243,0.25), rgba(255,235,243,0.25)), url('/background.jpg')",
-      }}
+      className="h-dvh overflow-hidden text-neutral-900"
+      style={APP_BACKGROUND_STYLE}
     >
-      <div className="mx-auto flex h-dvh max-w-md flex-col overflow-hidden bg-rose-50/95 shadow-2xl backdrop-blur-[2px]">
+      <div className="mx-auto flex h-dvh max-w-md flex-col overflow-hidden bg-rose-50/80 shadow-2xl backdrop-blur-[2px]">
 
         {activeTab === "calendar" && (
           <div className="flex min-h-0 flex-1 flex-col">
-            <header className="z-20 shrink-0 border-b border-rose-200 bg-rose-50/95 backdrop-blur-md">
+            <header className="z-20 shrink-0 border-b border-rose-200 bg-rose-50/85 backdrop-blur-md">
               <div className="px-5 pb-3 pt-4">
                 <div className="flex items-start justify-between gap-3">
                   <div>
@@ -2146,12 +2079,12 @@ export default function Home() {
                   </button>
                 </div>
 
-                <div className="mt-4 grid grid-cols-2 rounded-xl bg-rose-100 p-1">
+                <div className="mt-4 grid grid-cols-2 rounded-xl bg-rose-100/80 p-1">
                   <button
                     onClick={() => setCalendarView("day")}
                     className={`rounded-lg px-3 py-2 text-sm ${
                       calendarView === "day"
-                        ? "bg-white font-medium shadow-sm"
+                        ? "bg-white/90 font-medium shadow-sm"
                         : "text-neutral-500"
                     }`}
                   >
@@ -2172,7 +2105,7 @@ export default function Home() {
                     }}
                     className={`rounded-lg px-3 py-2 text-sm ${
                       calendarView === "month"
-                        ? "bg-white font-medium shadow-sm"
+                        ? "bg-white/90 font-medium shadow-sm"
                         : "text-neutral-500"
                     }`}
                   >
@@ -2195,7 +2128,7 @@ export default function Home() {
 
                 <button
                   onClick={goToToday}
-                  className="mx-auto rounded-xl bg-rose-100 px-4 py-2 text-sm font-medium"
+                  className="mx-auto rounded-xl bg-rose-100/80 px-4 py-2 text-sm font-medium"
                 >
                   {calendarView === "day"
                     ? selectedDateIsToday
@@ -2222,7 +2155,7 @@ export default function Home() {
             {calendarView === "day" && (
               <>
                 {!selectedDateIsWorkDay && (
-                  <div className="shrink-0 border-b border-orange-200 bg-orange-50 px-4 py-3">
+                  <div className="shrink-0 border-b border-orange-200 bg-orange-50/90 px-4 py-3">
                     <p className="text-sm font-medium text-orange-800">
                       {t.dayOff}
                     </p>
@@ -2361,7 +2294,7 @@ export default function Home() {
 
             {calendarView === "month" && (
               <section className="min-h-0 flex-1 overflow-y-auto p-4">
-                <div className="rounded-2xl border border-rose-200 bg-white/80 p-3 shadow-sm">
+                <div className="rounded-2xl border border-rose-200 bg-white/70 p-3 shadow-sm backdrop-blur-sm">
                   <div className="grid grid-cols-7 gap-1 pb-2">
                     {WEEKDAYS.map((weekday) => (
                       <div
@@ -2398,7 +2331,7 @@ export default function Home() {
                               : isToday
                               ? "border border-rose-400 bg-rose-100"
                               : !isWorkDay && item.isCurrentMonth
-                              ? "bg-rose-50 text-neutral-400"
+                              ? "bg-rose-50/80 text-neutral-400"
                               : item.isCurrentMonth
                               ? "hover:bg-rose-50"
                               : "text-neutral-300"
@@ -2462,7 +2395,7 @@ export default function Home() {
 
                           setCalendarView("day");
                         }}
-                        className="w-full rounded-xl border border-rose-200 bg-white/80 p-3 text-left shadow-sm"
+                        className="w-full rounded-xl border border-rose-200 bg-white/70 p-3 text-left shadow-sm backdrop-blur-sm"
                       >
                         <div className="flex justify-between gap-3">
                           <div>
@@ -2488,9 +2421,7 @@ export default function Home() {
                               appointment.status
                             )}`}
                           >
-                            {getStatusLabel(
-                              appointment.status
-                            )}
+                            {getStatusLabel(appointment.status)}
                           </span>
                         </div>
                       </button>
@@ -2503,7 +2434,7 @@ export default function Home() {
 
         {activeTab === "clients" && (
           <div className="flex min-h-0 flex-1 flex-col">
-            <header className="shrink-0 border-b border-rose-200 bg-rose-50/95 px-5 py-4">
+            <header className="shrink-0 border-b border-rose-200 bg-rose-50/85 px-5 py-4 backdrop-blur-md">
               <div className="flex justify-between">
                 <div>
                   <p className="text-sm text-neutral-500">
@@ -2533,13 +2464,13 @@ export default function Home() {
                   setClientSearch(event.target.value)
                 }
                 placeholder={t.searchClient}
-                className="mt-4 w-full rounded-xl border border-rose-200 bg-white px-4 py-3 outline-none focus:border-rose-400"
+                className="mt-4 w-full rounded-xl border border-rose-200 bg-white/90 px-4 py-3 outline-none focus:border-rose-400"
               />
             </header>
 
             <section className="min-h-0 flex-1 space-y-3 overflow-y-auto p-4">
               {clients.length === 0 && (
-                <div className="rounded-2xl border border-dashed border-rose-300 bg-white/70 p-8 text-center">
+                <div className="rounded-2xl border border-dashed border-rose-300 bg-white/60 p-8 text-center backdrop-blur-sm">
                   <p className="font-medium">
                     {t.noClients}
                   </p>
@@ -2552,7 +2483,7 @@ export default function Home() {
 
               {clients.length > 0 &&
                 filteredClients.length === 0 && (
-                  <div className="rounded-2xl border border-dashed border-rose-300 bg-white/70 p-8 text-center">
+                  <div className="rounded-2xl border border-dashed border-rose-300 bg-white/60 p-8 text-center">
                     {t.nothingFound}
                   </div>
                 )}
@@ -2563,7 +2494,7 @@ export default function Home() {
                   onClick={() =>
                     openClientDetails(client.id)
                   }
-                  className="w-full rounded-2xl border border-rose-300 bg-white/80 p-4 text-left shadow-md"
+                  className="w-full rounded-2xl border border-rose-300 bg-white/70 p-4 text-left shadow-md backdrop-blur-sm"
                 >
                   <div className="flex justify-between gap-4">
                     <div>
@@ -2598,7 +2529,7 @@ export default function Home() {
 
         {activeTab === "analytics" && (
           <div className="flex min-h-0 flex-1 flex-col">
-            <header className="shrink-0 border-b border-rose-200 bg-rose-50/95 px-5 py-4">
+            <header className="shrink-0 border-b border-rose-200 bg-rose-50/85 px-5 py-4 backdrop-blur-md">
               <p className="text-sm text-neutral-500">
                 {t.financeRecords}
               </p>
@@ -2614,7 +2545,7 @@ export default function Home() {
 
             <section className="min-h-0 flex-1 overflow-y-auto p-4">
               <div className="grid grid-cols-2 gap-3">
-                <div className="rounded-2xl border border-rose-200 bg-white/80 p-4">
+                <div className="rounded-2xl border border-rose-200 bg-white/70 p-4 backdrop-blur-sm">
                   <p className="text-xs text-neutral-500">
                     {t.todayIncome}
                   </p>
@@ -2629,7 +2560,7 @@ export default function Home() {
                   </p>
                 </div>
 
-                <div className="rounded-2xl border border-rose-200 bg-white/80 p-4">
+                <div className="rounded-2xl border border-rose-200 bg-white/70 p-4 backdrop-blur-sm">
                   <p className="text-xs text-neutral-500">
                     {t.sevenDays}
                   </p>
@@ -2645,7 +2576,7 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="mt-3 rounded-2xl border border-rose-300 bg-rose-100/80 p-5">
+              <div className="mt-3 rounded-2xl border border-rose-300 bg-rose-100/70 p-5 backdrop-blur-sm">
                 <p className="text-sm text-neutral-500">
                   {t.currentMonthIncome}
                 </p>
@@ -2663,7 +2594,7 @@ export default function Home() {
               </div>
 
               <div className="mt-3 grid grid-cols-2 gap-3">
-                <div className="rounded-2xl bg-white/80 p-4">
+                <div className="rounded-2xl bg-white/70 p-4 backdrop-blur-sm">
                   <p className="text-xs text-neutral-500">
                     {t.averageCheck}
                   </p>
@@ -2673,7 +2604,7 @@ export default function Home() {
                   </p>
                 </div>
 
-                <div className="rounded-2xl bg-sky-50 p-4">
+                <div className="rounded-2xl bg-sky-50/85 p-4">
                   <p className="text-xs text-sky-700">
                     {t.scheduled}
                   </p>
@@ -2683,7 +2614,7 @@ export default function Home() {
                   </p>
                 </div>
 
-                <div className="rounded-2xl bg-red-50 p-4">
+                <div className="rounded-2xl bg-red-50/85 p-4">
                   <p className="text-xs text-red-600">
                     {t.cancelled}
                   </p>
@@ -2693,7 +2624,7 @@ export default function Home() {
                   </p>
                 </div>
 
-                <div className="rounded-2xl bg-orange-50 p-4">
+                <div className="rounded-2xl bg-orange-50/85 p-4">
                   <p className="text-xs text-orange-600">
                     {t.noShow}
                   </p>
@@ -2711,7 +2642,7 @@ export default function Home() {
 
                 <div className="mt-3 space-y-2">
                   {serviceStats.length === 0 && (
-                    <div className="rounded-2xl border border-dashed border-rose-300 bg-white/70 p-6 text-center text-sm text-neutral-500">
+                    <div className="rounded-2xl border border-dashed border-rose-300 bg-white/60 p-6 text-center text-sm text-neutral-500">
                       {t.noCompleted}
                     </div>
                   )}
@@ -2720,7 +2651,7 @@ export default function Home() {
                     (service, index) => (
                       <div
                         key={service.name}
-                        className="rounded-2xl border border-rose-200 bg-white/80 p-4"
+                        className="rounded-2xl border border-rose-200 bg-white/70 p-4 backdrop-blur-sm"
                       >
                         <div className="flex justify-between">
                           <div>
@@ -2752,7 +2683,7 @@ export default function Home() {
 
         {activeTab === "settings" && (
           <div className="flex min-h-0 flex-1 flex-col">
-            <header className="shrink-0 border-b border-rose-200 bg-rose-50/95 px-5 py-4">
+            <header className="shrink-0 border-b border-rose-200 bg-rose-50/85 px-5 py-4 backdrop-blur-md">
               <p className="text-sm text-neutral-500">
                 {t.app}
               </p>
@@ -2768,7 +2699,7 @@ export default function Home() {
                   {t.account}
                 </h2>
 
-                <div className="mt-3 rounded-2xl border border-rose-200 bg-white/80 p-4">
+                <div className="mt-3 rounded-2xl border border-rose-200 bg-white/70 p-4 backdrop-blur-sm">
                   <p className="text-xs text-neutral-500">
                     {t.signedInAs}
                   </p>
@@ -2794,10 +2725,10 @@ export default function Home() {
                 <div
                   className={`mt-3 flex items-center gap-3 rounded-2xl border p-4 ${
                     databaseStatus === "connected"
-                      ? "border-green-200 bg-green-50"
+                      ? "border-green-200 bg-green-50/85"
                       : databaseStatus === "error"
-                      ? "border-red-200 bg-red-50"
-                      : "border-rose-200 bg-white/80"
+                      ? "border-red-200 bg-red-50/85"
+                      : "border-rose-200 bg-white/70"
                   }`}
                 >
                   <span
@@ -2829,7 +2760,7 @@ export default function Home() {
                   {t.languageHint}
                 </p>
 
-                <div className="mt-4 grid grid-cols-2 gap-2 rounded-2xl border border-rose-200 bg-white/80 p-2">
+                <div className="mt-4 grid grid-cols-2 gap-2 rounded-2xl border border-rose-200 bg-white/70 p-2">
                   <button
                     onClick={() => setLanguage("ru")}
                     className={`rounded-xl px-4 py-3 text-sm font-medium ${
@@ -2863,7 +2794,7 @@ export default function Home() {
                   {t.workScheduleHint}
                 </p>
 
-                <div className="mt-4 rounded-2xl border border-rose-200 bg-white/80 p-4">
+                <div className="mt-4 rounded-2xl border border-rose-200 bg-white/70 p-4 backdrop-blur-sm">
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <label className="mb-1 block text-xs text-neutral-500">
@@ -3008,7 +2939,7 @@ export default function Home() {
 
                 <div className="mt-4 space-y-3">
                   {services.length === 0 && (
-                    <div className="rounded-2xl border border-dashed border-rose-300 bg-white/70 p-6 text-center text-sm text-neutral-500">
+                    <div className="rounded-2xl border border-dashed border-rose-300 bg-white/60 p-6 text-center text-sm text-neutral-500">
                       {t.addFirstService}
                     </div>
                   )}
@@ -3016,7 +2947,7 @@ export default function Home() {
                   {services.map((service) => (
                     <div
                       key={service.id}
-                      className="rounded-2xl border border-rose-200 bg-white/80 p-4"
+                      className="rounded-2xl border border-rose-200 bg-white/70 p-4 backdrop-blur-sm"
                     >
                       <p className="font-semibold">
                         {service.name}
@@ -3059,7 +2990,7 @@ export default function Home() {
           </div>
         )}
 
-        <nav className="z-40 grid shrink-0 grid-cols-4 border-t border-rose-200 bg-rose-50/95 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] backdrop-blur-md">
+        <nav className="z-40 grid shrink-0 grid-cols-4 border-t border-rose-200 bg-rose-50/85 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] backdrop-blur-md">
           <button
             onClick={() =>
               setActiveTab("calendar")
@@ -3115,7 +3046,7 @@ export default function Home() {
 
         {isAppointmentModalOpen && (
           <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40">
-            <div className="max-h-[90dvh] w-full max-w-md overflow-y-auto rounded-t-3xl bg-rose-50 p-5">
+            <div className="max-h-[90dvh] w-full max-w-md overflow-y-auto rounded-t-3xl bg-rose-50/95 p-5 backdrop-blur-md">
               <div className="mb-5 flex justify-between gap-4">
                 <div>
                   <h2 className="text-xl font-semibold">
@@ -3450,9 +3381,7 @@ export default function Home() {
 
                 {appointmentError && (
                   <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-                    {
-                      appointmentError
-                    }
+                    {appointmentError}
 
                     {hasConflict && (
                       <button
@@ -3489,9 +3418,7 @@ export default function Home() {
                     }
                     className="w-full rounded-xl bg-red-50 px-4 py-4 font-medium text-red-600"
                   >
-                    {
-                      t.deleteAppointment
-                    }
+                    {t.deleteAppointment}
                   </button>
                 )}
               </div>
@@ -3501,7 +3428,7 @@ export default function Home() {
 
         {isClientModalOpen && (
           <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40">
-            <div className="max-h-[90dvh] w-full max-w-md overflow-y-auto rounded-t-3xl bg-rose-50 p-5">
+            <div className="max-h-[90dvh] w-full max-w-md overflow-y-auto rounded-t-3xl bg-rose-50/95 p-5 backdrop-blur-md">
               <div className="flex justify-between">
                 <h2 className="text-xl font-semibold">
                   {editingClientId !==
@@ -3582,7 +3509,7 @@ export default function Home() {
         {isClientDetailsOpen &&
           selectedClientDetails && (
             <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40">
-              <div className="max-h-[92dvh] w-full max-w-md overflow-y-auto rounded-t-3xl bg-rose-50 p-5">
+              <div className="max-h-[92dvh] w-full max-w-md overflow-y-auto rounded-t-3xl bg-rose-50/95 p-5 backdrop-blur-md">
                 <div className="flex justify-between gap-4">
                   <div>
                     <p className="text-sm text-neutral-500">
@@ -3608,7 +3535,7 @@ export default function Home() {
                   </button>
                 </div>
 
-                <div className="mt-5 rounded-2xl border border-rose-200 bg-white/80 p-4">
+                <div className="mt-5 rounded-2xl border border-rose-200 bg-white/70 p-4">
                   <p className="font-medium">
                     {selectedClientDetails.phone ||
                       t.phoneMissing}
@@ -3661,9 +3588,7 @@ export default function Home() {
                           }
                           className="rounded-xl border border-rose-200 bg-white px-3 py-3 text-sm font-medium"
                         >
-                          {
-                            t.telegram
-                          }
+                          {t.telegram}
                         </button>
                       )}
 
@@ -3686,40 +3611,30 @@ export default function Home() {
                           }
                           className="rounded-xl border border-rose-200 bg-white px-3 py-3 text-sm font-medium"
                         >
-                          {
-                            t.instagram
-                          }
+                          {t.instagram}
                         </button>
                       )}
                   </div>
                 </div>
 
                 <div className="mt-4 grid grid-cols-2 gap-3">
-                  <div className="rounded-2xl bg-white/80 p-4">
+                  <div className="rounded-2xl bg-white/70 p-4">
                     <p className="text-xs text-neutral-500">
-                      {
-                        t.totalAppointments
-                      }
+                      {t.totalAppointments}
                     </p>
 
                     <p className="mt-1 text-2xl font-semibold">
-                      {
-                        selectedClientAppointments.length
-                      }
+                      {selectedClientAppointments.length}
                     </p>
                   </div>
 
-                  <div className="rounded-2xl bg-white/80 p-4">
+                  <div className="rounded-2xl bg-white/70 p-4">
                     <p className="text-xs text-neutral-500">
-                      {
-                        t.futureAppointmentsCount
-                      }
+                      {t.futureAppointmentsCount}
                     </p>
 
                     <p className="mt-1 text-2xl font-semibold">
-                      {
-                        futureClientAppointments.length
-                      }
+                      {futureClientAppointments.length}
                     </p>
                   </div>
                 </div>
@@ -3743,35 +3658,26 @@ export default function Home() {
                   }
                   className="mt-3 w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
                 >
-                  {
-                    t.editClientButton
-                  }
+                  {t.editClientButton}
                 </button>
 
                 <div className="mt-6">
                   <h3 className="text-lg font-semibold">
-                    {
-                      t.futureAppointments
-                    }
+                    {t.futureAppointments}
                   </h3>
 
                   <div className="mt-3 space-y-2">
-                    {futureClientAppointments.length ===
-                      0 && (
+                    {futureClientAppointments.length === 0 && (
                       <p className="rounded-xl bg-white/70 p-4 text-sm text-neutral-500">
-                        {
-                          t.noFutureAppointments
-                        }
+                        {t.noFutureAppointments}
                       </p>
                     )}
 
                     {futureClientAppointments.map(
                       (appointment) => (
                         <div
-                          key={
-                            appointment.id
-                          }
-                          className="rounded-xl border border-rose-200 bg-white/80 p-3"
+                          key={appointment.id}
+                          className="rounded-xl border border-rose-200 bg-white/70 p-3"
                         >
                           <div className="flex justify-between gap-3">
                             <div>
@@ -3783,20 +3689,12 @@ export default function Home() {
                               </p>
 
                               <p className="mt-1 text-sm text-neutral-500">
-                                {
-                                  appointment.time
-                                }{" "}
-                                ·{" "}
-                                {
-                                  appointment.service
-                                }
+                                {appointment.time} ·{" "}
+                                {appointment.service}
                               </p>
 
                               <p className="mt-1 text-sm font-medium">
-                                {
-                                  appointment.price
-                                }{" "}
-                                грн
+                                {appointment.price} грн
                               </p>
                             </div>
 
@@ -3821,9 +3719,7 @@ export default function Home() {
                               }
                               className="mt-3 w-full rounded-xl bg-sky-50 px-3 py-2 text-sm font-medium text-sky-700"
                             >
-                              {
-                                t.remind
-                              }
+                              {t.remind}
                             </button>
                           )}
                         </div>
@@ -3838,8 +3734,7 @@ export default function Home() {
                   </h3>
 
                   <div className="mt-3 space-y-2">
-                    {pastClientAppointments.length ===
-                      0 && (
+                    {pastClientAppointments.length === 0 && (
                       <p className="rounded-xl bg-white/70 p-4 text-sm text-neutral-500">
                         {t.noHistory}
                       </p>
@@ -3848,10 +3743,8 @@ export default function Home() {
                     {pastClientAppointments.map(
                       (appointment) => (
                         <div
-                          key={
-                            appointment.id
-                          }
-                          className="rounded-xl border border-rose-200 bg-white/80 p-3"
+                          key={appointment.id}
+                          className="rounded-xl border border-rose-200 bg-white/70 p-3"
                         >
                           <div className="flex justify-between gap-3">
                             <div>
@@ -3863,14 +3756,8 @@ export default function Home() {
                               </p>
 
                               <p className="mt-1 text-sm text-neutral-500">
-                                {
-                                  appointment.service
-                                }{" "}
-                                ·{" "}
-                                {
-                                  appointment.price
-                                }{" "}
-                                грн
+                                {appointment.service} ·{" "}
+                                {appointment.price} грн
                               </p>
                             </div>
 
@@ -3906,7 +3793,7 @@ export default function Home() {
 
         {isServiceModalOpen && (
           <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40">
-            <div className="w-full max-w-md rounded-t-3xl bg-rose-50 p-5">
+            <div className="w-full max-w-md rounded-t-3xl bg-rose-50/95 p-5 backdrop-blur-md">
               <div className="flex justify-between">
                 <h2 className="text-xl font-semibold">
                   {editingServiceId !==
@@ -3935,16 +3822,12 @@ export default function Home() {
                       event.target.value
                     )
                   }
-                  placeholder={
-                    t.serviceName
-                  }
+                  placeholder={t.serviceName}
                   className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
                 />
 
                 <select
-                  value={
-                    serviceDuration
-                  }
+                  value={serviceDuration}
                   onChange={(event) =>
                     setServiceDuration(
                       event.target.value
@@ -3979,9 +3862,7 @@ export default function Home() {
                       event.target.value
                     )
                   }
-                  placeholder={
-                    t.servicePrice
-                  }
+                  placeholder={t.servicePrice}
                   className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
                 />
 
@@ -3998,7 +3879,7 @@ export default function Home() {
 
         {isReminderModalOpen && (
           <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/50">
-            <div className="w-full max-w-md rounded-t-3xl bg-rose-50 p-5">
+            <div className="w-full max-w-md rounded-t-3xl bg-rose-50/95 p-5 backdrop-blur-md">
               <div className="flex justify-between gap-4">
                 <div>
                   <h2 className="text-xl font-semibold">
@@ -4006,9 +3887,7 @@ export default function Home() {
                   </h2>
 
                   <p className="mt-1 text-sm text-neutral-500">
-                    {
-                      t.reminderHint
-                    }
+                    {t.reminderHint}
                   </p>
                 </div>
 
@@ -4067,9 +3946,7 @@ export default function Home() {
                       }
                       className="rounded-xl border border-rose-200 bg-white px-3 py-3 text-sm font-medium"
                     >
-                      {
-                        t.openTelegram
-                      }
+                      {t.openTelegram}
                     </button>
                   )}
 
@@ -4090,9 +3967,7 @@ export default function Home() {
                       }
                       className="rounded-xl border border-rose-200 bg-white px-3 py-3 text-sm font-medium"
                     >
-                      {
-                        t.openInstagram
-                      }
+                      {t.openInstagram}
                     </button>
                   )}
                 </div>
