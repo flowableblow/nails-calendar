@@ -67,10 +67,10 @@ const DEFAULT_WORK_SETTINGS: WorkSettings = {
 
 const APP_BACKGROUND_STYLE = {
   backgroundImage:
-    "linear-gradient(rgba(248,233,238,0.88), rgba(248,233,238,0.88)), url('/bg-man.png')",
+    "linear-gradient(rgba(255,235,243,0.68), rgba(255,235,243,0.68)), url('/publicbg-man.png')",
   backgroundRepeat: "no-repeat",
-  backgroundPosition: "center top",
-  backgroundSize: "60% auto",
+  backgroundPosition: "center center",
+  backgroundSize: "cover",
   backgroundColor: "#f8e9ee",
 };
 
@@ -439,6 +439,7 @@ function isSameDay(first: Date, second: Date) {
 
 function timeToMinutes(time: string) {
   const [hours, minutes] = time.split(":").map(Number);
+
   return hours * 60 + minutes;
 }
 
@@ -472,7 +473,9 @@ function getMonthCalendarDays(date: Date) {
 
   let firstWeekday = firstDay.getDay();
 
-  if (firstWeekday === 0) firstWeekday = 7;
+  if (firstWeekday === 0) {
+    firstWeekday = 7;
+  }
 
   const daysBefore = firstWeekday - 1;
   const daysInMonth = lastDay.getDate();
@@ -532,18 +535,23 @@ function cleanUsername(value: string) {
 
 function getTelegramUrl(social: string) {
   const username = cleanUsername(social);
+
   return username ? `https://t.me/${username}` : "";
 }
 
 function getInstagramUrl(social: string) {
   const username = cleanUsername(social);
+
   return username ? `https://instagram.com/${username}` : "";
 }
 
 function getSocialType(social: string) {
   const normalized = social.toLowerCase();
 
-  if (normalized.includes("t.me") || normalized.includes("telegram")) {
+  if (
+    normalized.includes("t.me") ||
+    normalized.includes("telegram")
+  ) {
     return "telegram";
   }
 
@@ -563,6 +571,7 @@ function safeParseArray<T>(value: string | null): T[] {
 
   try {
     const parsed = JSON.parse(value);
+
     return Array.isArray(parsed) ? parsed : [];
   } catch {
     return [];
@@ -625,6 +634,7 @@ export default function Home() {
     useState<DatabaseStatus>("connecting");
 
   const [activeTab, setActiveTab] = useState<Tab>("calendar");
+
   const [calendarView, setCalendarView] =
     useState<CalendarView>("day");
 
@@ -648,22 +658,26 @@ export default function Home() {
   const [isAppointmentModalOpen, setIsAppointmentModalOpen] =
     useState(false);
 
-  const [isClientModalOpen, setIsClientModalOpen] = useState(false);
-  const [isClientDetailsOpen, setIsClientDetailsOpen] = useState(false);
-  const [isServiceModalOpen, setIsServiceModalOpen] = useState(false);
-  const [isReminderModalOpen, setIsReminderModalOpen] = useState(false);
+  const [isClientModalOpen, setIsClientModalOpen] =
+    useState(false);
 
-  const [editingAppointmentId, setEditingAppointmentId] = useState<
-    number | null
-  >(null);
+  const [isClientDetailsOpen, setIsClientDetailsOpen] =
+    useState(false);
 
-  const [editingClientId, setEditingClientId] = useState<number | null>(
-    null
-  );
+  const [isServiceModalOpen, setIsServiceModalOpen] =
+    useState(false);
 
-  const [editingServiceId, setEditingServiceId] = useState<
-    number | null
-  >(null);
+  const [isReminderModalOpen, setIsReminderModalOpen] =
+    useState(false);
+
+  const [editingAppointmentId, setEditingAppointmentId] =
+    useState<number | null>(null);
+
+  const [editingClientId, setEditingClientId] =
+    useState<number | null>(null);
+
+  const [editingServiceId, setEditingServiceId] =
+    useState<number | null>(null);
 
   const [selectedClientDetailsId, setSelectedClientDetailsId] =
     useState<number | null>(null);
@@ -696,9 +710,10 @@ export default function Home() {
   const [clientSearch, setClientSearch] = useState("");
 
   const [reminderText, setReminderText] = useState("");
-  const [reminderClientId, setReminderClientId] = useState<number | null>(
-    null
-  );
+
+  const [reminderClientId, setReminderClientId] =
+    useState<number | null>(null);
+
   const [reminderCopied, setReminderCopied] = useState(false);
 
   useEffect(() => {
@@ -713,26 +728,32 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    const localLanguage = localStorage.getItem(LANGUAGE_STORAGE_KEY);
+    const localLanguage =
+      localStorage.getItem(LANGUAGE_STORAGE_KEY);
 
-    if (localLanguage === "ru" || localLanguage === "uk") {
+    if (
+      localLanguage === "ru" ||
+      localLanguage === "uk"
+    ) {
       setLanguage(localLanguage);
     }
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, nextSession) => {
-      setSession(nextSession);
-      setAuthChecked(true);
+    } = supabase.auth.onAuthStateChange(
+      (_event, nextSession) => {
+        setSession(nextSession);
+        setAuthChecked(true);
 
-      if (!nextSession) {
-        setIsLoaded(false);
-        setClients([]);
-        setServices([]);
-        setAppointments([]);
-        setDatabaseStatus("connecting");
+        if (!nextSession) {
+          setIsLoaded(false);
+          setClients([]);
+          setServices([]);
+          setAppointments([]);
+          setDatabaseStatus("connecting");
+        }
       }
-    });
+    );
 
     return () => {
       subscription.unsubscribe();
@@ -753,9 +774,15 @@ export default function Home() {
           appointmentsResult,
           settingsResult,
         ] = await Promise.all([
-          supabase.from("clients").select("*").order("name"),
+          supabase
+            .from("clients")
+            .select("*")
+            .order("name"),
 
-          supabase.from("services").select("*").order("name"),
+          supabase
+            .from("services")
+            .select("*")
+            .order("name"),
 
           supabase
             .from("appointments")
@@ -772,53 +799,54 @@ export default function Home() {
 
         if (clientsResult.error) throw clientsResult.error;
         if (servicesResult.error) throw servicesResult.error;
-        if (appointmentsResult.error) throw appointmentsResult.error;
+        if (appointmentsResult.error)
+          throw appointmentsResult.error;
         if (settingsResult.error) throw settingsResult.error;
 
-        const databaseClients: Client[] = (clientsResult.data ?? []).map(
-          (row) => ({
+        const databaseClients: Client[] =
+          (clientsResult.data ?? []).map((row) => ({
             id: Number(row.id),
             name: row.name ?? "",
             phone: row.phone ?? "",
             social: row.social ?? "",
             note: row.note ?? "",
-          })
-        );
+          }));
 
-        const databaseServices: Service[] = (
-          servicesResult.data ?? []
-        ).map((row) => ({
-          id: Number(row.id),
-          name: row.name ?? "",
-          duration: Number(row.duration ?? 90),
-          price: Number(row.price ?? 0),
-        }));
+        const databaseServices: Service[] =
+          (servicesResult.data ?? []).map((row) => ({
+            id: Number(row.id),
+            name: row.name ?? "",
+            duration: Number(row.duration ?? 90),
+            price: Number(row.price ?? 0),
+          }));
 
-        const databaseAppointments: Appointment[] = (
-          appointmentsResult.data ?? []
-        ).map((row) => ({
-          id: Number(row.id),
-          date: row.date ?? "",
-          time: String(row.time ?? "").slice(0, 5),
+        const databaseAppointments: Appointment[] =
+          (appointmentsResult.data ?? []).map((row) => ({
+            id: Number(row.id),
+            date: row.date ?? "",
+            time: String(row.time ?? "").slice(0, 5),
 
-          clientId:
-            row.client_id !== null && row.client_id !== undefined
-              ? Number(row.client_id)
-              : undefined,
+            clientId:
+              row.client_id !== null &&
+              row.client_id !== undefined
+                ? Number(row.client_id)
+                : undefined,
 
-          name: row.name ?? "",
+            name: row.name ?? "",
 
-          serviceId:
-            row.service_id !== null && row.service_id !== undefined
-              ? Number(row.service_id)
-              : undefined,
+            serviceId:
+              row.service_id !== null &&
+              row.service_id !== undefined
+                ? Number(row.service_id)
+                : undefined,
 
-          service: row.service ?? "",
-          duration: Number(row.duration ?? 90),
-          price: Number(row.price ?? 0),
+            service: row.service ?? "",
+            duration: Number(row.duration ?? 90),
+            price: Number(row.price ?? 0),
 
-          status: (row.status ?? "scheduled") as AppointmentStatus,
-        }));
+            status: (row.status ??
+              "scheduled") as AppointmentStatus,
+          }));
 
         const databaseIsEmpty =
           databaseClients.length === 0 &&
@@ -826,101 +854,151 @@ export default function Home() {
           databaseAppointments.length === 0;
 
         const migrationDone =
-          localStorage.getItem(MIGRATION_STORAGE_KEY) === "true";
+          localStorage.getItem(
+            MIGRATION_STORAGE_KEY
+          ) === "true";
 
         if (databaseIsEmpty && !migrationDone) {
           const localClients = safeParseArray<Client>(
-            localStorage.getItem(CLIENTS_STORAGE_KEY)
+            localStorage.getItem(
+              CLIENTS_STORAGE_KEY
+            )
           );
 
           const localServices = safeParseArray<Service>(
-            localStorage.getItem(SERVICES_STORAGE_KEY)
+            localStorage.getItem(
+              SERVICES_STORAGE_KEY
+            )
           );
 
-          const localAppointments = safeParseArray<Appointment>(
-            localStorage.getItem(APPOINTMENTS_STORAGE_KEY)
-          );
+          const localAppointments =
+            safeParseArray<Appointment>(
+              localStorage.getItem(
+                APPOINTMENTS_STORAGE_KEY
+              )
+            );
 
           if (localClients.length > 0) {
-            const { error } = await supabase.from("clients").upsert(
-              localClients.map((client) => ({
-                id: client.id,
-                name: client.name,
-                phone: client.phone ?? "",
-                social: client.social ?? "",
-                note: client.note ?? "",
-              })),
-              { onConflict: "id" }
-            );
+            const { error } =
+              await supabase
+                .from("clients")
+                .upsert(
+                  localClients.map((client) => ({
+                    id: client.id,
+                    name: client.name,
+                    phone: client.phone ?? "",
+                    social: client.social ?? "",
+                    note: client.note ?? "",
+                  })),
+                  { onConflict: "id" }
+                );
 
             if (error) throw error;
           }
 
           if (localServices.length > 0) {
-            const { error } = await supabase.from("services").upsert(
-              localServices.map((service) => ({
-                id: service.id,
-                name: service.name,
-                duration: Number(service.duration) || 90,
-                price: Number(service.price) || 0,
-              })),
-              { onConflict: "id" }
-            );
+            const { error } =
+              await supabase
+                .from("services")
+                .upsert(
+                  localServices.map((service) => ({
+                    id: service.id,
+                    name: service.name,
+                    duration:
+                      Number(service.duration) || 90,
+                    price:
+                      Number(service.price) || 0,
+                  })),
+                  { onConflict: "id" }
+                );
 
             if (error) throw error;
           }
 
-          const validClientIds = new Set(
-            localClients.map((client) => client.id)
-          );
+          const validClientIds =
+            new Set(
+              localClients.map(
+                (client) => client.id
+              )
+            );
 
-          const validServiceIds = new Set(
-            localServices.map((service) => service.id)
-          );
+          const validServiceIds =
+            new Set(
+              localServices.map(
+                (service) => service.id
+              )
+            );
 
           if (localAppointments.length > 0) {
-            const { error } = await supabase.from("appointments").upsert(
-              localAppointments.map((appointment) => ({
-                id: appointment.id,
-                date: appointment.date,
-                time: appointment.time,
+            const { error } =
+              await supabase
+                .from("appointments")
+                .upsert(
+                  localAppointments.map(
+                    (appointment) => ({
+                      id: appointment.id,
+                      date: appointment.date,
+                      time: appointment.time,
 
-                client_id:
-                  appointment.clientId &&
-                  validClientIds.has(appointment.clientId)
-                    ? appointment.clientId
-                    : null,
+                      client_id:
+                        appointment.clientId &&
+                        validClientIds.has(
+                          appointment.clientId
+                        )
+                          ? appointment.clientId
+                          : null,
 
-                name: appointment.name,
+                      name: appointment.name,
 
-                service_id:
-                  appointment.serviceId &&
-                  validServiceIds.has(appointment.serviceId)
-                    ? appointment.serviceId
-                    : null,
+                      service_id:
+                        appointment.serviceId &&
+                        validServiceIds.has(
+                          appointment.serviceId
+                        )
+                          ? appointment.serviceId
+                          : null,
 
-                service: appointment.service ?? "",
-                duration: Number(appointment.duration) || 90,
-                price: Number(appointment.price) || 0,
-                status: appointment.status ?? "scheduled",
-              })),
-              { onConflict: "id" }
-            );
+                      service:
+                        appointment.service ?? "",
+                      duration:
+                        Number(
+                          appointment.duration
+                        ) || 90,
+                      price:
+                        Number(
+                          appointment.price
+                        ) || 0,
+                      status:
+                        appointment.status ??
+                        "scheduled",
+                    })
+                  ),
+                  { onConflict: "id" }
+                );
 
             if (error) throw error;
           }
 
-          localStorage.setItem(MIGRATION_STORAGE_KEY, "true");
+          localStorage.setItem(
+            MIGRATION_STORAGE_KEY,
+            "true"
+          );
 
           setClients(localClients);
           setServices(localServices);
 
           setAppointments(
-            localAppointments.map((appointment) => ({
-              ...appointment,
-              price: Number(appointment.price ?? 0),
-              status: appointment.status ?? "scheduled",
-            }))
+            localAppointments.map(
+              (appointment) => ({
+                ...appointment,
+                price: Number(
+                  appointment.price ?? 0
+                ),
+                status:
+                  appointment.status ??
+                  "scheduled",
+              })
+            )
           );
         } else {
           setClients(databaseClients);
@@ -932,23 +1010,34 @@ export default function Home() {
           const row = settingsResult.data;
 
           const nextLanguage: Language =
-            row.language === "ru" ? "ru" : "uk";
+            row.language === "ru"
+              ? "ru"
+              : "uk";
 
           setLanguage(nextLanguage);
 
           setWorkSettings({
-            startHour: Number(row.start_hour ?? 9),
-            endHour: Number(row.end_hour ?? 21),
+            startHour: Number(
+              row.start_hour ?? 9
+            ),
+            endHour: Number(
+              row.end_hour ?? 21
+            ),
 
-            workDays: Array.isArray(row.work_days)
-              ? row.work_days.map(Number)
-              : DEFAULT_WORK_SETTINGS.workDays,
+            workDays:
+              Array.isArray(row.work_days)
+                ? row.work_days.map(Number)
+                : DEFAULT_WORK_SETTINGS.workDays,
           });
         }
 
         setDatabaseStatus("connected");
       } catch (error) {
-        console.error("Supabase load error:", error);
+        console.error(
+          "Supabase load error:",
+          error
+        );
+
         setDatabaseStatus("error");
       } finally {
         setIsLoaded(true);
@@ -961,13 +1050,19 @@ export default function Home() {
   useEffect(() => {
     if (!isLoaded) return;
 
-    localStorage.setItem(CLIENTS_STORAGE_KEY, JSON.stringify(clients));
+    localStorage.setItem(
+      CLIENTS_STORAGE_KEY,
+      JSON.stringify(clients)
+    );
   }, [clients, isLoaded]);
 
   useEffect(() => {
     if (!isLoaded) return;
 
-    localStorage.setItem(SERVICES_STORAGE_KEY, JSON.stringify(services));
+    localStorage.setItem(
+      SERVICES_STORAGE_KEY,
+      JSON.stringify(services)
+    );
   }, [services, isLoaded]);
 
   useEffect(() => {
@@ -982,7 +1077,10 @@ export default function Home() {
   useEffect(() => {
     if (!isLoaded) return;
 
-    localStorage.setItem(LANGUAGE_STORAGE_KEY, language);
+    localStorage.setItem(
+      LANGUAGE_STORAGE_KEY,
+      language
+    );
 
     localStorage.setItem(
       WORK_SETTINGS_STORAGE_KEY,
@@ -991,28 +1089,47 @@ export default function Home() {
   }, [language, workSettings, isLoaded]);
 
   useEffect(() => {
-    if (!session || !isLoaded || databaseStatus !== "connected") return;
+    if (
+      !session ||
+      !isLoaded ||
+      databaseStatus !== "connected"
+    ) {
+      return;
+    }
 
-    const timer = window.setTimeout(async () => {
-      const { error } = await supabase.from("settings").upsert(
-        {
-          id: "main",
-          language,
-          start_hour: workSettings.startHour,
-          end_hour: workSettings.endHour,
-          work_days: workSettings.workDays,
-          updated_at: new Date().toISOString(),
-        },
-        { onConflict: "id" }
-      );
+    const timer =
+      window.setTimeout(async () => {
+        const { error } =
+          await supabase
+            .from("settings")
+            .upsert(
+              {
+                id: "main",
+                language,
+                start_hour:
+                  workSettings.startHour,
+                end_hour:
+                  workSettings.endHour,
+                work_days:
+                  workSettings.workDays,
+                updated_at:
+                  new Date().toISOString(),
+              },
+              { onConflict: "id" }
+            );
 
-      if (error) {
-        console.error("Settings save error:", error);
-        setDatabaseStatus("error");
-      }
-    }, 300);
+        if (error) {
+          console.error(
+            "Settings save error:",
+            error
+          );
 
-    return () => window.clearTimeout(timer);
+          setDatabaseStatus("error");
+        }
+      }, 300);
+
+    return () =>
+      window.clearTimeout(timer);
   }, [
     session,
     language,
@@ -1022,16 +1139,19 @@ export default function Home() {
     supabase,
   ]);
 
-  async function handleLogin(event: React.FormEvent) {
+  async function handleLogin(
+    event: React.FormEvent
+  ) {
     event.preventDefault();
 
     setLoginError("");
     setLoginLoading(true);
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email: loginEmail.trim(),
-      password: loginPassword,
-    });
+    const { error } =
+      await supabase.auth.signInWithPassword({
+        email: loginEmail.trim(),
+        password: loginPassword,
+      });
 
     if (error) {
       setLoginError(
@@ -1059,37 +1179,62 @@ export default function Home() {
     setIsReminderModalOpen(false);
   }
 
-  const selectedDateKey = formatDateKey(selectedDate);
+  const selectedDateKey =
+    formatDateKey(selectedDate);
 
-  const selectedDayAppointments = appointments
-    .filter((appointment) => appointment.date === selectedDateKey)
-    .sort((a, b) => a.time.localeCompare(b.time));
+  const selectedDayAppointments =
+    appointments
+      .filter(
+        (appointment) =>
+          appointment.date ===
+          selectedDateKey
+      )
+      .sort((a, b) =>
+        a.time.localeCompare(b.time)
+      );
 
-  const selectedDateIsToday = isSameDay(selectedDate, today);
+  const selectedDateIsToday =
+    isSameDay(selectedDate, today);
 
   const visibleMonthIsCurrent =
-    visibleMonth.getFullYear() === today.getFullYear() &&
-    visibleMonth.getMonth() === today.getMonth();
+    visibleMonth.getFullYear() ===
+      today.getFullYear() &&
+    visibleMonth.getMonth() ===
+      today.getMonth();
 
-  const selectedDateIsWorkDay = workSettings.workDays.includes(
-    selectedDate.getDay()
-  );
+  const selectedDateIsWorkDay =
+    workSettings.workDays.includes(
+      selectedDate.getDay()
+    );
 
   const hours = Array.from(
     {
-      length: workSettings.endHour - workSettings.startHour + 1,
+      length:
+        workSettings.endHour -
+        workSettings.startHour +
+        1,
     },
-    (_, index) => workSettings.startHour + index
+    (_, index) =>
+      workSettings.startHour + index
   );
 
   const calendarHeight =
-    (workSettings.endHour - workSettings.startHour) * HOUR_HEIGHT;
+    (workSettings.endHour -
+      workSettings.startHour) *
+    HOUR_HEIGHT;
 
-  const monthDays = getMonthCalendarDays(visibleMonth);
+  const monthDays =
+    getMonthCalendarDays(
+      visibleMonth
+    );
 
   const selectedClientDetails =
     selectedClientDetailsId !== null
-      ? clients.find((client) => client.id === selectedClientDetailsId)
+      ? clients.find(
+          (client) =>
+            client.id ===
+            selectedClientDetailsId
+        )
       : undefined;
 
   const selectedClientAppointments =
@@ -1097,168 +1242,277 @@ export default function Home() {
       ? appointments
           .filter(
             (appointment) =>
-              appointment.clientId === selectedClientDetailsId
+              appointment.clientId ===
+              selectedClientDetailsId
           )
           .sort((a, b) => {
-            if (a.date !== b.date) return a.date.localeCompare(b.date);
-            return a.time.localeCompare(b.time);
+            if (a.date !== b.date) {
+              return a.date.localeCompare(
+                b.date
+              );
+            }
+
+            return a.time.localeCompare(
+              b.time
+            );
           })
       : [];
 
-  const futureClientAppointments = selectedClientAppointments.filter(
-    (appointment) =>
-      appointment.date >= todayKey &&
-      appointment.status === "scheduled"
-  );
-
-  const pastClientAppointments = selectedClientAppointments
-    .filter(
+  const futureClientAppointments =
+    selectedClientAppointments.filter(
       (appointment) =>
-        appointment.date < todayKey ||
-        appointment.status !== "scheduled"
-    )
-    .sort((a, b) => {
-      if (a.date !== b.date) return b.date.localeCompare(a.date);
-      return b.time.localeCompare(a.time);
-    });
-
-  const filteredClients = [...clients]
-    .filter((client) => {
-      const search = clientSearch.trim().toLowerCase();
-
-      if (!search) return true;
-
-      return (
-        client.name.toLowerCase().includes(search) ||
-        client.phone.toLowerCase().includes(search) ||
-        client.social.toLowerCase().includes(search)
-      );
-    })
-    .sort((a, b) =>
-      a.name.localeCompare(b.name, getLocale(language))
+        appointment.date >= todayKey &&
+        appointment.status ===
+          "scheduled"
     );
 
-  const completedAppointments = appointments.filter(
-    (appointment) => appointment.status === "completed"
-  );
+  const pastClientAppointments =
+    selectedClientAppointments
+      .filter(
+        (appointment) =>
+          appointment.date < todayKey ||
+          appointment.status !==
+            "scheduled"
+      )
+      .sort((a, b) => {
+        if (a.date !== b.date) {
+          return b.date.localeCompare(
+            a.date
+          );
+        }
 
-  const todayCompletedAppointments = completedAppointments.filter(
-    (appointment) => appointment.date === todayKey
-  );
+        return b.time.localeCompare(
+          a.time
+        );
+      });
+
+  const filteredClients =
+    [...clients]
+      .filter((client) => {
+        const search =
+          clientSearch
+            .trim()
+            .toLowerCase();
+
+        if (!search) return true;
+
+        return (
+          client.name
+            .toLowerCase()
+            .includes(search) ||
+          client.phone
+            .toLowerCase()
+            .includes(search) ||
+          client.social
+            .toLowerCase()
+            .includes(search)
+        );
+      })
+      .sort((a, b) =>
+        a.name.localeCompare(
+          b.name,
+          getLocale(language)
+        )
+      );
+
+  const completedAppointments =
+    appointments.filter(
+      (appointment) =>
+        appointment.status ===
+        "completed"
+    );
+
+  const todayCompletedAppointments =
+    completedAppointments.filter(
+      (appointment) =>
+        appointment.date === todayKey
+    );
 
   const sevenDaysAgo = useMemo(() => {
     const date = new Date(today);
-    date.setDate(date.getDate() - 6);
+
+    date.setDate(
+      date.getDate() - 6
+    );
+
     return date;
   }, [today]);
 
-  const sevenDaysAgoKey = formatDateKey(sevenDaysAgo);
+  const sevenDaysAgoKey =
+    formatDateKey(sevenDaysAgo);
 
-  const weekCompletedAppointments = completedAppointments.filter(
-    (appointment) =>
-      appointment.date >= sevenDaysAgoKey &&
-      appointment.date <= todayKey
-  );
+  const weekCompletedAppointments =
+    completedAppointments.filter(
+      (appointment) =>
+        appointment.date >=
+          sevenDaysAgoKey &&
+        appointment.date <= todayKey
+    );
 
-  const monthStartKey = formatDateKey(
-    new Date(today.getFullYear(), today.getMonth(), 1)
-  );
+  const monthStartKey =
+    formatDateKey(
+      new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        1
+      )
+    );
 
-  const monthEndKey = formatDateKey(
-    new Date(today.getFullYear(), today.getMonth() + 1, 0)
-  );
+  const monthEndKey =
+    formatDateKey(
+      new Date(
+        today.getFullYear(),
+        today.getMonth() + 1,
+        0
+      )
+    );
 
-  const currentMonthAppointments = appointments.filter(
-    (appointment) =>
-      appointment.date >= monthStartKey &&
-      appointment.date <= monthEndKey
-  );
+  const currentMonthAppointments =
+    appointments.filter(
+      (appointment) =>
+        appointment.date >=
+          monthStartKey &&
+        appointment.date <=
+          monthEndKey
+    );
 
   const currentMonthCompletedAppointments =
     currentMonthAppointments.filter(
-      (appointment) => appointment.status === "completed"
+      (appointment) =>
+        appointment.status ===
+        "completed"
     );
 
-  const todayIncome = sumPrices(todayCompletedAppointments);
-  const weekIncome = sumPrices(weekCompletedAppointments);
-  const monthIncome = sumPrices(currentMonthCompletedAppointments);
+  const todayIncome =
+    sumPrices(
+      todayCompletedAppointments
+    );
+
+  const weekIncome =
+    sumPrices(
+      weekCompletedAppointments
+    );
+
+  const monthIncome =
+    sumPrices(
+      currentMonthCompletedAppointments
+    );
 
   const averageCheck =
-    currentMonthCompletedAppointments.length > 0
+    currentMonthCompletedAppointments.length >
+    0
       ? Math.round(
-          monthIncome / currentMonthCompletedAppointments.length
+          monthIncome /
+            currentMonthCompletedAppointments.length
         )
       : 0;
 
-  const monthScheduledCount = currentMonthAppointments.filter(
-    (appointment) => appointment.status === "scheduled"
-  ).length;
+  const monthScheduledCount =
+    currentMonthAppointments.filter(
+      (appointment) =>
+        appointment.status ===
+        "scheduled"
+    ).length;
 
-  const monthCancelledCount = currentMonthAppointments.filter(
-    (appointment) => appointment.status === "cancelled"
-  ).length;
+  const monthCancelledCount =
+    currentMonthAppointments.filter(
+      (appointment) =>
+        appointment.status ===
+        "cancelled"
+    ).length;
 
-  const monthNoShowCount = currentMonthAppointments.filter(
-    (appointment) => appointment.status === "no-show"
-  ).length;
+  const monthNoShowCount =
+    currentMonthAppointments.filter(
+      (appointment) =>
+        appointment.status ===
+        "no-show"
+    ).length;
 
-  const serviceStats = Object.values(
-    currentMonthCompletedAppointments.reduce(
-      (
-        accumulator: Record<
-          string,
-          {
-            name: string;
-            count: number;
-            income: number;
+  const serviceStats =
+    Object.values(
+      currentMonthCompletedAppointments.reduce(
+        (
+          accumulator: Record<
+            string,
+            {
+              name: string;
+              count: number;
+              income: number;
+            }
+          >,
+          appointment
+        ) => {
+          const key =
+            appointment.service ||
+            "Без услуги";
+
+          if (!accumulator[key]) {
+            accumulator[key] = {
+              name: key,
+              count: 0,
+              income: 0,
+            };
           }
-        >,
-        appointment
-      ) => {
-        const key = appointment.service || "Без услуги";
 
-        if (!accumulator[key]) {
-          accumulator[key] = {
-            name: key,
-            count: 0,
-            income: 0,
-          };
-        }
+          accumulator[key].count += 1;
 
-        accumulator[key].count += 1;
-        accumulator[key].income += Number(appointment.price || 0);
+          accumulator[key].income +=
+            Number(
+              appointment.price || 0
+            );
 
-        return accumulator;
-      },
-      {}
-    )
-  ).sort((a, b) => {
-    if (b.count !== a.count) return b.count - a.count;
-    return b.income - a.income;
-  });
+          return accumulator;
+        },
+        {}
+      )
+    ).sort((a, b) => {
+      if (b.count !== a.count) {
+        return b.count - a.count;
+      }
+
+      return b.income - a.income;
+    });
 
   const reminderClient =
     reminderClientId !== null
-      ? clients.find((client) => client.id === reminderClientId)
+      ? clients.find(
+          (client) =>
+            client.id ===
+            reminderClientId
+        )
       : undefined;
 
-  function getStatusLabel(status: AppointmentStatus) {
-    if (status === "completed") return t.completedStatus;
-    if (status === "cancelled") return t.cancelledStatus;
-    if (status === "no-show") return t.noShowStatus;
+  function getStatusLabel(
+    status: AppointmentStatus
+  ) {
+    if (status === "completed")
+      return t.completedStatus;
+
+    if (status === "cancelled")
+      return t.cancelledStatus;
+
+    if (status === "no-show")
+      return t.noShowStatus;
 
     return t.scheduledStatus;
   }
 
   function changeDay(amount: number) {
-    const newDate = new Date(selectedDate);
+    const newDate =
+      new Date(selectedDate);
 
-    newDate.setDate(newDate.getDate() + amount);
+    newDate.setDate(
+      newDate.getDate() + amount
+    );
 
     setSelectedDate(newDate);
 
     setVisibleMonth(
-      new Date(newDate.getFullYear(), newDate.getMonth(), 1)
+      new Date(
+        newDate.getFullYear(),
+        newDate.getMonth(),
+        1
+      )
     );
   }
 
@@ -1266,7 +1520,8 @@ export default function Home() {
     setVisibleMonth(
       new Date(
         visibleMonth.getFullYear(),
-        visibleMonth.getMonth() + amount,
+        visibleMonth.getMonth() +
+          amount,
         1
       )
     );
@@ -1278,25 +1533,39 @@ export default function Home() {
     setSelectedDate(current);
 
     setVisibleMonth(
-      new Date(current.getFullYear(), current.getMonth(), 1)
+      new Date(
+        current.getFullYear(),
+        current.getMonth(),
+        1
+      )
     );
   }
 
-  function selectMonthDate(date: Date) {
+  function selectMonthDate(
+    date: Date
+  ) {
     setSelectedDate(date);
 
     setVisibleMonth(
-      new Date(date.getFullYear(), date.getMonth(), 1)
+      new Date(
+        date.getFullYear(),
+        date.getMonth(),
+        1
+      )
     );
 
     setCalendarView("day");
   }
 
-  function getAppointmentsForDate(date: Date) {
-    const dateKey = formatDateKey(date);
+  function getAppointmentsForDate(
+    date: Date
+  ) {
+    const dateKey =
+      formatDateKey(date);
 
     return appointments.filter(
-      (appointment) => appointment.date === dateKey
+      (appointment) =>
+        appointment.date === dateKey
     );
   }
 
@@ -1305,65 +1574,128 @@ export default function Home() {
     setSelectedClientId("");
     setSelectedServiceId("");
     setAppointmentName("");
-    setAppointmentDate(selectedDateKey);
+    setAppointmentDate(
+      selectedDateKey
+    );
     setAppointmentTime("");
     setAppointmentService("");
     setAppointmentDuration("90");
     setAppointmentPrice("");
-    setAppointmentStatus("scheduled");
+    setAppointmentStatus(
+      "scheduled"
+    );
     setAppointmentError("");
     setHasConflict(false);
   }
 
-  function openNewAppointment(prefilledTime = "") {
+  function openNewAppointment(
+    prefilledTime = ""
+  ) {
     resetAppointmentForm();
 
-    setAppointmentDate(selectedDateKey);
-    setAppointmentTime(prefilledTime);
+    setAppointmentDate(
+      selectedDateKey
+    );
 
-    setIsAppointmentModalOpen(true);
+    setAppointmentTime(
+      prefilledTime
+    );
+
+    setIsAppointmentModalOpen(
+      true
+    );
   }
 
-  function openNewAppointmentForClient(client: Client) {
+  function openNewAppointmentForClient(
+    client: Client
+  ) {
     resetAppointmentForm();
 
-    setSelectedClientId(String(client.id));
-    setAppointmentDate(selectedDateKey);
+    setSelectedClientId(
+      String(client.id)
+    );
+
+    setAppointmentDate(
+      selectedDateKey
+    );
 
     setIsClientDetailsOpen(false);
     setActiveTab("calendar");
     setCalendarView("day");
-    setIsAppointmentModalOpen(true);
+
+    setIsAppointmentModalOpen(
+      true
+    );
   }
 
-  function openEditAppointment(appointment: Appointment) {
-    setEditingAppointmentId(appointment.id);
+  function openEditAppointment(
+    appointment: Appointment
+  ) {
+    setEditingAppointmentId(
+      appointment.id
+    );
 
-    setAppointmentDate(appointment.date);
-    setAppointmentTime(appointment.time);
-    setAppointmentService(appointment.service);
-    setAppointmentDuration(String(appointment.duration));
-    setAppointmentPrice(String(appointment.price ?? 0));
-    setAppointmentStatus(appointment.status ?? "scheduled");
+    setAppointmentDate(
+      appointment.date
+    );
+
+    setAppointmentTime(
+      appointment.time
+    );
+
+    setAppointmentService(
+      appointment.service
+    );
+
+    setAppointmentDuration(
+      String(
+        appointment.duration
+      )
+    );
+
+    setAppointmentPrice(
+      String(
+        appointment.price ?? 0
+      )
+    );
+
+    setAppointmentStatus(
+      appointment.status ??
+        "scheduled"
+    );
 
     if (appointment.serviceId) {
-      setSelectedServiceId(String(appointment.serviceId));
+      setSelectedServiceId(
+        String(
+          appointment.serviceId
+        )
+      );
     } else {
       setSelectedServiceId("");
     }
 
     if (appointment.clientId) {
-      setSelectedClientId(String(appointment.clientId));
+      setSelectedClientId(
+        String(
+          appointment.clientId
+        )
+      );
+
       setAppointmentName("");
     } else {
       setSelectedClientId("");
-      setAppointmentName(appointment.name);
+
+      setAppointmentName(
+        appointment.name
+      );
     }
 
     setAppointmentError("");
     setHasConflict(false);
 
-    setIsAppointmentModalOpen(true);
+    setIsAppointmentModalOpen(
+      true
+    );
   }
 
   function findConflictingAppointment(
@@ -1372,99 +1704,177 @@ export default function Home() {
     duration: number,
     ignoreId: number | null
   ) {
-    const newStart = timeToMinutes(time);
-    const newEnd = newStart + duration;
+    const newStart =
+      timeToMinutes(time);
 
-    return appointments.find((appointment) => {
-      if (appointment.date !== date) return false;
+    const newEnd =
+      newStart + duration;
 
-      if (
-        appointment.status === "cancelled" ||
-        appointment.status === "no-show"
-      ) {
-        return false;
+    return appointments.find(
+      (appointment) => {
+        if (
+          appointment.date !== date
+        ) {
+          return false;
+        }
+
+        if (
+          appointment.status ===
+            "cancelled" ||
+          appointment.status ===
+            "no-show"
+        ) {
+          return false;
+        }
+
+        if (
+          ignoreId !== null &&
+          appointment.id === ignoreId
+        ) {
+          return false;
+        }
+
+        const existingStart =
+          timeToMinutes(
+            appointment.time
+          );
+
+        const existingEnd =
+          existingStart +
+          appointment.duration;
+
+        return (
+          newStart < existingEnd &&
+          newEnd > existingStart
+        );
       }
-
-      if (ignoreId !== null && appointment.id === ignoreId) {
-        return false;
-      }
-
-      const existingStart = timeToMinutes(appointment.time);
-      const existingEnd = existingStart + appointment.duration;
-
-      return newStart < existingEnd && newEnd > existingStart;
-    });
+    );
   }
 
   async function actuallySaveAppointment() {
-    const selectedClient = clients.find(
-      (client) => client.id === Number(selectedClientId)
-    );
+    const selectedClient =
+      clients.find(
+        (client) =>
+          client.id ===
+          Number(selectedClientId)
+      );
 
-    const selectedService = services.find(
-      (service) => service.id === Number(selectedServiceId)
-    );
+    const selectedService =
+      services.find(
+        (service) =>
+          service.id ===
+          Number(selectedServiceId)
+      );
 
-    const finalName = selectedClient?.name || appointmentName.trim();
+    const finalName =
+      selectedClient?.name ||
+      appointmentName.trim();
 
-    const duration = Number(appointmentDuration);
-    const price = Number(appointmentPrice || 0);
+    const duration =
+      Number(
+        appointmentDuration
+      );
 
-    const appointmentId = editingAppointmentId ?? Date.now();
+    const price =
+      Number(
+        appointmentPrice || 0
+      );
 
-    const newAppointment: Appointment = {
-      id: appointmentId,
-      date: appointmentDate,
-      time: appointmentTime,
-      clientId: selectedClient?.id,
-      name: finalName,
-      serviceId: selectedService?.id,
-      service:
-        selectedService?.name ||
-        appointmentService.trim() ||
-        (language === "uk" ? "Манікюр" : "Маникюр"),
-      duration,
-      price,
-      status: appointmentStatus,
-    };
+    const appointmentId =
+      editingAppointmentId ??
+      Date.now();
 
-    const { error } = await supabase.from("appointments").upsert(
+    const newAppointment: Appointment =
       {
-        id: newAppointment.id,
-        date: newAppointment.date,
-        time: newAppointment.time,
-        client_id: newAppointment.clientId ?? null,
-        name: newAppointment.name,
-        service_id: newAppointment.serviceId ?? null,
-        service: newAppointment.service,
-        duration: newAppointment.duration,
-        price: newAppointment.price,
-        status: newAppointment.status,
-      },
-      { onConflict: "id" }
-    );
+        id: appointmentId,
+        date: appointmentDate,
+        time: appointmentTime,
+        clientId:
+          selectedClient?.id,
+        name: finalName,
+        serviceId:
+          selectedService?.id,
+        service:
+          selectedService?.name ||
+          appointmentService.trim() ||
+          (language === "uk"
+            ? "Манікюр"
+            : "Маникюр"),
+        duration,
+        price,
+        status:
+          appointmentStatus,
+      };
+
+    const { error } =
+      await supabase
+        .from("appointments")
+        .upsert(
+          {
+            id: newAppointment.id,
+            date:
+              newAppointment.date,
+            time:
+              newAppointment.time,
+            client_id:
+              newAppointment.clientId ??
+              null,
+            name:
+              newAppointment.name,
+            service_id:
+              newAppointment.serviceId ??
+              null,
+            service:
+              newAppointment.service,
+            duration:
+              newAppointment.duration,
+            price:
+              newAppointment.price,
+            status:
+              newAppointment.status,
+          },
+          {
+            onConflict: "id",
+          }
+        );
 
     if (error) {
       console.error(error);
-      window.alert(t.databaseSaveError);
+
+      window.alert(
+        t.databaseSaveError
+      );
+
       setDatabaseStatus("error");
+
       return;
     }
 
-    if (editingAppointmentId !== null) {
+    if (
+      editingAppointmentId !== null
+    ) {
       setAppointments(
-        appointments.map((appointment) =>
-          appointment.id === editingAppointmentId
-            ? newAppointment
-            : appointment
+        appointments.map(
+          (appointment) =>
+            appointment.id ===
+            editingAppointmentId
+              ? newAppointment
+              : appointment
         )
       );
     } else {
-      setAppointments([...appointments, newAppointment]);
+      setAppointments([
+        ...appointments,
+        newAppointment,
+      ]);
     }
 
     setDatabaseStatus("connected");
-    setIsAppointmentModalOpen(false);
+
+    setIsAppointmentModalOpen(
+      false
+    );
+
     resetAppointmentForm();
   }
 
@@ -1472,48 +1882,78 @@ export default function Home() {
     setAppointmentError("");
     setHasConflict(false);
 
-    const selectedClient = clients.find(
-      (client) => client.id === Number(selectedClientId)
-    );
+    const selectedClient =
+      clients.find(
+        (client) =>
+          client.id ===
+          Number(selectedClientId)
+      );
 
-    const finalName = selectedClient?.name || appointmentName.trim();
+    const finalName =
+      selectedClient?.name ||
+      appointmentName.trim();
 
     if (!finalName) {
-      setAppointmentError(t.clientRequired);
+      setAppointmentError(
+        t.clientRequired
+      );
+
       return;
     }
 
     if (!appointmentDate) {
-      setAppointmentError(t.dateRequired);
+      setAppointmentError(
+        t.dateRequired
+      );
+
       return;
     }
 
     if (!appointmentTime) {
-      setAppointmentError(t.timeRequired);
+      setAppointmentError(
+        t.timeRequired
+      );
+
       return;
     }
 
-    const duration = Number(appointmentDuration);
-
-    if (
-      appointmentStatus !== "cancelled" &&
-      appointmentStatus !== "no-show"
-    ) {
-      const conflict = findConflictingAppointment(
-        appointmentDate,
-        appointmentTime,
-        duration,
-        editingAppointmentId
+    const duration =
+      Number(
+        appointmentDuration
       );
 
+    if (
+      appointmentStatus !==
+        "cancelled" &&
+      appointmentStatus !==
+        "no-show"
+    ) {
+      const conflict =
+        findConflictingAppointment(
+          appointmentDate,
+          appointmentTime,
+          duration,
+          editingAppointmentId
+        );
+
       if (conflict) {
-        const conflictStart = timeToMinutes(conflict.time);
-        const conflictEnd = conflictStart + conflict.duration;
+        const conflictStart =
+          timeToMinutes(
+            conflict.time
+          );
+
+        const conflictEnd =
+          conflictStart +
+          conflict.duration;
 
         setAppointmentError(
           `${t.conflict}: ${
             conflict.name
-          }, ${conflict.time}–${minutesToTime(conflictEnd)}.`
+          }, ${
+            conflict.time
+          }–${minutesToTime(
+            conflictEnd
+          )}.`
         );
 
         setHasConflict(true);
@@ -1525,27 +1965,49 @@ export default function Home() {
     await actuallySaveAppointment();
   }
 
-  async function deleteAppointment(id: number) {
-    if (!window.confirm(t.deleteAppointmentConfirm)) return;
+  async function deleteAppointment(
+    id: number
+  ) {
+    if (
+      !window.confirm(
+        t.deleteAppointmentConfirm
+      )
+    ) {
+      return;
+    }
 
-    const { error } = await supabase
-      .from("appointments")
-      .delete()
-      .eq("id", id);
+    const { error } =
+      await supabase
+        .from("appointments")
+        .delete()
+        .eq("id", id);
 
     if (error) {
       console.error(error);
-      window.alert(t.databaseDeleteError);
+
+      window.alert(
+        t.databaseDeleteError
+      );
+
       setDatabaseStatus("error");
+
       return;
     }
 
     setAppointments(
-      appointments.filter((appointment) => appointment.id !== id)
+      appointments.filter(
+        (appointment) =>
+          appointment.id !== id
+      )
     );
 
-    setIsAppointmentModalOpen(false);
-    setDatabaseStatus("connected");
+    setIsAppointmentModalOpen(
+      false
+    );
+
+    setDatabaseStatus(
+      "connected"
+    );
   }
 
   function resetClientForm() {
@@ -1558,119 +2020,209 @@ export default function Home() {
 
   function openNewClient() {
     resetClientForm();
-    setIsClientModalOpen(true);
+
+    setIsClientModalOpen(
+      true
+    );
   }
 
-  function openClientDetails(clientId: number) {
-    setSelectedClientDetailsId(clientId);
-    setIsClientDetailsOpen(true);
+  function openClientDetails(
+    clientId: number
+  ) {
+    setSelectedClientDetailsId(
+      clientId
+    );
+
+    setIsClientDetailsOpen(
+      true
+    );
   }
 
-  function openEditClient(client: Client) {
-    setEditingClientId(client.id);
+  function openEditClient(
+    client: Client
+  ) {
+    setEditingClientId(
+      client.id
+    );
 
     setClientName(client.name);
     setClientPhone(client.phone);
     setClientSocial(client.social);
     setClientNote(client.note);
 
-    setIsClientDetailsOpen(false);
-    setIsClientModalOpen(true);
+    setIsClientDetailsOpen(
+      false
+    );
+
+    setIsClientModalOpen(
+      true
+    );
   }
 
   async function saveClient() {
-    if (!clientName.trim()) return;
-
-    const clientId = editingClientId ?? Date.now();
-
-    const newClient: Client = {
-      id: clientId,
-      name: clientName.trim(),
-      phone: clientPhone.trim(),
-      social: clientSocial.trim(),
-      note: clientNote.trim(),
-    };
-
-    const { error } = await supabase.from("clients").upsert(
-      {
-        id: newClient.id,
-        name: newClient.name,
-        phone: newClient.phone,
-        social: newClient.social,
-        note: newClient.note,
-      },
-      { onConflict: "id" }
-    );
-
-    if (error) {
-      console.error(error);
-      window.alert(t.databaseSaveError);
+    if (!clientName.trim()) {
       return;
     }
 
-    if (editingClientId !== null) {
+    const clientId =
+      editingClientId ??
+      Date.now();
+
+    const newClient: Client =
+      {
+        id: clientId,
+        name:
+          clientName.trim(),
+        phone:
+          clientPhone.trim(),
+        social:
+          clientSocial.trim(),
+        note:
+          clientNote.trim(),
+      };
+
+    const { error } =
+      await supabase
+        .from("clients")
+        .upsert(
+          {
+            id: newClient.id,
+            name:
+              newClient.name,
+            phone:
+              newClient.phone,
+            social:
+              newClient.social,
+            note:
+              newClient.note,
+          },
+          {
+            onConflict: "id",
+          }
+        );
+
+    if (error) {
+      console.error(error);
+
+      window.alert(
+        t.databaseSaveError
+      );
+
+      return;
+    }
+
+    if (
+      editingClientId !== null
+    ) {
       await supabase
         .from("appointments")
         .update({
           name: newClient.name,
         })
-        .eq("client_id", editingClientId);
+        .eq(
+          "client_id",
+          editingClientId
+        );
 
       setClients(
         clients.map((client) =>
-          client.id === editingClientId ? newClient : client
+          client.id ===
+          editingClientId
+            ? newClient
+            : client
         )
       );
 
       setAppointments(
-        appointments.map((appointment) =>
-          appointment.clientId === editingClientId
-            ? {
-                ...appointment,
-                name: newClient.name,
-              }
-            : appointment
+        appointments.map(
+          (appointment) =>
+            appointment.clientId ===
+            editingClientId
+              ? {
+                  ...appointment,
+                  name:
+                    newClient.name,
+                }
+              : appointment
         )
       );
     } else {
-      setClients([...clients, newClient]);
+      setClients([
+        ...clients,
+        newClient,
+      ]);
     }
 
-    setDatabaseStatus("connected");
-    setIsClientModalOpen(false);
+    setDatabaseStatus(
+      "connected"
+    );
+
+    setIsClientModalOpen(
+      false
+    );
+
     resetClientForm();
   }
 
-  async function deleteClient(id: number) {
-    if (!window.confirm(t.deleteClientConfirm)) return;
-
-    const { error } = await supabase
-      .from("clients")
-      .delete()
-      .eq("id", id);
-
-    if (error) {
-      console.error(error);
-      window.alert(t.databaseDeleteError);
+  async function deleteClient(
+    id: number
+  ) {
+    if (
+      !window.confirm(
+        t.deleteClientConfirm
+      )
+    ) {
       return;
     }
 
-    setClients(clients.filter((client) => client.id !== id));
+    const { error } =
+      await supabase
+        .from("clients")
+        .delete()
+        .eq("id", id);
 
-    setAppointments(
-      appointments.map((appointment) =>
-        appointment.clientId === id
-          ? {
-              ...appointment,
-              clientId: undefined,
-            }
-          : appointment
+    if (error) {
+      console.error(error);
+
+      window.alert(
+        t.databaseDeleteError
+      );
+
+      return;
+    }
+
+    setClients(
+      clients.filter(
+        (client) =>
+          client.id !== id
       )
     );
 
-    setIsClientDetailsOpen(false);
-    setSelectedClientDetailsId(null);
-    setDatabaseStatus("connected");
+    setAppointments(
+      appointments.map(
+        (appointment) =>
+          appointment.clientId ===
+          id
+            ? {
+                ...appointment,
+                clientId:
+                  undefined,
+              }
+            : appointment
+      )
+    );
+
+    setIsClientDetailsOpen(
+      false
+    );
+
+    setSelectedClientDetailsId(
+      null
+    );
+
+    setDatabaseStatus(
+      "connected"
+    );
   }
 
   function resetServiceForm() {
@@ -1682,131 +2234,244 @@ export default function Home() {
 
   function openNewService() {
     resetServiceForm();
-    setIsServiceModalOpen(true);
+
+    setIsServiceModalOpen(
+      true
+    );
   }
 
-  function openEditService(service: Service) {
-    setEditingServiceId(service.id);
-    setServiceName(service.name);
-    setServiceDuration(String(service.duration));
-    setServicePrice(String(service.price));
-    setIsServiceModalOpen(true);
-  }
-
-  async function saveService() {
-    if (!serviceName.trim()) return;
-
-    const serviceId = editingServiceId ?? Date.now();
-
-    const newService: Service = {
-      id: serviceId,
-      name: serviceName.trim(),
-      duration: Number(serviceDuration),
-      price: Number(servicePrice || 0),
-    };
-
-    const { error } = await supabase.from("services").upsert(
-      {
-        id: newService.id,
-        name: newService.name,
-        duration: newService.duration,
-        price: newService.price,
-      },
-      {
-        onConflict: "id",
-      }
+  function openEditService(
+    service: Service
+  ) {
+    setEditingServiceId(
+      service.id
     );
 
-    if (error) {
-      console.error(error);
-      window.alert(t.databaseSaveError);
-      return;
-    }
+    setServiceName(
+      service.name
+    );
 
-    if (editingServiceId !== null) {
-      setServices(
-        services.map((service) =>
-          service.id === editingServiceId ? newService : service
-        )
-      );
-    } else {
-      setServices([...services, newService]);
-    }
-
-    setDatabaseStatus("connected");
-    setIsServiceModalOpen(false);
-    resetServiceForm();
-  }
-
-  async function deleteService(id: number) {
-    if (!window.confirm(t.deleteServiceConfirm)) return;
-
-    const { error } = await supabase
-      .from("services")
-      .delete()
-      .eq("id", id);
-
-    if (error) {
-      console.error(error);
-      window.alert(t.databaseDeleteError);
-      return;
-    }
-
-    setServices(services.filter((service) => service.id !== id));
-
-    setAppointments(
-      appointments.map((appointment) =>
-        appointment.serviceId === id
-          ? {
-              ...appointment,
-              serviceId: undefined,
-            }
-          : appointment
+    setServiceDuration(
+      String(
+        service.duration
       )
     );
 
-    setDatabaseStatus("connected");
+    setServicePrice(
+      String(
+        service.price
+      )
+    );
+
+    setIsServiceModalOpen(
+      true
+    );
   }
 
-  function getClientAppointmentsCount(clientId: number) {
+  async function saveService() {
+    if (!serviceName.trim()) {
+      return;
+    }
+
+    const serviceId =
+      editingServiceId ??
+      Date.now();
+
+    const newService: Service =
+      {
+        id: serviceId,
+        name:
+          serviceName.trim(),
+        duration:
+          Number(
+            serviceDuration
+          ),
+        price:
+          Number(
+            servicePrice || 0
+          ),
+      };
+
+    const { error } =
+      await supabase
+        .from("services")
+        .upsert(
+          {
+            id: newService.id,
+            name:
+              newService.name,
+            duration:
+              newService.duration,
+            price:
+              newService.price,
+          },
+          {
+            onConflict: "id",
+          }
+        );
+
+    if (error) {
+      console.error(error);
+
+      window.alert(
+        t.databaseSaveError
+      );
+
+      return;
+    }
+
+    if (
+      editingServiceId !== null
+    ) {
+      setServices(
+        services.map(
+          (service) =>
+            service.id ===
+            editingServiceId
+              ? newService
+              : service
+        )
+      );
+    } else {
+      setServices([
+        ...services,
+        newService,
+      ]);
+    }
+
+    setDatabaseStatus(
+      "connected"
+    );
+
+    setIsServiceModalOpen(
+      false
+    );
+
+    resetServiceForm();
+  }
+
+  async function deleteService(
+    id: number
+  ) {
+    if (
+      !window.confirm(
+        t.deleteServiceConfirm
+      )
+    ) {
+      return;
+    }
+
+    const { error } =
+      await supabase
+        .from("services")
+        .delete()
+        .eq("id", id);
+
+    if (error) {
+      console.error(error);
+
+      window.alert(
+        t.databaseDeleteError
+      );
+
+      return;
+    }
+
+    setServices(
+      services.filter(
+        (service) =>
+          service.id !== id
+      )
+    );
+
+    setAppointments(
+      appointments.map(
+        (appointment) =>
+          appointment.serviceId ===
+          id
+            ? {
+                ...appointment,
+                serviceId:
+                  undefined,
+              }
+            : appointment
+      )
+    );
+
+    setDatabaseStatus(
+      "connected"
+    );
+  }
+
+  function getClientAppointmentsCount(
+    clientId: number
+  ) {
     return appointments.filter(
-      (appointment) => appointment.clientId === clientId
+      (appointment) =>
+        appointment.clientId ===
+        clientId
     ).length;
   }
 
-  function getClientForAppointment(appointment: Appointment) {
+  function getClientForAppointment(
+    appointment: Appointment
+  ) {
     if (appointment.clientId) {
-      const client = clients.find(
-        (item) => item.id === appointment.clientId
-      );
+      const client =
+        clients.find(
+          (item) =>
+            item.id ===
+            appointment.clientId
+        );
 
-      if (client) return client;
+      if (client) {
+        return client;
+      }
     }
 
     return clients.find(
       (client) =>
-        client.name.trim().toLowerCase() ===
-        appointment.name.trim().toLowerCase()
+        client.name
+          .trim()
+          .toLowerCase() ===
+        appointment.name
+          .trim()
+          .toLowerCase()
     );
   }
 
   function handleCalendarClick(
     event: React.MouseEvent<HTMLDivElement>
   ) {
-    const rect = event.currentTarget.getBoundingClientRect();
-    const y = event.clientY - rect.top;
+    const rect =
+      event.currentTarget.getBoundingClientRect();
+
+    const y =
+      event.clientY -
+      rect.top;
 
     const clickedHour =
-      workSettings.startHour + Math.floor(y / HOUR_HEIGHT);
+      workSettings.startHour +
+      Math.floor(
+        y / HOUR_HEIGHT
+      );
 
     if (
-      clickedHour < workSettings.startHour ||
-      clickedHour >= workSettings.endHour
+      clickedHour <
+        workSettings.startHour ||
+      clickedHour >=
+        workSettings.endHour
     ) {
       return;
     }
 
-    const time = `${String(clickedHour).padStart(2, "0")}:00`;
+    const time =
+      `${String(
+        clickedHour
+      ).padStart(
+        2,
+        "0"
+      )}:00`;
 
     openNewAppointment(time);
   }
@@ -1816,46 +2481,92 @@ export default function Home() {
     setHasConflict(false);
   }
 
-  function handleServiceSelection(serviceId: string) {
-    setSelectedServiceId(serviceId);
-    clearAppointmentWarning();
-
-    if (!serviceId) return;
-
-    const service = services.find(
-      (item) => item.id === Number(serviceId)
+  function handleServiceSelection(
+    serviceId: string
+  ) {
+    setSelectedServiceId(
+      serviceId
     );
 
-    if (!service) return;
+    clearAppointmentWarning();
 
-    setAppointmentService(service.name);
-    setAppointmentDuration(String(service.duration));
-    setAppointmentPrice(String(service.price));
+    if (!serviceId) {
+      return;
+    }
+
+    const service =
+      services.find(
+        (item) =>
+          item.id ===
+          Number(serviceId)
+      );
+
+    if (!service) {
+      return;
+    }
+
+    setAppointmentService(
+      service.name
+    );
+
+    setAppointmentDuration(
+      String(
+        service.duration
+      )
+    );
+
+    setAppointmentPrice(
+      String(
+        service.price
+      )
+    );
   }
 
-  function toggleWorkDay(day: number) {
-    if (workSettings.workDays.includes(day)) {
+  function toggleWorkDay(
+    day: number
+  ) {
+    if (
+      workSettings.workDays.includes(
+        day
+      )
+    ) {
       setWorkSettings({
         ...workSettings,
-        workDays: workSettings.workDays.filter(
-          (item) => item !== day
-        ),
+
+        workDays:
+          workSettings.workDays.filter(
+            (item) =>
+              item !== day
+          ),
       });
     } else {
       setWorkSettings({
         ...workSettings,
-        workDays: [...workSettings.workDays, day],
+
+        workDays: [
+          ...workSettings.workDays,
+          day,
+        ],
       });
     }
   }
 
-  function openReminder(appointment: Appointment) {
+  function openReminder(
+    appointment: Appointment
+  ) {
     const client =
-      appointment.clientId !== undefined
-        ? clients.find((item) => item.id === appointment.clientId)
+      appointment.clientId !==
+      undefined
+        ? clients.find(
+            (item) =>
+              item.id ===
+              appointment.clientId
+          )
         : undefined;
 
-    const name = client?.name || appointment.name;
+    const name =
+      client?.name ||
+      appointment.name;
 
     const text =
       `Привіт, ${name}! ` +
@@ -1866,46 +2577,81 @@ export default function Home() {
       `Чекаю на вас ❤️`;
 
     setReminderText(text);
-    setReminderClientId(client?.id ?? null);
+
+    setReminderClientId(
+      client?.id ?? null
+    );
+
     setReminderCopied(false);
-    setIsReminderModalOpen(true);
+
+    setIsReminderModalOpen(
+      true
+    );
   }
 
   function openReminderForEditingAppointment() {
-    if (editingAppointmentId === null) return;
+    if (
+      editingAppointmentId ===
+      null
+    ) {
+      return;
+    }
 
-    const appointment = appointments.find(
-      (item) => item.id === editingAppointmentId
+    const appointment =
+      appointments.find(
+        (item) =>
+          item.id ===
+          editingAppointmentId
+      );
+
+    if (!appointment) {
+      return;
+    }
+
+    setIsAppointmentModalOpen(
+      false
     );
 
-    if (!appointment) return;
-
-    setIsAppointmentModalOpen(false);
     openReminder(appointment);
   }
 
   async function copyReminder() {
     try {
-      await navigator.clipboard.writeText(reminderText);
+      await navigator.clipboard.writeText(
+        reminderText
+      );
+
       setReminderCopied(true);
     } catch {
-      window.alert(reminderText);
+      window.alert(
+        reminderText
+      );
     }
   }
 
-  function openExternal(url: string) {
-    if (!url) return;
+  function openExternal(
+    url: string
+  ) {
+    if (!url) {
+      return;
+    }
 
-    window.open(url, "_blank", "noopener,noreferrer");
+    window.open(
+      url,
+      "_blank",
+      "noopener,noreferrer"
+    );
   }
 
   if (!authChecked) {
     return (
       <main
         className="flex h-dvh items-center justify-center"
-        style={APP_BACKGROUND_STYLE}
+        style={
+          APP_BACKGROUND_STYLE
+        }
       >
-        <div className="rounded-3xl bg-rose-50/90 px-8 py-7 text-center shadow-2xl backdrop-blur-md">
+        <div className="rounded-3xl bg-rose-50/80 px-8 py-7 text-center shadow-2xl backdrop-blur-md">
           <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-rose-200 border-t-black" />
 
           <p className="mt-4 font-semibold">
@@ -1924,9 +2670,11 @@ export default function Home() {
     return (
       <main
         className="flex h-dvh items-center justify-center px-5"
-        style={APP_BACKGROUND_STYLE}
+        style={
+          APP_BACKGROUND_STYLE
+        }
       >
-        <div className="w-full max-w-sm rounded-3xl bg-rose-50/88 p-6 shadow-2xl backdrop-blur-md">
+        <div className="w-full max-w-sm rounded-3xl bg-rose-50/75 p-6 shadow-2xl backdrop-blur-md">
           <div className="text-center">
             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-black text-2xl text-white">
               ✦
@@ -1942,7 +2690,9 @@ export default function Home() {
           </div>
 
           <form
-            onSubmit={handleLogin}
+            onSubmit={
+              handleLogin
+            }
             className="mt-7 space-y-4"
           >
             <div>
@@ -1954,10 +2704,19 @@ export default function Home() {
                 type="email"
                 autoComplete="email"
                 required
-                value={loginEmail}
-                onChange={(event) => {
-                  setLoginEmail(event.target.value);
-                  setLoginError("");
+                value={
+                  loginEmail
+                }
+                onChange={(
+                  event
+                ) => {
+                  setLoginEmail(
+                    event.target.value
+                  );
+
+                  setLoginError(
+                    ""
+                  );
                 }}
                 placeholder="name@example.com"
                 className="w-full rounded-xl border border-rose-200 bg-white/90 px-4 py-3 text-black caret-black outline-none placeholder:text-neutral-400 focus:border-rose-400"
@@ -1973,10 +2732,19 @@ export default function Home() {
                 type="password"
                 autoComplete="current-password"
                 required
-                value={loginPassword}
-                onChange={(event) => {
-                  setLoginPassword(event.target.value);
-                  setLoginError("");
+                value={
+                  loginPassword
+                }
+                onChange={(
+                  event
+                ) => {
+                  setLoginPassword(
+                    event.target.value
+                  );
+
+                  setLoginError(
+                    ""
+                  );
                 }}
                 placeholder="••••••••"
                 className="w-full rounded-xl border border-rose-200 bg-white/90 px-4 py-3 text-black caret-black outline-none placeholder:text-neutral-400 focus:border-rose-400"
@@ -1991,10 +2759,14 @@ export default function Home() {
 
             <button
               type="submit"
-              disabled={loginLoading}
+              disabled={
+                loginLoading
+              }
               className="w-full rounded-xl bg-black px-4 py-4 font-medium text-white disabled:opacity-50"
             >
-              {loginLoading ? "Вхід..." : "Увійти / Войти"}
+              {loginLoading
+                ? "Вхід..."
+                : "Увійти / Войти"}
             </button>
           </form>
         </div>
@@ -2006,9 +2778,11 @@ export default function Home() {
     return (
       <main
         className="flex h-dvh items-center justify-center"
-        style={APP_BACKGROUND_STYLE}
+        style={
+          APP_BACKGROUND_STYLE
+        }
       >
-        <div className="rounded-2xl bg-rose-50/90 px-6 py-5 text-center shadow-xl backdrop-blur-md">
+        <div className="rounded-2xl bg-rose-50/80 px-6 py-5 text-center shadow-xl backdrop-blur-md">
           <div className="mx-auto h-7 w-7 animate-spin rounded-full border-2 border-rose-200 border-t-black" />
 
           <p className="mt-3 text-sm font-medium">
@@ -2016,7 +2790,8 @@ export default function Home() {
           </p>
 
           <p className="mt-1 text-xs text-neutral-500">
-            {language === "uk"
+            {language ===
+            "uk"
               ? "Завантаження даних..."
               : "Загрузка данных..."}
           </p>
@@ -2028,63 +2803,100 @@ export default function Home() {
   return (
     <main
       className="h-dvh overflow-hidden text-neutral-900"
-      style={APP_BACKGROUND_STYLE}
+      style={
+        APP_BACKGROUND_STYLE
+      }
     >
-      <div className="mx-auto flex h-dvh max-w-md flex-col overflow-hidden bg-rose-50/80 shadow-2xl backdrop-blur-[2px]">
+      <div className="mx-auto flex h-dvh max-w-md flex-col overflow-hidden bg-rose-50/45 shadow-2xl backdrop-blur-[1px]">
 
-        {activeTab === "calendar" && (
+        {activeTab ===
+          "calendar" && (
           <div className="flex min-h-0 flex-1 flex-col">
-            <header className="z-20 shrink-0 border-b border-rose-200 bg-rose-50/85 backdrop-blur-md">
+            <header className="z-20 shrink-0 border-b border-rose-200 bg-rose-50/70 backdrop-blur-md">
               <div className="px-5 pb-3 pt-4">
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="text-sm capitalize text-neutral-500">
-                      {calendarView === "day"
+                      {calendarView ===
+                      "day"
                         ? selectedDateIsToday
                           ? t.today
-                          : formatWeekday(selectedDate, language)
+                          : formatWeekday(
+                              selectedDate,
+                              language
+                            )
                         : t.calendar}
                     </p>
 
                     <h1 className="text-2xl font-semibold capitalize">
-                      {calendarView === "day"
-                        ? formatDateTitle(selectedDate, language)
-                        : formatMonthTitle(visibleMonth, language)}
+                      {calendarView ===
+                      "day"
+                        ? formatDateTitle(
+                            selectedDate,
+                            language
+                          )
+                        : formatMonthTitle(
+                            visibleMonth,
+                            language
+                          )}
                     </h1>
 
                     <p className="mt-1 text-xs text-neutral-400">
-                      {calendarView === "day"
+                      {calendarView ===
+                      "day"
                         ? `${t.records}: ${selectedDayAppointments.length}`
                         : `${t.totalRecords}: ${
-                            appointments.filter((appointment) => {
-                              const [year, month] =
-                                appointment.date
-                                  .split("-")
-                                  .map(Number);
+                            appointments.filter(
+                              (
+                                appointment
+                              ) => {
+                                const [
+                                  year,
+                                  month,
+                                ] =
+                                  appointment.date
+                                    .split(
+                                      "-"
+                                    )
+                                    .map(
+                                      Number
+                                    );
 
-                              return (
-                                year === visibleMonth.getFullYear() &&
-                                month - 1 === visibleMonth.getMonth()
-                              );
-                            }).length
+                                return (
+                                  year ===
+                                    visibleMonth.getFullYear() &&
+                                  month -
+                                    1 ===
+                                    visibleMonth.getMonth()
+                                );
+                              }
+                            )
+                              .length
                           }`}
                     </p>
                   </div>
 
                   <button
-                    onClick={() => openNewAppointment()}
+                    onClick={() =>
+                      openNewAppointment()
+                    }
                     className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-black text-2xl text-white shadow-sm"
                   >
                     +
                   </button>
                 </div>
 
-                <div className="mt-4 grid grid-cols-2 rounded-xl bg-rose-100/80 p-1">
+                <div className="mt-4 grid grid-cols-2 rounded-xl bg-rose-100/70 p-1">
                   <button
-                    onClick={() => setCalendarView("day")}
+                    onClick={() =>
+                      setCalendarView(
+                        "day"
+                      )
+                    }
                     className={`rounded-lg px-3 py-2 text-sm ${
-                      calendarView === "day"
-                        ? "bg-white/90 font-medium shadow-sm"
+                      calendarView ===
+                      "day"
+                        ? "bg-white/85 font-medium shadow-sm"
                         : "text-neutral-500"
                     }`}
                   >
@@ -2101,11 +2913,14 @@ export default function Home() {
                         )
                       );
 
-                      setCalendarView("month");
+                      setCalendarView(
+                        "month"
+                      );
                     }}
                     className={`rounded-lg px-3 py-2 text-sm ${
-                      calendarView === "month"
-                        ? "bg-white/90 font-medium shadow-sm"
+                      calendarView ===
+                      "month"
+                        ? "bg-white/85 font-medium shadow-sm"
                         : "text-neutral-500"
                     }`}
                   >
@@ -2117,9 +2932,14 @@ export default function Home() {
               <div className="grid grid-cols-[48px_1fr_48px] items-center border-t border-rose-100 px-3 py-2">
                 <button
                   onClick={() =>
-                    calendarView === "day"
-                      ? changeDay(-1)
-                      : changeMonth(-1)
+                    calendarView ===
+                    "day"
+                      ? changeDay(
+                          -1
+                        )
+                      : changeMonth(
+                          -1
+                        )
                   }
                   className="flex h-10 items-center justify-center rounded-xl text-2xl hover:bg-rose-100"
                 >
@@ -2127,10 +2947,13 @@ export default function Home() {
                 </button>
 
                 <button
-                  onClick={goToToday}
-                  className="mx-auto rounded-xl bg-rose-100/80 px-4 py-2 text-sm font-medium"
+                  onClick={
+                    goToToday
+                  }
+                  className="mx-auto rounded-xl bg-rose-100/70 px-4 py-2 text-sm font-medium"
                 >
-                  {calendarView === "day"
+                  {calendarView ===
+                  "day"
                     ? selectedDateIsToday
                       ? t.today
                       : t.returnToday
@@ -2141,9 +2964,14 @@ export default function Home() {
 
                 <button
                   onClick={() =>
-                    calendarView === "day"
-                      ? changeDay(1)
-                      : changeMonth(1)
+                    calendarView ===
+                    "day"
+                      ? changeDay(
+                          1
+                        )
+                      : changeMonth(
+                          1
+                        )
                   }
                   className="flex h-10 items-center justify-center rounded-xl text-2xl hover:bg-rose-100"
                 >
@@ -2152,16 +2980,19 @@ export default function Home() {
               </div>
             </header>
 
-            {calendarView === "day" && (
+            {calendarView ===
+              "day" && (
               <>
                 {!selectedDateIsWorkDay && (
-                  <div className="shrink-0 border-b border-orange-200 bg-orange-50/90 px-4 py-3">
+                  <div className="shrink-0 border-b border-orange-200 bg-orange-50/85 px-4 py-3">
                     <p className="text-sm font-medium text-orange-800">
                       {t.dayOff}
                     </p>
 
                     <p className="mt-1 text-xs text-orange-600">
-                      {t.dayOffHint}
+                      {
+                        t.dayOffHint
+                      }
                     </p>
                   </div>
                 )}
@@ -2174,271 +3005,305 @@ export default function Home() {
                     }}
                   >
                     <div className="relative border-r border-rose-200/80">
-                      {hours.map((hour) => (
-                        <div
-                          key={hour}
-                          className="absolute left-0 w-full px-3 text-sm text-neutral-500"
-                          style={{
-                            top: `${
-                              (hour - workSettings.startHour) *
-                              HOUR_HEIGHT
-                            }px`,
-                          }}
-                        >
-                          {String(hour).padStart(2, "0")}:00
-                        </div>
-                      ))}
+                      {hours.map(
+                        (hour) => (
+                          <div
+                            key={
+                              hour
+                            }
+                            className="absolute left-0 w-full px-3 text-sm text-neutral-500"
+                            style={{
+                              top: `${
+                                (hour -
+                                  workSettings.startHour) *
+                                HOUR_HEIGHT
+                              }px`,
+                            }}
+                          >
+                            {String(
+                              hour
+                            ).padStart(
+                              2,
+                              "0"
+                            )}
+                            :00
+                          </div>
+                        )
+                      )}
                     </div>
 
                     <div
                       className="relative cursor-pointer"
-                      onClick={handleCalendarClick}
+                      onClick={
+                        handleCalendarClick
+                      }
                     >
-                      {hours.map((hour) => (
-                        <div
-                          key={hour}
-                          className="absolute left-0 right-0 border-t border-rose-200/80"
-                          style={{
-                            top: `${
-                              (hour - workSettings.startHour) *
-                              HOUR_HEIGHT
-                            }px`,
-                          }}
-                        />
-                      ))}
-
-                      {selectedDayAppointments.map((appointment) => {
-                        const client =
-                          getClientForAppointment(appointment);
-
-                        const top = getAppointmentTop(
-                          appointment.time,
-                          workSettings.startHour
-                        );
-
-                        const height = getAppointmentHeight(
-                          appointment.duration
-                        );
-
-                        if (top < 0 || top > calendarHeight) {
-                          return null;
-                        }
-
-                        return (
-                          <button
-                            key={appointment.id}
-                            onClick={(event) => {
-                              event.stopPropagation();
-
-                              openEditAppointment(appointment);
-                            }}
-                            className={`absolute left-2 right-2 z-10 overflow-hidden rounded-2xl border p-3 text-left shadow-md backdrop-blur-sm ${getAppointmentCardClass(
-                              appointment.status
-                            )}`}
+                      {hours.map(
+                        (hour) => (
+                          <div
+                            key={
+                              hour
+                            }
+                            className="absolute left-0 right-0 border-t border-rose-200/80"
                             style={{
-                              top: `${top}px`,
-                              height: `${height}px`,
+                              top: `${
+                                (hour -
+                                  workSettings.startHour) *
+                                HOUR_HEIGHT
+                              }px`,
                             }}
-                          >
-                            <div className="flex items-center justify-between gap-2">
-                              <p className="text-sm font-medium">
-                                {appointment.time}
-                              </p>
+                          />
+                        )
+                      )}
 
-                              <span
-                                className={`rounded-full border px-2 py-0.5 text-[10px] font-medium ${getStatusBadgeClass(
-                                  appointment.status
-                                )}`}
-                              >
-                                {getStatusLabel(appointment.status)}
-                              </span>
-                            </div>
+                      {selectedDayAppointments.map(
+                        (
+                          appointment
+                        ) => {
+                          const client =
+                            getClientForAppointment(
+                              appointment
+                            );
 
-                            <div className="mt-1 flex items-center justify-between gap-2">
-                              <p className="truncate font-semibold">
-                                {appointment.name}
-                              </p>
+                          const top =
+                            getAppointmentTop(
+                              appointment.time,
+                              workSettings.startHour
+                            );
 
-                              {client?.phone && (
-                                <span className="shrink-0 text-xs text-neutral-700">
-                                  {client.phone}
-                                </span>
-                              )}
-                            </div>
+                          const height =
+                            getAppointmentHeight(
+                              appointment.duration
+                            );
 
-                            {height >= 70 && (
-                              <p className="mt-1 truncate text-sm text-neutral-600">
-                                {appointment.service}
-                              </p>
-                            )}
+                          if (
+                            top <
+                              0 ||
+                            top >
+                              calendarHeight
+                          ) {
+                            return null;
+                          }
 
-                            {height >= 90 && (
-                              <div className="mt-1 flex justify-between text-xs text-neutral-500">
-                                <span>
-                                  {appointment.duration} {t.minutes}
-                                </span>
+                          return (
+                            <button
+                              key={
+                                appointment.id
+                              }
+                              onClick={(
+                                event
+                              ) => {
+                                event.stopPropagation();
 
-                                <span>
-                                  {appointment.price} грн
+                                openEditAppointment(
+                                  appointment
+                                );
+                              }}
+                              className={`absolute left-2 right-2 z-10 overflow-hidden rounded-2xl border p-3 text-left shadow-md backdrop-blur-sm ${getAppointmentCardClass(
+                                appointment.status
+                              )}`}
+                              style={{
+                                top: `${top}px`,
+                                height: `${height}px`,
+                              }}
+                            >
+                              <div className="flex items-center justify-between gap-2">
+                                <p className="text-sm font-medium">
+                                  {
+                                    appointment.time
+                                  }
+                                </p>
+
+                                <span
+                                  className={`rounded-full border px-2 py-0.5 text-[10px] font-medium ${getStatusBadgeClass(
+                                    appointment.status
+                                  )}`}
+                                >
+                                  {getStatusLabel(
+                                    appointment.status
+                                  )}
                                 </span>
                               </div>
-                            )}
-                          </button>
-                        );
-                      })}
+
+                              <div className="mt-1 flex items-center justify-between gap-2">
+                                <p className="truncate font-semibold">
+                                  {
+                                    appointment.name
+                                  }
+                                </p>
+
+                                {client?.phone && (
+                                  <span className="shrink-0 text-xs text-neutral-700">
+                                    {
+                                      client.phone
+                                    }
+                                  </span>
+                                )}
+                              </div>
+
+                              {height >=
+                                70 && (
+                                <p className="mt-1 truncate text-sm text-neutral-600">
+                                  {
+                                    appointment.service
+                                  }
+                                </p>
+                              )}
+
+                              {height >=
+                                90 && (
+                                <div className="mt-1 flex justify-between text-xs text-neutral-500">
+                                  <span>
+                                    {
+                                      appointment.duration
+                                    }{" "}
+                                    {
+                                      t.minutes
+                                    }
+                                  </span>
+
+                                  <span>
+                                    {
+                                      appointment.price
+                                    }{" "}
+                                    грн
+                                  </span>
+                                </div>
+                              )}
+                            </button>
+                          );
+                        }
+                      )}
                     </div>
                   </div>
                 </section>
               </>
             )}
 
-            {calendarView === "month" && (
+            {calendarView ===
+              "month" && (
               <section className="min-h-0 flex-1 overflow-y-auto p-4">
-                <div className="rounded-2xl border border-rose-200 bg-white/70 p-3 shadow-sm backdrop-blur-sm">
+                <div className="rounded-2xl border border-rose-200 bg-white/65 p-3 shadow-sm backdrop-blur-sm">
                   <div className="grid grid-cols-7 gap-1 pb-2">
-                    {WEEKDAYS.map((weekday) => (
-                      <div
-                        key={weekday.value}
-                        className="py-2 text-center text-xs text-neutral-400"
-                      >
-                        {weekday[language]}
-                      </div>
-                    ))}
+                    {WEEKDAYS.map(
+                      (
+                        weekday
+                      ) => (
+                        <div
+                          key={
+                            weekday.value
+                          }
+                          className="py-2 text-center text-xs text-neutral-400"
+                        >
+                          {
+                            weekday[
+                              language
+                            ]
+                          }
+                        </div>
+                      )
+                    )}
                   </div>
 
                   <div className="grid grid-cols-7 gap-1">
-                    {monthDays.map((item) => {
-                      const dateKey = formatDateKey(item.date);
-
-                      const dayAppointments =
-                        getAppointmentsForDate(item.date);
-
-                      const isToday = dateKey === todayKey;
-                      const isSelected = dateKey === selectedDateKey;
-
-                      const isWorkDay =
-                        workSettings.workDays.includes(
-                          item.date.getDay()
-                        );
-
-                      return (
-                        <button
-                          key={dateKey}
-                          onClick={() => selectMonthDate(item.date)}
-                          className={`relative flex min-h-[64px] flex-col items-center rounded-xl px-1 py-2 ${
-                            isSelected
-                              ? "bg-black text-white"
-                              : isToday
-                              ? "border border-rose-400 bg-rose-100"
-                              : !isWorkDay && item.isCurrentMonth
-                              ? "bg-rose-50/80 text-neutral-400"
-                              : item.isCurrentMonth
-                              ? "hover:bg-rose-50"
-                              : "text-neutral-300"
-                          }`}
-                        >
-                          <span className="text-sm">
-                            {item.date.getDate()}
-                          </span>
-
-                          {!isWorkDay &&
-                            item.isCurrentMonth && (
-                              <span className="mt-1 text-[9px] opacity-60">
-                                {t.dayOffShort}
-                              </span>
-                            )}
-
-                          {dayAppointments.length > 0 && (
-                            <span
-                              className={`mt-1 rounded-full px-1.5 text-[10px] ${
-                                isSelected
-                                  ? "bg-white text-black"
-                                  : "bg-black text-white"
-                              }`}
-                            >
-                              {dayAppointments.length}
-                            </span>
-                          )}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                <div className="mt-4 space-y-2">
-                  {appointments
-                    .filter((appointment) => {
-                      const [year, month] =
-                        appointment.date
-                          .split("-")
-                          .map(Number);
-
-                      return (
-                        year === visibleMonth.getFullYear() &&
-                        month - 1 === visibleMonth.getMonth()
-                      );
-                    })
-                    .sort((a, b) =>
-                      a.date === b.date
-                        ? a.time.localeCompare(b.time)
-                        : a.date.localeCompare(b.date)
-                    )
-                    .map((appointment) => (
-                      <button
-                        key={appointment.id}
-                        onClick={() => {
-                          setSelectedDate(
-                            new Date(
-                              `${appointment.date}T12:00:00`
-                            )
+                    {monthDays.map(
+                      (item) => {
+                        const dateKey =
+                          formatDateKey(
+                            item.date
                           );
 
-                          setCalendarView("day");
-                        }}
-                        className="w-full rounded-xl border border-rose-200 bg-white/70 p-3 text-left shadow-sm backdrop-blur-sm"
-                      >
-                        <div className="flex justify-between gap-3">
-                          <div>
-                            <p className="font-medium">
-                              {formatFullDate(
-                                appointment.date,
-                                language
-                              )}
-                            </p>
+                        const dayAppointments =
+                          getAppointmentsForDate(
+                            item.date
+                          );
 
-                            <p className="mt-1 text-sm text-neutral-500">
-                              {appointment.time} ·{" "}
-                              {appointment.name}
-                            </p>
+                        const isToday =
+                          dateKey ===
+                          todayKey;
 
-                            <p className="mt-1 text-xs text-neutral-400">
-                              {appointment.service}
-                            </p>
-                          </div>
+                        const isSelected =
+                          dateKey ===
+                          selectedDateKey;
 
-                          <span
-                            className={`h-fit rounded-full border px-2 py-1 text-[10px] ${getStatusBadgeClass(
-                              appointment.status
-                            )}`}
+                        const isWorkDay =
+                          workSettings.workDays.includes(
+                            item.date.getDay()
+                          );
+
+                        return (
+                          <button
+                            key={
+                              dateKey
+                            }
+                            onClick={() =>
+                              selectMonthDate(
+                                item.date
+                              )
+                            }
+                            className={`relative flex min-h-[64px] flex-col items-center rounded-xl px-1 py-2 ${
+                              isSelected
+                                ? "bg-black text-white"
+                                : isToday
+                                ? "border border-rose-400 bg-rose-100"
+                                : !isWorkDay &&
+                                  item.isCurrentMonth
+                                ? "bg-rose-50/80 text-neutral-400"
+                                : item.isCurrentMonth
+                                ? "hover:bg-rose-50"
+                                : "text-neutral-300"
+                            }`}
                           >
-                            {getStatusLabel(appointment.status)}
-                          </span>
-                        </div>
-                      </button>
-                    ))}
+                            <span className="text-sm">
+                              {
+                                item.date.getDate()
+                              }
+                            </span>
+
+                            {!isWorkDay &&
+                              item.isCurrentMonth && (
+                                <span className="mt-1 text-[9px] opacity-60">
+                                  {
+                                    t.dayOffShort
+                                  }
+                                </span>
+                              )}
+
+                            {dayAppointments.length >
+                              0 && (
+                              <span
+                                className={`mt-1 rounded-full px-1.5 text-[10px] ${
+                                  isSelected
+                                    ? "bg-white text-black"
+                                    : "bg-black text-white"
+                                }`}
+                              >
+                                {
+                                  dayAppointments.length
+                                }
+                              </span>
+                            )}
+                          </button>
+                        );
+                      }
+                    )}
+                  </div>
                 </div>
               </section>
             )}
           </div>
         )}
 
-        {activeTab === "clients" && (
+        {activeTab ===
+          "clients" && (
           <div className="flex min-h-0 flex-1 flex-col">
-            <header className="shrink-0 border-b border-rose-200 bg-rose-50/85 px-5 py-4 backdrop-blur-md">
+            <header className="shrink-0 border-b border-rose-200 bg-rose-50/70 px-5 py-4 backdrop-blur-md">
               <div className="flex justify-between">
                 <div>
                   <p className="text-sm text-neutral-500">
-                    {t.clientBase}
+                    {
+                      t.clientBase
+                    }
                   </p>
 
                   <h1 className="text-2xl font-semibold">
@@ -2446,12 +3311,17 @@ export default function Home() {
                   </h1>
 
                   <p className="mt-1 text-xs text-neutral-400">
-                    {t.total}: {clients.length}
+                    {t.total}:{" "}
+                    {
+                      clients.length
+                    }
                   </p>
                 </div>
 
                 <button
-                  onClick={openNewClient}
+                  onClick={
+                    openNewClient
+                  }
                   className="flex h-11 w-11 items-center justify-center rounded-full bg-black text-2xl text-white"
                 >
                   +
@@ -2459,79 +3329,111 @@ export default function Home() {
               </div>
 
               <input
-                value={clientSearch}
-                onChange={(event) =>
-                  setClientSearch(event.target.value)
+                value={
+                  clientSearch
                 }
-                placeholder={t.searchClient}
-                className="mt-4 w-full rounded-xl border border-rose-200 bg-white/90 px-4 py-3 outline-none focus:border-rose-400"
+                onChange={(
+                  event
+                ) =>
+                  setClientSearch(
+                    event.target.value
+                  )
+                }
+                placeholder={
+                  t.searchClient
+                }
+                className="mt-4 w-full rounded-xl border border-rose-200 bg-white/85 px-4 py-3 outline-none focus:border-rose-400"
               />
             </header>
 
             <section className="min-h-0 flex-1 space-y-3 overflow-y-auto p-4">
-              {clients.length === 0 && (
-                <div className="rounded-2xl border border-dashed border-rose-300 bg-white/60 p-8 text-center backdrop-blur-sm">
+              {clients.length ===
+                0 && (
+                <div className="rounded-2xl border border-dashed border-rose-300 bg-white/55 p-8 text-center backdrop-blur-sm">
                   <p className="font-medium">
-                    {t.noClients}
+                    {
+                      t.noClients
+                    }
                   </p>
 
                   <p className="mt-2 text-sm text-neutral-500">
-                    {t.addFirstClient}
+                    {
+                      t.addFirstClient
+                    }
                   </p>
                 </div>
               )}
 
-              {clients.length > 0 &&
-                filteredClients.length === 0 && (
-                  <div className="rounded-2xl border border-dashed border-rose-300 bg-white/60 p-8 text-center">
-                    {t.nothingFound}
+              {clients.length >
+                0 &&
+                filteredClients.length ===
+                  0 && (
+                  <div className="rounded-2xl border border-dashed border-rose-300 bg-white/55 p-8 text-center">
+                    {
+                      t.nothingFound
+                    }
                   </div>
                 )}
 
-              {filteredClients.map((client) => (
-                <button
-                  key={client.id}
-                  onClick={() =>
-                    openClientDetails(client.id)
-                  }
-                  className="w-full rounded-2xl border border-rose-300 bg-white/70 p-4 text-left shadow-md backdrop-blur-sm"
-                >
-                  <div className="flex justify-between gap-4">
-                    <div>
-                      <h2 className="text-lg font-semibold">
-                        {client.name}
-                      </h2>
-
-                      {client.phone && (
-                        <p className="mt-2 text-sm">
-                          {client.phone}
-                        </p>
-                      )}
-
-                      {client.social && (
-                        <p className="mt-1 text-sm text-neutral-500">
-                          {client.social}
-                        </p>
-                      )}
-                    </div>
-
-                    <span className="h-fit rounded-full bg-rose-100 px-3 py-1 text-xs">
-                      {getClientAppointmentsCount(
+              {filteredClients.map(
+                (client) => (
+                  <button
+                    key={
+                      client.id
+                    }
+                    onClick={() =>
+                      openClientDetails(
                         client.id
-                      )}
-                    </span>
-                  </div>
-                </button>
-              ))}
+                      )
+                    }
+                    className="w-full rounded-2xl border border-rose-300 bg-white/65 p-4 text-left shadow-md backdrop-blur-sm"
+                  >
+                    <div className="flex justify-between gap-4">
+                      <div>
+                        <h2 className="text-lg font-semibold">
+                          {
+                            client.name
+                          }
+                        </h2>
+
+                        {client.phone && (
+                          <p className="mt-2 text-sm">
+                            {
+                              client.phone
+                            }
+                          </p>
+                        )}
+
+                        {client.social && (
+                          <p className="mt-1 text-sm text-neutral-500">
+                            {
+                              client.social
+                            }
+                          </p>
+                        )}
+                      </div>
+
+                      <span className="h-fit rounded-full bg-rose-100 px-3 py-1 text-xs">
+                        {getClientAppointmentsCount(
+                          client.id
+                        )}
+                      </span>
+                    </div>
+                  </button>
+                )
+              )}
             </section>
           </div>
         )}
 
-        {activeTab === "analytics" && (
+        {activeTab ===
+          "analytics" && (
           <div className="flex min-h-0 flex-1 flex-col">
-            <header className="shrink-0 border-b border-rose-200 bg-rose-50/85 px-5 py-4 backdrop-blur-md">
+            <header className="shrink-0 border-b border-rose-200 bg-rose-50/70 px-5 py-4 backdrop-blur-md">
               <p className="text-sm text-neutral-500">
-                {t.financeRecords}
+                {
+                  t.financeRecords
+                }
               </p>
 
               <h1 className="text-2xl font-semibold">
@@ -2539,88 +3441,101 @@ export default function Home() {
               </h1>
 
               <p className="mt-1 text-xs text-neutral-400">
-                {t.completedOnlyIncome}
+                {
+                  t.completedOnlyIncome
+                }
               </p>
             </header>
 
             <section className="min-h-0 flex-1 overflow-y-auto p-4">
               <div className="grid grid-cols-2 gap-3">
-                <div className="rounded-2xl border border-rose-200 bg-white/70 p-4 backdrop-blur-sm">
+                <div className="rounded-2xl border border-rose-200 bg-white/65 p-4 backdrop-blur-sm">
                   <p className="text-xs text-neutral-500">
-                    {t.todayIncome}
+                    {
+                      t.todayIncome
+                    }
                   </p>
 
                   <p className="mt-2 text-2xl font-semibold">
-                    {todayIncome} грн
-                  </p>
-
-                  <p className="mt-1 text-xs text-neutral-400">
-                    {todayCompletedAppointments.length}{" "}
-                    {t.completed}
+                    {
+                      todayIncome
+                    }{" "}
+                    грн
                   </p>
                 </div>
 
-                <div className="rounded-2xl border border-rose-200 bg-white/70 p-4 backdrop-blur-sm">
+                <div className="rounded-2xl border border-rose-200 bg-white/65 p-4 backdrop-blur-sm">
                   <p className="text-xs text-neutral-500">
-                    {t.sevenDays}
+                    {
+                      t.sevenDays
+                    }
                   </p>
 
                   <p className="mt-2 text-2xl font-semibold">
-                    {weekIncome} грн
-                  </p>
-
-                  <p className="mt-1 text-xs text-neutral-400">
-                    {weekCompletedAppointments.length}{" "}
-                    {t.completed}
+                    {
+                      weekIncome
+                    }{" "}
+                    грн
                   </p>
                 </div>
               </div>
 
-              <div className="mt-3 rounded-2xl border border-rose-300 bg-rose-100/70 p-5 backdrop-blur-sm">
+              <div className="mt-3 rounded-2xl border border-rose-300 bg-rose-100/65 p-5 backdrop-blur-sm">
                 <p className="text-sm text-neutral-500">
-                  {t.currentMonthIncome}
+                  {
+                    t.currentMonthIncome
+                  }
                 </p>
 
                 <p className="mt-2 text-3xl font-semibold">
-                  {monthIncome} грн
-                </p>
-
-                <p className="mt-2 text-sm text-neutral-500">
                   {
-                    currentMonthCompletedAppointments.length
+                    monthIncome
                   }{" "}
-                  {t.completed}
+                  грн
                 </p>
               </div>
 
               <div className="mt-3 grid grid-cols-2 gap-3">
-                <div className="rounded-2xl bg-white/70 p-4 backdrop-blur-sm">
+                <div className="rounded-2xl bg-white/65 p-4 backdrop-blur-sm">
                   <p className="text-xs text-neutral-500">
-                    {t.averageCheck}
+                    {
+                      t.averageCheck
+                    }
                   </p>
 
                   <p className="mt-2 text-xl font-semibold">
-                    {averageCheck} грн
+                    {
+                      averageCheck
+                    }{" "}
+                    грн
                   </p>
                 </div>
 
                 <div className="rounded-2xl bg-sky-50/85 p-4">
                   <p className="text-xs text-sky-700">
-                    {t.scheduled}
+                    {
+                      t.scheduled
+                    }
                   </p>
 
                   <p className="mt-2 text-xl font-semibold">
-                    {monthScheduledCount}
+                    {
+                      monthScheduledCount
+                    }
                   </p>
                 </div>
 
                 <div className="rounded-2xl bg-red-50/85 p-4">
                   <p className="text-xs text-red-600">
-                    {t.cancelled}
+                    {
+                      t.cancelled
+                    }
                   </p>
 
                   <p className="mt-2 text-xl font-semibold">
-                    {monthCancelledCount}
+                    {
+                      monthCancelledCount
+                    }
                   </p>
                 </div>
 
@@ -2630,46 +3545,67 @@ export default function Home() {
                   </p>
 
                   <p className="mt-2 text-xl font-semibold">
-                    {monthNoShowCount}
+                    {
+                      monthNoShowCount
+                    }
                   </p>
                 </div>
               </div>
 
               <div className="mt-6">
                 <h2 className="text-lg font-semibold">
-                  {t.topServices}
+                  {
+                    t.topServices
+                  }
                 </h2>
 
                 <div className="mt-3 space-y-2">
-                  {serviceStats.length === 0 && (
-                    <div className="rounded-2xl border border-dashed border-rose-300 bg-white/60 p-6 text-center text-sm text-neutral-500">
-                      {t.noCompleted}
+                  {serviceStats.length ===
+                    0 && (
+                    <div className="rounded-2xl border border-dashed border-rose-300 bg-white/55 p-6 text-center text-sm text-neutral-500">
+                      {
+                        t.noCompleted
+                      }
                     </div>
                   )}
 
                   {serviceStats.map(
-                    (service, index) => (
+                    (
+                      service,
+                      index
+                    ) => (
                       <div
-                        key={service.name}
-                        className="rounded-2xl border border-rose-200 bg-white/70 p-4 backdrop-blur-sm"
+                        key={
+                          service.name
+                        }
+                        className="rounded-2xl border border-rose-200 bg-white/65 p-4 backdrop-blur-sm"
                       >
                         <div className="flex justify-between">
                           <div>
                             <p className="text-xs text-neutral-400">
-                              #{index + 1}
+                              #
+                              {index +
+                                1}
                             </p>
 
                             <p className="font-semibold">
-                              {service.name}
+                              {
+                                service.name
+                              }
                             </p>
 
                             <p className="mt-1 text-sm text-neutral-500">
-                              {service.count}
+                              {
+                                service.count
+                              }
                             </p>
                           </div>
 
                           <p className="font-semibold">
-                            {service.income} грн
+                            {
+                              service.income
+                            }{" "}
+                            грн
                           </p>
                         </div>
                       </div>
@@ -2681,9 +3617,10 @@ export default function Home() {
           </div>
         )}
 
-        {activeTab === "settings" && (
+        {activeTab ===
+          "settings" && (
           <div className="flex min-h-0 flex-1 flex-col">
-            <header className="shrink-0 border-b border-rose-200 bg-rose-50/85 px-5 py-4 backdrop-blur-md">
+            <header className="shrink-0 border-b border-rose-200 bg-rose-50/70 px-5 py-4 backdrop-blur-md">
               <p className="text-sm text-neutral-500">
                 {t.app}
               </p>
@@ -2699,17 +3636,24 @@ export default function Home() {
                   {t.account}
                 </h2>
 
-                <div className="mt-3 rounded-2xl border border-rose-200 bg-white/70 p-4 backdrop-blur-sm">
+                <div className="mt-3 rounded-2xl border border-rose-200 bg-white/65 p-4 backdrop-blur-sm">
                   <p className="text-xs text-neutral-500">
-                    {t.signedInAs}
+                    {
+                      t.signedInAs
+                    }
                   </p>
 
                   <p className="mt-1 break-all text-sm font-medium">
-                    {session.user.email}
+                    {
+                      session.user
+                        .email
+                    }
                   </p>
 
                   <button
-                    onClick={handleLogout}
+                    onClick={
+                      handleLogout
+                    }
                     className="mt-4 w-full rounded-xl bg-red-50 px-4 py-3 text-sm font-medium text-red-600"
                   >
                     {t.logout}
@@ -2724,27 +3668,33 @@ export default function Home() {
 
                 <div
                   className={`mt-3 flex items-center gap-3 rounded-2xl border p-4 ${
-                    databaseStatus === "connected"
+                    databaseStatus ===
+                    "connected"
                       ? "border-green-200 bg-green-50/85"
-                      : databaseStatus === "error"
+                      : databaseStatus ===
+                        "error"
                       ? "border-red-200 bg-red-50/85"
-                      : "border-rose-200 bg-white/70"
+                      : "border-rose-200 bg-white/65"
                   }`}
                 >
                   <span
                     className={`h-3 w-3 rounded-full ${
-                      databaseStatus === "connected"
+                      databaseStatus ===
+                      "connected"
                         ? "bg-green-500"
-                        : databaseStatus === "error"
+                        : databaseStatus ===
+                          "error"
                         ? "bg-red-500"
                         : "bg-neutral-400"
                     }`}
                   />
 
                   <p className="text-sm font-medium">
-                    {databaseStatus === "connected"
+                    {databaseStatus ===
+                    "connected"
                       ? t.databaseConnected
-                      : databaseStatus === "error"
+                      : databaseStatus ===
+                        "error"
                       ? t.databaseError
                       : t.databaseConnecting}
                   </p>
@@ -2753,18 +3703,27 @@ export default function Home() {
 
               <div className="mt-7">
                 <h2 className="text-lg font-semibold">
-                  {t.language}
+                  {
+                    t.language
+                  }
                 </h2>
 
                 <p className="mt-1 text-sm text-neutral-500">
-                  {t.languageHint}
+                  {
+                    t.languageHint
+                  }
                 </p>
 
-                <div className="mt-4 grid grid-cols-2 gap-2 rounded-2xl border border-rose-200 bg-white/70 p-2">
+                <div className="mt-4 grid grid-cols-2 gap-2 rounded-2xl border border-rose-200 bg-white/65 p-2">
                   <button
-                    onClick={() => setLanguage("ru")}
+                    onClick={() =>
+                      setLanguage(
+                        "ru"
+                      )
+                    }
                     className={`rounded-xl px-4 py-3 text-sm font-medium ${
-                      language === "ru"
+                      language ===
+                      "ru"
                         ? "bg-black text-white"
                         : "bg-rose-50 text-neutral-500"
                     }`}
@@ -2773,9 +3732,14 @@ export default function Home() {
                   </button>
 
                   <button
-                    onClick={() => setLanguage("uk")}
+                    onClick={() =>
+                      setLanguage(
+                        "uk"
+                      )
+                    }
                     className={`rounded-xl px-4 py-3 text-sm font-medium ${
-                      language === "uk"
+                      language ===
+                      "uk"
                         ? "bg-black text-white"
                         : "bg-rose-50 text-neutral-500"
                     }`}
@@ -2787,131 +3751,207 @@ export default function Home() {
 
               <div className="mt-7">
                 <h2 className="text-lg font-semibold">
-                  {t.workSchedule}
+                  {
+                    t.workSchedule
+                  }
                 </h2>
 
                 <p className="mt-1 text-sm text-neutral-500">
-                  {t.workScheduleHint}
+                  {
+                    t.workScheduleHint
+                  }
                 </p>
 
-                <div className="mt-4 rounded-2xl border border-rose-200 bg-white/70 p-4 backdrop-blur-sm">
+                <div className="mt-4 rounded-2xl border border-rose-200 bg-white/65 p-4 backdrop-blur-sm">
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <label className="mb-1 block text-xs text-neutral-500">
-                        {t.startDay}
+                        {
+                          t.startDay
+                        }
                       </label>
 
                       <select
-                        value={workSettings.startHour}
-                        onChange={(event) => {
-                          const hour = Number(
-                            event.target.value
-                          );
+                        value={
+                          workSettings.startHour
+                        }
+                        onChange={(
+                          event
+                        ) => {
+                          const hour =
+                            Number(
+                              event
+                                .target
+                                .value
+                            );
 
-                          setWorkSettings({
-                            ...workSettings,
-                            startHour: hour,
-                            endHour: Math.max(
-                              hour + 1,
-                              workSettings.endHour
-                            ),
-                          });
+                          setWorkSettings(
+                            {
+                              ...workSettings,
+                              startHour:
+                                hour,
+
+                              endHour:
+                                Math.max(
+                                  hour +
+                                    1,
+                                  workSettings.endHour
+                                ),
+                            }
+                          );
                         }}
                         className="w-full rounded-xl border border-rose-200 bg-white px-3 py-3"
                       >
                         {Array.from(
-                          { length: 18 },
-                          (_, index) => index + 6
-                        ).map((hour) => (
-                          <option
-                            key={hour}
-                            value={hour}
-                          >
-                            {String(hour).padStart(
-                              2,
-                              "0"
-                            )}
-                            :00
-                          </option>
-                        ))}
+                          {
+                            length: 18,
+                          },
+                          (
+                            _,
+                            index
+                          ) =>
+                            index +
+                            6
+                        ).map(
+                          (
+                            hour
+                          ) => (
+                            <option
+                              key={
+                                hour
+                              }
+                              value={
+                                hour
+                              }
+                            >
+                              {String(
+                                hour
+                              ).padStart(
+                                2,
+                                "0"
+                              )}
+                              :00
+                            </option>
+                          )
+                        )}
                       </select>
                     </div>
 
                     <div>
                       <label className="mb-1 block text-xs text-neutral-500">
-                        {t.endDay}
+                        {
+                          t.endDay
+                        }
                       </label>
 
                       <select
-                        value={workSettings.endHour}
-                        onChange={(event) =>
-                          setWorkSettings({
-                            ...workSettings,
-                            endHour: Number(
-                              event.target.value
-                            ),
-                          })
+                        value={
+                          workSettings.endHour
+                        }
+                        onChange={(
+                          event
+                        ) =>
+                          setWorkSettings(
+                            {
+                              ...workSettings,
+
+                              endHour:
+                                Number(
+                                  event
+                                    .target
+                                    .value
+                                ),
+                            }
+                          )
                         }
                         className="w-full rounded-xl border border-rose-200 bg-white px-3 py-3"
                       >
                         {Array.from(
-                          { length: 18 },
-                          (_, index) => index + 7
+                          {
+                            length: 18,
+                          },
+                          (
+                            _,
+                            index
+                          ) =>
+                            index +
+                            7
                         )
                           .filter(
-                            (hour) =>
+                            (
+                              hour
+                            ) =>
                               hour >
                               workSettings.startHour
                           )
-                          .map((hour) => (
-                            <option
-                              key={hour}
-                              value={hour}
-                            >
-                              {hour === 24
-                                ? "24:00"
-                                : `${String(
-                                    hour
-                                  ).padStart(
-                                    2,
-                                    "0"
-                                  )}:00`}
-                            </option>
-                          ))}
+                          .map(
+                            (
+                              hour
+                            ) => (
+                              <option
+                                key={
+                                  hour
+                                }
+                                value={
+                                  hour
+                                }
+                              >
+                                {hour ===
+                                24
+                                  ? "24:00"
+                                  : `${String(
+                                      hour
+                                    ).padStart(
+                                      2,
+                                      "0"
+                                    )}:00`}
+                              </option>
+                            )
+                          )}
                       </select>
                     </div>
                   </div>
 
                   <div className="mt-5">
                     <p className="text-xs text-neutral-500">
-                      {t.workDays}
+                      {
+                        t.workDays
+                      }
                     </p>
 
                     <div className="mt-2 grid grid-cols-7 gap-1">
-                      {WEEKDAYS.map((day) => {
-                        const active =
-                          workSettings.workDays.includes(
-                            day.value
-                          );
+                      {WEEKDAYS.map(
+                        (day) => {
+                          const active =
+                            workSettings.workDays.includes(
+                              day.value
+                            );
 
-                        return (
-                          <button
-                            key={day.value}
-                            onClick={() =>
-                              toggleWorkDay(
+                          return (
+                            <button
+                              key={
                                 day.value
-                              )
-                            }
-                            className={`rounded-xl py-3 text-xs font-medium ${
-                              active
-                                ? "bg-black text-white"
-                                : "bg-rose-100 text-neutral-400"
-                            }`}
-                          >
-                            {day[language]}
-                          </button>
-                        );
-                      })}
+                              }
+                              onClick={() =>
+                                toggleWorkDay(
+                                  day.value
+                                )
+                              }
+                              className={`rounded-xl py-3 text-xs font-medium ${
+                                active
+                                  ? "bg-black text-white"
+                                  : "bg-rose-100 text-neutral-400"
+                              }`}
+                            >
+                              {
+                                day[
+                                  language
+                                ]
+                              }
+                            </button>
+                          );
+                        }
+                      )}
                     </div>
                   </div>
                 </div>
@@ -2921,16 +3961,22 @@ export default function Home() {
                 <div className="flex justify-between">
                   <div>
                     <h2 className="text-lg font-semibold">
-                      {t.services}
+                      {
+                        t.services
+                      }
                     </h2>
 
                     <p className="mt-1 text-sm text-neutral-500">
-                      {t.servicePriceDuration}
+                      {
+                        t.servicePriceDuration
+                      }
                     </p>
                   </div>
 
                   <button
-                    onClick={openNewService}
+                    onClick={
+                      openNewService
+                    }
                     className="flex h-10 w-10 items-center justify-center rounded-full bg-black text-xl text-white"
                   >
                     +
@@ -2938,65 +3984,91 @@ export default function Home() {
                 </div>
 
                 <div className="mt-4 space-y-3">
-                  {services.length === 0 && (
-                    <div className="rounded-2xl border border-dashed border-rose-300 bg-white/60 p-6 text-center text-sm text-neutral-500">
-                      {t.addFirstService}
+                  {services.length ===
+                    0 && (
+                    <div className="rounded-2xl border border-dashed border-rose-300 bg-white/55 p-6 text-center text-sm text-neutral-500">
+                      {
+                        t.addFirstService
+                      }
                     </div>
                   )}
 
-                  {services.map((service) => (
-                    <div
-                      key={service.id}
-                      className="rounded-2xl border border-rose-200 bg-white/70 p-4 backdrop-blur-sm"
-                    >
-                      <p className="font-semibold">
-                        {service.name}
-                      </p>
-
-                      <p className="mt-1 text-sm text-neutral-500">
-                        {service.duration}{" "}
-                        {t.minutes} ·{" "}
-                        {service.price} грн
-                      </p>
-
-                      <div className="mt-3 flex gap-2">
-                        <button
-                          onClick={() =>
-                            openEditService(
-                              service
-                            )
+                  {services.map(
+                    (
+                      service
+                    ) => (
+                      <div
+                        key={
+                          service.id
+                        }
+                        className="rounded-2xl border border-rose-200 bg-white/65 p-4 backdrop-blur-sm"
+                      >
+                        <p className="font-semibold">
+                          {
+                            service.name
                           }
-                          className="rounded-lg border border-rose-200 bg-white px-3 py-2 text-xs"
-                        >
-                          {t.edit}
-                        </button>
+                        </p>
 
-                        <button
-                          onClick={() =>
-                            deleteService(
-                              service.id
-                            )
-                          }
-                          className="rounded-lg bg-red-50 px-3 py-2 text-xs text-red-600"
-                        >
-                          {t.delete}
-                        </button>
+                        <p className="mt-1 text-sm text-neutral-500">
+                          {
+                            service.duration
+                          }{" "}
+                          {
+                            t.minutes
+                          }{" "}
+                          ·{" "}
+                          {
+                            service.price
+                          }{" "}
+                          грн
+                        </p>
+
+                        <div className="mt-3 flex gap-2">
+                          <button
+                            onClick={() =>
+                              openEditService(
+                                service
+                              )
+                            }
+                            className="rounded-lg border border-rose-200 bg-white px-3 py-2 text-xs"
+                          >
+                            {
+                              t.edit
+                            }
+                          </button>
+
+                          <button
+                            onClick={() =>
+                              deleteService(
+                                service.id
+                              )
+                            }
+                            className="rounded-lg bg-red-50 px-3 py-2 text-xs text-red-600"
+                          >
+                            {
+                              t.delete
+                            }
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    )
+                  )}
                 </div>
               </div>
             </section>
           </div>
         )}
 
-        <nav className="z-40 grid shrink-0 grid-cols-4 border-t border-rose-200 bg-rose-50/85 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] backdrop-blur-md">
+        <nav className="z-40 grid shrink-0 grid-cols-4 border-t border-rose-200 bg-rose-50/72 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] backdrop-blur-md">
           <button
             onClick={() =>
-              setActiveTab("calendar")
+              setActiveTab(
+                "calendar"
+              )
             }
             className={`px-1 py-4 text-xs ${
-              activeTab === "calendar"
+              activeTab ===
+              "calendar"
                 ? "font-semibold text-neutral-900"
                 : "text-neutral-400"
             }`}
@@ -3006,10 +4078,13 @@ export default function Home() {
 
           <button
             onClick={() =>
-              setActiveTab("clients")
+              setActiveTab(
+                "clients"
+              )
             }
             className={`px-1 py-4 text-xs ${
-              activeTab === "clients"
+              activeTab ===
+              "clients"
                 ? "font-semibold text-neutral-900"
                 : "text-neutral-400"
             }`}
@@ -3019,10 +4094,13 @@ export default function Home() {
 
           <button
             onClick={() =>
-              setActiveTab("analytics")
+              setActiveTab(
+                "analytics"
+              )
             }
             className={`px-1 py-4 text-xs ${
-              activeTab === "analytics"
+              activeTab ===
+              "analytics"
                 ? "font-semibold text-neutral-900"
                 : "text-neutral-400"
             }`}
@@ -3032,10 +4110,13 @@ export default function Home() {
 
           <button
             onClick={() =>
-              setActiveTab("settings")
+              setActiveTab(
+                "settings"
+              )
             }
             className={`px-1 py-4 text-xs ${
-              activeTab === "settings"
+              activeTab ===
+              "settings"
                 ? "font-semibold text-neutral-900"
                 : "text-neutral-400"
             }`}
@@ -3046,7 +4127,7 @@ export default function Home() {
 
         {isAppointmentModalOpen && (
           <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40">
-            <div className="max-h-[90dvh] w-full max-w-md overflow-y-auto rounded-t-3xl bg-rose-50/95 p-5 backdrop-blur-md">
+            <div className="max-h-[90dvh] w-full max-w-md overflow-y-auto rounded-t-3xl bg-rose-50/92 p-5 backdrop-blur-md">
               <div className="mb-5 flex justify-between gap-4">
                 <div>
                   <h2 className="text-xl font-semibold">
@@ -3057,7 +4138,9 @@ export default function Home() {
                   </h2>
 
                   <p className="mt-1 text-sm text-neutral-500">
-                    {t.appointmentSubtitle}
+                    {
+                      t.appointmentSubtitle
+                    }
                   </p>
                 </div>
 
@@ -3074,25 +4157,34 @@ export default function Home() {
               </div>
 
               <div className="space-y-4">
-                {clients.length > 0 && (
+                {clients.length >
+                  0 && (
                   <div>
                     <label className="mb-1 block text-sm text-neutral-500">
-                      {t.client}
+                      {
+                        t.client
+                      }
                     </label>
 
                     <select
                       value={
                         selectedClientId
                       }
-                      onChange={(event) => {
+                      onChange={(
+                        event
+                      ) => {
                         setSelectedClientId(
-                          event.target.value
+                          event
+                            .target
+                            .value
                         );
 
                         clearAppointmentWarning();
 
                         if (
-                          event.target.value
+                          event
+                            .target
+                            .value
                         ) {
                           setAppointmentName(
                             ""
@@ -3102,33 +4194,45 @@ export default function Home() {
                       className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
                     >
                       <option value="">
-                        {t.manualName}
+                        {
+                          t.manualName
+                        }
                       </option>
 
                       {[...clients]
-                        .sort((a, b) =>
-                          a.name.localeCompare(
-                            b.name,
-                            getLocale(
-                              language
+                        .sort(
+                          (
+                            a,
+                            b
+                          ) =>
+                            a.name.localeCompare(
+                              b.name,
+                              getLocale(
+                                language
+                              )
                             )
-                          )
                         )
-                        .map((client) => (
-                          <option
-                            key={client.id}
-                            value={
-                              client.id
-                            }
-                          >
-                            {
-                              client.name
-                            }
-                            {client.phone
-                              ? ` — ${client.phone}`
-                              : ""}
-                          </option>
-                        ))}
+                        .map(
+                          (
+                            client
+                          ) => (
+                            <option
+                              key={
+                                client.id
+                              }
+                              value={
+                                client.id
+                              }
+                            >
+                              {
+                                client.name
+                              }
+                              {client.phone
+                                ? ` — ${client.phone}`
+                                : ""}
+                            </option>
+                          )
+                        )}
                     </select>
                   </div>
                 )}
@@ -3136,16 +4240,22 @@ export default function Home() {
                 {!selectedClientId && (
                   <div>
                     <label className="mb-1 block text-sm text-neutral-500">
-                      {t.clientName}
+                      {
+                        t.clientName
+                      }
                     </label>
 
                     <input
                       value={
                         appointmentName
                       }
-                      onChange={(event) => {
+                      onChange={(
+                        event
+                      ) => {
                         setAppointmentName(
-                          event.target.value
+                          event
+                            .target
+                            .value
                         );
 
                         clearAppointmentWarning();
@@ -3155,29 +4265,40 @@ export default function Home() {
                   </div>
                 )}
 
-                {services.length > 0 && (
+                {services.length >
+                  0 && (
                   <div>
                     <label className="mb-1 block text-sm text-neutral-500">
-                      {t.service}
+                      {
+                        t.service
+                      }
                     </label>
 
                     <select
                       value={
                         selectedServiceId
                       }
-                      onChange={(event) =>
+                      onChange={(
+                        event
+                      ) =>
                         handleServiceSelection(
-                          event.target.value
+                          event
+                            .target
+                            .value
                         )
                       }
                       className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
                     >
                       <option value="">
-                        {t.manualService}
+                        {
+                          t.manualService
+                        }
                       </option>
 
                       {services.map(
-                        (service) => (
+                        (
+                          service
+                        ) => (
                           <option
                             key={
                               service.id
@@ -3204,16 +4325,22 @@ export default function Home() {
                 {!selectedServiceId && (
                   <div>
                     <label className="mb-1 block text-sm text-neutral-500">
-                      {t.serviceName}
+                      {
+                        t.serviceName
+                      }
                     </label>
 
                     <input
                       value={
                         appointmentService
                       }
-                      onChange={(event) => {
+                      onChange={(
+                        event
+                      ) => {
                         setAppointmentService(
-                          event.target.value
+                          event
+                            .target
+                            .value
                         );
 
                         clearAppointmentWarning();
@@ -3226,7 +4353,9 @@ export default function Home() {
                 <div className="flex min-w-0 items-start gap-5">
                   <div className="w-[40%] min-w-0">
                     <label className="mb-1 block text-sm text-neutral-500">
-                      {t.date}
+                      {
+                        t.date
+                      }
                     </label>
 
                     <input
@@ -3234,9 +4363,13 @@ export default function Home() {
                       value={
                         appointmentDate
                       }
-                      onChange={(event) => {
+                      onChange={(
+                        event
+                      ) => {
                         setAppointmentDate(
-                          event.target.value
+                          event
+                            .target
+                            .value
                         );
 
                         clearAppointmentWarning();
@@ -3247,7 +4380,9 @@ export default function Home() {
 
                   <div className="w-[40%] min-w-0">
                     <label className="mb-1 block text-sm text-neutral-500">
-                      {t.time}
+                      {
+                        t.time
+                      }
                     </label>
 
                     <input
@@ -3255,9 +4390,13 @@ export default function Home() {
                       value={
                         appointmentTime
                       }
-                      onChange={(event) => {
+                      onChange={(
+                        event
+                      ) => {
                         setAppointmentTime(
-                          event.target.value
+                          event
+                            .target
+                            .value
                         );
 
                         clearAppointmentWarning();
@@ -3269,16 +4408,22 @@ export default function Home() {
 
                 <div>
                   <label className="mb-1 block text-sm text-neutral-500">
-                    {t.duration}
+                    {
+                      t.duration
+                    }
                   </label>
 
                   <select
                     value={
                       appointmentDuration
                     }
-                    onChange={(event) => {
+                    onChange={(
+                      event
+                    ) => {
                       setAppointmentDuration(
-                        event.target.value
+                        event
+                          .target
+                          .value
                       );
 
                       clearAppointmentWarning();
@@ -3292,21 +4437,35 @@ export default function Home() {
                       120,
                       150,
                       180,
-                    ].map((minutes) => (
-                      <option
-                        key={minutes}
-                        value={minutes}
-                      >
-                        {minutes}{" "}
-                        {t.minutes}
-                      </option>
-                    ))}
+                    ].map(
+                      (
+                        minutes
+                      ) => (
+                        <option
+                          key={
+                            minutes
+                          }
+                          value={
+                            minutes
+                          }
+                        >
+                          {
+                            minutes
+                          }{" "}
+                          {
+                            t.minutes
+                          }
+                        </option>
+                      )
+                    )}
                   </select>
                 </div>
 
                 <div>
                   <label className="mb-1 block text-sm text-neutral-500">
-                    {t.price}
+                    {
+                      t.price
+                    }
                   </label>
 
                   <input
@@ -3315,9 +4474,13 @@ export default function Home() {
                     value={
                       appointmentPrice
                     }
-                    onChange={(event) =>
+                    onChange={(
+                      event
+                    ) =>
                       setAppointmentPrice(
-                        event.target.value
+                        event
+                          .target
+                          .value
                       )
                     }
                     className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
@@ -3326,16 +4489,21 @@ export default function Home() {
 
                 <div>
                   <label className="mb-1 block text-sm text-neutral-500">
-                    {t.status}
+                    {
+                      t.status
+                    }
                   </label>
 
                   <select
                     value={
                       appointmentStatus
                     }
-                    onChange={(event) =>
+                    onChange={(
+                      event
+                    ) =>
                       setAppointmentStatus(
-                        event.target
+                        event
+                          .target
                           .value as AppointmentStatus
                       )
                     }
@@ -3360,7 +4528,9 @@ export default function Home() {
                     </option>
 
                     <option value="no-show">
-                      {t.noShowStatus}
+                      {
+                        t.noShowStatus
+                      }
                     </option>
                   </select>
                 </div>
@@ -3375,13 +4545,17 @@ export default function Home() {
                       }
                       className="w-full rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 font-medium text-sky-700"
                     >
-                      {t.remindClient}
+                      {
+                        t.remindClient
+                      }
                     </button>
                   )}
 
                 {appointmentError && (
                   <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-                    {appointmentError}
+                    {
+                      appointmentError
+                    }
 
                     {hasConflict && (
                       <button
@@ -3390,7 +4564,9 @@ export default function Home() {
                         }
                         className="mt-3 w-full rounded-xl bg-white px-4 py-3"
                       >
-                        {t.forceSave}
+                        {
+                          t.forceSave
+                        }
                       </button>
                     )}
                   </div>
@@ -3418,7 +4594,9 @@ export default function Home() {
                     }
                     className="w-full rounded-xl bg-red-50 px-4 py-4 font-medium text-red-600"
                   >
-                    {t.deleteAppointment}
+                    {
+                      t.deleteAppointment
+                    }
                   </button>
                 )}
               </div>
@@ -3428,7 +4606,7 @@ export default function Home() {
 
         {isClientModalOpen && (
           <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40">
-            <div className="max-h-[90dvh] w-full max-w-md overflow-y-auto rounded-t-3xl bg-rose-50/95 p-5 backdrop-blur-md">
+            <div className="max-h-[90dvh] w-full max-w-md overflow-y-auto rounded-t-3xl bg-rose-50/92 p-5 backdrop-blur-md">
               <div className="flex justify-between">
                 <h2 className="text-xl font-semibold">
                   {editingClientId !==
@@ -3451,32 +4629,54 @@ export default function Home() {
 
               <div className="mt-5 space-y-4">
                 <input
-                  value={clientName}
-                  onChange={(event) =>
+                  value={
+                    clientName
+                  }
+                  onChange={(
+                    event
+                  ) =>
                     setClientName(
-                      event.target.value
+                      event
+                        .target
+                        .value
                     )
                   }
-                  placeholder={t.name}
+                  placeholder={
+                    t.name
+                  }
                   className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
                 />
 
                 <input
-                  value={clientPhone}
-                  onChange={(event) =>
+                  value={
+                    clientPhone
+                  }
+                  onChange={(
+                    event
+                  ) =>
                     setClientPhone(
-                      event.target.value
+                      event
+                        .target
+                        .value
                     )
                   }
-                  placeholder={t.phone}
+                  placeholder={
+                    t.phone
+                  }
                   className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
                 />
 
                 <input
-                  value={clientSocial}
-                  onChange={(event) =>
+                  value={
+                    clientSocial
+                  }
+                  onChange={(
+                    event
+                  ) =>
                     setClientSocial(
-                      event.target.value
+                      event
+                        .target
+                        .value
                     )
                   }
                   placeholder="@username"
@@ -3484,19 +4684,29 @@ export default function Home() {
                 />
 
                 <textarea
-                  value={clientNote}
-                  onChange={(event) =>
+                  value={
+                    clientNote
+                  }
+                  onChange={(
+                    event
+                  ) =>
                     setClientNote(
-                      event.target.value
+                      event
+                        .target
+                        .value
                     )
                   }
-                  placeholder={t.note}
+                  placeholder={
+                    t.note
+                  }
                   rows={3}
                   className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
                 />
 
                 <button
-                  onClick={saveClient}
+                  onClick={
+                    saveClient
+                  }
                   className="w-full rounded-xl bg-black px-4 py-4 text-white"
                 >
                   {t.save}
@@ -3509,11 +4719,13 @@ export default function Home() {
         {isClientDetailsOpen &&
           selectedClientDetails && (
             <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40">
-              <div className="max-h-[92dvh] w-full max-w-md overflow-y-auto rounded-t-3xl bg-rose-50/95 p-5 backdrop-blur-md">
+              <div className="max-h-[92dvh] w-full max-w-md overflow-y-auto rounded-t-3xl bg-rose-50/92 p-5 backdrop-blur-md">
                 <div className="flex justify-between gap-4">
                   <div>
                     <p className="text-sm text-neutral-500">
-                      {t.clientCard}
+                      {
+                        t.clientCard
+                      }
                     </p>
 
                     <h2 className="mt-1 text-2xl font-semibold">
@@ -3531,11 +4743,13 @@ export default function Home() {
                     }
                     className="text-sm text-neutral-500"
                   >
-                    {t.close}
+                    {
+                      t.close
+                    }
                   </button>
                 </div>
 
-                <div className="mt-5 rounded-2xl border border-rose-200 bg-white/70 p-4">
+                <div className="mt-5 rounded-2xl border border-rose-200 bg-white/65 p-4">
                   <p className="font-medium">
                     {selectedClientDetails.phone ||
                       t.phoneMissing}
@@ -3565,7 +4779,9 @@ export default function Home() {
                         )}
                         className="rounded-xl bg-black px-3 py-3 text-center text-sm font-medium text-white"
                       >
-                        {t.call}
+                        {
+                          t.call
+                        }
                       </a>
                     )}
 
@@ -3588,7 +4804,9 @@ export default function Home() {
                           }
                           className="rounded-xl border border-rose-200 bg-white px-3 py-3 text-sm font-medium"
                         >
-                          {t.telegram}
+                          {
+                            t.telegram
+                          }
                         </button>
                       )}
 
@@ -3611,30 +4829,40 @@ export default function Home() {
                           }
                           className="rounded-xl border border-rose-200 bg-white px-3 py-3 text-sm font-medium"
                         >
-                          {t.instagram}
+                          {
+                            t.instagram
+                          }
                         </button>
                       )}
                   </div>
                 </div>
 
                 <div className="mt-4 grid grid-cols-2 gap-3">
-                  <div className="rounded-2xl bg-white/70 p-4">
+                  <div className="rounded-2xl bg-white/65 p-4">
                     <p className="text-xs text-neutral-500">
-                      {t.totalAppointments}
+                      {
+                        t.totalAppointments
+                      }
                     </p>
 
                     <p className="mt-1 text-2xl font-semibold">
-                      {selectedClientAppointments.length}
+                      {
+                        selectedClientAppointments.length
+                      }
                     </p>
                   </div>
 
-                  <div className="rounded-2xl bg-white/70 p-4">
+                  <div className="rounded-2xl bg-white/65 p-4">
                     <p className="text-xs text-neutral-500">
-                      {t.futureAppointmentsCount}
+                      {
+                        t.futureAppointmentsCount
+                      }
                     </p>
 
                     <p className="mt-1 text-2xl font-semibold">
-                      {futureClientAppointments.length}
+                      {
+                        futureClientAppointments.length
+                      }
                     </p>
                   </div>
                 </div>
@@ -3647,7 +4875,9 @@ export default function Home() {
                   }
                   className="mt-4 w-full rounded-xl bg-black px-4 py-4 text-white"
                 >
-                  {t.bookClient}
+                  {
+                    t.bookClient
+                  }
                 </button>
 
                 <button
@@ -3658,26 +4888,37 @@ export default function Home() {
                   }
                   className="mt-3 w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
                 >
-                  {t.editClientButton}
+                  {
+                    t.editClientButton
+                  }
                 </button>
 
                 <div className="mt-6">
                   <h3 className="text-lg font-semibold">
-                    {t.futureAppointments}
+                    {
+                      t.futureAppointments
+                    }
                   </h3>
 
                   <div className="mt-3 space-y-2">
-                    {futureClientAppointments.length === 0 && (
-                      <p className="rounded-xl bg-white/70 p-4 text-sm text-neutral-500">
-                        {t.noFutureAppointments}
+                    {futureClientAppointments.length ===
+                      0 && (
+                      <p className="rounded-xl bg-white/65 p-4 text-sm text-neutral-500">
+                        {
+                          t.noFutureAppointments
+                        }
                       </p>
                     )}
 
                     {futureClientAppointments.map(
-                      (appointment) => (
+                      (
+                        appointment
+                      ) => (
                         <div
-                          key={appointment.id}
-                          className="rounded-xl border border-rose-200 bg-white/70 p-3"
+                          key={
+                            appointment.id
+                          }
+                          className="rounded-xl border border-rose-200 bg-white/65 p-3"
                         >
                           <div className="flex justify-between gap-3">
                             <div>
@@ -3689,12 +4930,20 @@ export default function Home() {
                               </p>
 
                               <p className="mt-1 text-sm text-neutral-500">
-                                {appointment.time} ·{" "}
-                                {appointment.service}
+                                {
+                                  appointment.time
+                                }{" "}
+                                ·{" "}
+                                {
+                                  appointment.service
+                                }
                               </p>
 
                               <p className="mt-1 text-sm font-medium">
-                                {appointment.price} грн
+                                {
+                                  appointment.price
+                                }{" "}
+                                грн
                               </p>
                             </div>
 
@@ -3719,7 +4968,9 @@ export default function Home() {
                               }
                               className="mt-3 w-full rounded-xl bg-sky-50 px-3 py-2 text-sm font-medium text-sky-700"
                             >
-                              {t.remind}
+                              {
+                                t.remind
+                              }
                             </button>
                           )}
                         </div>
@@ -3730,21 +4981,30 @@ export default function Home() {
 
                 <div className="mt-6">
                   <h3 className="text-lg font-semibold">
-                    {t.history}
+                    {
+                      t.history
+                    }
                   </h3>
 
                   <div className="mt-3 space-y-2">
-                    {pastClientAppointments.length === 0 && (
-                      <p className="rounded-xl bg-white/70 p-4 text-sm text-neutral-500">
-                        {t.noHistory}
+                    {pastClientAppointments.length ===
+                      0 && (
+                      <p className="rounded-xl bg-white/65 p-4 text-sm text-neutral-500">
+                        {
+                          t.noHistory
+                        }
                       </p>
                     )}
 
                     {pastClientAppointments.map(
-                      (appointment) => (
+                      (
+                        appointment
+                      ) => (
                         <div
-                          key={appointment.id}
-                          className="rounded-xl border border-rose-200 bg-white/70 p-3"
+                          key={
+                            appointment.id
+                          }
+                          className="rounded-xl border border-rose-200 bg-white/65 p-3"
                         >
                           <div className="flex justify-between gap-3">
                             <div>
@@ -3756,8 +5016,14 @@ export default function Home() {
                               </p>
 
                               <p className="mt-1 text-sm text-neutral-500">
-                                {appointment.service} ·{" "}
-                                {appointment.price} грн
+                                {
+                                  appointment.service
+                                }{" "}
+                                ·{" "}
+                                {
+                                  appointment.price
+                                }{" "}
+                                грн
                               </p>
                             </div>
 
@@ -3785,7 +5051,9 @@ export default function Home() {
                   }
                   className="mt-6 w-full rounded-xl bg-red-50 px-4 py-3 text-red-600"
                 >
-                  {t.deleteClient}
+                  {
+                    t.deleteClient
+                  }
                 </button>
               </div>
             </div>
@@ -3793,7 +5061,7 @@ export default function Home() {
 
         {isServiceModalOpen && (
           <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40">
-            <div className="w-full max-w-md rounded-t-3xl bg-rose-50/95 p-5 backdrop-blur-md">
+            <div className="w-full max-w-md rounded-t-3xl bg-rose-50/92 p-5 backdrop-blur-md">
               <div className="flex justify-between">
                 <h2 className="text-xl font-semibold">
                   {editingServiceId !==
@@ -3810,27 +5078,43 @@ export default function Home() {
                   }
                   className="text-sm text-neutral-500"
                 >
-                  {t.close}
+                  {
+                    t.close
+                  }
                 </button>
               </div>
 
               <div className="mt-5 space-y-4">
                 <input
-                  value={serviceName}
-                  onChange={(event) =>
+                  value={
+                    serviceName
+                  }
+                  onChange={(
+                    event
+                  ) =>
                     setServiceName(
-                      event.target.value
+                      event
+                        .target
+                        .value
                     )
                   }
-                  placeholder={t.serviceName}
+                  placeholder={
+                    t.serviceName
+                  }
                   className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
                 />
 
                 <select
-                  value={serviceDuration}
-                  onChange={(event) =>
+                  value={
+                    serviceDuration
+                  }
+                  onChange={(
+                    event
+                  ) =>
                     setServiceDuration(
-                      event.target.value
+                      event
+                        .target
+                        .value
                     )
                   }
                   className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
@@ -3842,35 +5126,59 @@ export default function Home() {
                     120,
                     150,
                     180,
-                  ].map((minutes) => (
-                    <option
-                      key={minutes}
-                      value={minutes}
-                    >
-                      {minutes}{" "}
-                      {t.minutes}
-                    </option>
-                  ))}
+                  ].map(
+                    (
+                      minutes
+                    ) => (
+                      <option
+                        key={
+                          minutes
+                        }
+                        value={
+                          minutes
+                        }
+                      >
+                        {
+                          minutes
+                        }{" "}
+                        {
+                          t.minutes
+                        }
+                      </option>
+                    )
+                  )}
                 </select>
 
                 <input
                   type="number"
                   min="0"
-                  value={servicePrice}
-                  onChange={(event) =>
+                  value={
+                    servicePrice
+                  }
+                  onChange={(
+                    event
+                  ) =>
                     setServicePrice(
-                      event.target.value
+                      event
+                        .target
+                        .value
                     )
                   }
-                  placeholder={t.servicePrice}
+                  placeholder={
+                    t.servicePrice
+                  }
                   className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
                 />
 
                 <button
-                  onClick={saveService}
+                  onClick={
+                    saveService
+                  }
                   className="w-full rounded-xl bg-black px-4 py-4 text-white"
                 >
-                  {t.save}
+                  {
+                    t.save
+                  }
                 </button>
               </div>
             </div>
@@ -3879,15 +5187,19 @@ export default function Home() {
 
         {isReminderModalOpen && (
           <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/50">
-            <div className="w-full max-w-md rounded-t-3xl bg-rose-50/95 p-5 backdrop-blur-md">
+            <div className="w-full max-w-md rounded-t-3xl bg-rose-50/92 p-5 backdrop-blur-md">
               <div className="flex justify-between gap-4">
                 <div>
                   <h2 className="text-xl font-semibold">
-                    {t.reminder}
+                    {
+                      t.reminder
+                    }
                   </h2>
 
                   <p className="mt-1 text-sm text-neutral-500">
-                    {t.reminderHint}
+                    {
+                      t.reminderHint
+                    }
                   </p>
                 </div>
 
@@ -3899,15 +5211,23 @@ export default function Home() {
                   }
                   className="text-sm text-neutral-500"
                 >
-                  {t.close}
+                  {
+                    t.close
+                  }
                 </button>
               </div>
 
               <textarea
-                value={reminderText}
-                onChange={(event) => {
+                value={
+                  reminderText
+                }
+                onChange={(
+                  event
+                ) => {
                   setReminderText(
-                    event.target.value
+                    event
+                      .target
+                      .value
                   );
 
                   setReminderCopied(
@@ -3919,7 +5239,9 @@ export default function Home() {
               />
 
               <button
-                onClick={copyReminder}
+                onClick={
+                  copyReminder
+                }
                 className="mt-3 w-full rounded-xl bg-black px-4 py-4 font-medium text-white"
               >
                 {reminderCopied
@@ -3931,7 +5253,8 @@ export default function Home() {
                 <div className="mt-3 grid grid-cols-2 gap-2">
                   {(getSocialType(
                     reminderClient.social
-                  ) === "telegram" ||
+                  ) ===
+                    "telegram" ||
                     getSocialType(
                       reminderClient.social
                     ) ===
@@ -3946,13 +5269,16 @@ export default function Home() {
                       }
                       className="rounded-xl border border-rose-200 bg-white px-3 py-3 text-sm font-medium"
                     >
-                      {t.openTelegram}
+                      {
+                        t.openTelegram
+                      }
                     </button>
                   )}
 
                   {(getSocialType(
                     reminderClient.social
-                  ) === "instagram" ||
+                  ) ===
+                    "instagram" ||
                     getSocialType(
                       reminderClient.social
                     ) ===
@@ -3967,7 +5293,9 @@ export default function Home() {
                       }
                       className="rounded-xl border border-rose-200 bg-white px-3 py-3 text-sm font-medium"
                     >
-                      {t.openInstagram}
+                      {
+                        t.openInstagram
+                      }
                     </button>
                   )}
                 </div>
