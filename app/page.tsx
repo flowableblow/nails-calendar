@@ -41,9 +41,6 @@ type Client = {
   telegram: string;
   instagram: string;
   note: string;
-
-  // Нужен только для совместимости со старыми
-  // локальными данными приложения.
   social?: string;
 };
 
@@ -101,19 +98,14 @@ const HOUR_HEIGHT = 96;
 
 const APPOINTMENTS_STORAGE_KEY =
   "nails-calendar-appointments";
-
 const CLIENTS_STORAGE_KEY =
   "nails-calendar-clients";
-
 const SERVICES_STORAGE_KEY =
   "nails-calendar-services";
-
 const WORK_SETTINGS_STORAGE_KEY =
   "nails-calendar-work-settings";
-
 const LANGUAGE_STORAGE_KEY =
   "nails-calendar-language";
-
 const OFFLINE_QUEUE_STORAGE_KEY =
   "nails-calendar-offline-queue";
 
@@ -152,8 +144,7 @@ const translations = {
     today: "Сегодня",
     currentMonth: "Текущий месяц",
     returnToday: "Вернуться на сегодня",
-    returnCurrentMonth:
-      "Вернуться на текущий месяц",
+    returnCurrentMonth: "Вернуться на текущий месяц",
 
     day: "День",
     month: "Месяц",
@@ -240,9 +231,6 @@ const translations = {
     copyText: "Скопировать текст",
     copied: "Текст скопирован",
 
-    openTelegram: "Telegram",
-    openInstagram: "Instagram",
-
     newService: "Новая услуга",
     editService: "Редактировать услугу",
     servicePrice: "Цена, грн",
@@ -254,17 +242,12 @@ const translations = {
     dateRequired: "Укажи дату.",
     timeRequired: "Укажи время.",
 
-    conflict:
-      "Это время пересекается с записью",
+    conflict: "Это время пересекается с записью",
 
-    deleteAppointmentConfirm:
-      "Удалить эту запись?",
-
+    deleteAppointmentConfirm: "Удалить эту запись?",
     deleteClientConfirm:
       "Удалить клиента? Его записи останутся в календаре.",
-
-    deleteServiceConfirm:
-      "Удалить эту услугу?",
+    deleteServiceConfirm: "Удалить эту услугу?",
   },
 
   uk: {
@@ -364,9 +347,6 @@ const translations = {
     copyText: "Скопіювати текст",
     copied: "Текст скопійовано",
 
-    openTelegram: "Telegram",
-    openInstagram: "Instagram",
-
     newService: "Нова послуга",
     editService: "Редагувати послугу",
     servicePrice: "Ціна, грн",
@@ -383,10 +363,8 @@ const translations = {
 
     deleteAppointmentConfirm:
       "Видалити цей запис?",
-
     deleteClientConfirm:
       "Видалити клієнта? Його записи залишаться в календарі.",
-
     deleteServiceConfirm:
       "Видалити цю послугу?",
   },
@@ -509,6 +487,55 @@ function minutesToTime(
   )}`;
 }
 
+function formatDurationLabel(
+  minutes: number,
+  language: Language
+) {
+  if (minutes === 30) {
+    return language === "uk"
+      ? "30 хвилин"
+      : "30 минут";
+  }
+
+  const hours =
+    Math.floor(minutes / 60);
+
+  const hasHalfHour =
+    minutes % 60 === 30;
+
+  if (hasHalfHour) {
+    return `${hours}:30`;
+  }
+
+  if (language === "uk") {
+    if (hours === 1) {
+      return "1 година";
+    }
+
+    if (
+      hours >= 2 &&
+      hours <= 4
+    ) {
+      return `${hours} години`;
+    }
+
+    return `${hours} годин`;
+  }
+
+  if (hours === 1) {
+    return "1 час";
+  }
+
+  if (
+    hours >= 2 &&
+    hours <= 4
+  ) {
+    return `${hours} часа`;
+  }
+
+  return `${hours} часов`;
+}
+
 function getAppointmentTop(
   time: string,
   startHour: number
@@ -525,7 +552,8 @@ function getAppointmentHeight(
   duration: number
 ) {
   return Math.max(
-    (duration / 60) * HOUR_HEIGHT,
+    (duration / 60) *
+      HOUR_HEIGHT,
     48
   );
 }
@@ -820,12 +848,14 @@ export default function Home() {
   const syncingRef =
     useRef(false);
 
-  const [today, setToday] =
-    useState(
-      new Date(
-        "2000-01-01T12:00:00"
-      )
-    );
+  const [
+    today,
+    setToday,
+  ] = useState(
+    new Date(
+      "2000-01-01T12:00:00"
+    )
+  );
 
   const [
     session,
@@ -1365,9 +1395,7 @@ export default function Home() {
           );
         }
       },
-      [
-        executeOperation,
-      ]
+      [executeOperation]
     );
 
   async function saveOrQueue(
@@ -1380,9 +1408,7 @@ export default function Home() {
         operation
       );
 
-      setIsOnline(
-        false
-      );
+      setIsOnline(false);
 
       setDatabaseStatus(
         "offline"
@@ -1476,9 +1502,7 @@ export default function Home() {
     const current =
       new Date();
 
-    setToday(
-      current
-    );
+    setToday(current);
 
     setSelectedDate(
       current
@@ -1607,9 +1631,7 @@ export default function Home() {
     }
 
     async function loadData() {
-      setIsLoaded(
-        false
-      );
+      setIsLoaded(false);
 
       if (
         !navigator.onLine
@@ -1623,9 +1645,7 @@ export default function Home() {
         settingsReadyRef.current =
           true;
 
-        setIsLoaded(
-          true
-        );
+        setIsLoaded(true);
 
         return;
       }
@@ -1905,9 +1925,7 @@ export default function Home() {
         settingsReadyRef.current =
           true;
 
-        setIsLoaded(
-          true
-        );
+        setIsLoaded(true);
       }
     }
 
@@ -1996,14 +2014,11 @@ export default function Home() {
             queueId:
               createQueueId(),
 
-            type:
-              "upsert",
+            type: "upsert",
 
-            table:
-              "settings",
+            table: "settings",
 
-            recordId:
-              "main",
+            recordId: "main",
 
             payload: {
               id: "main",
@@ -2055,10 +2070,7 @@ export default function Home() {
       return;
     }
 
-    setLoginLoading(
-      true
-    );
-
+    setLoginLoading(true);
     setLoginError("");
 
     const { error } =
@@ -2092,9 +2104,7 @@ export default function Home() {
       await supabase.auth.signOut();
     }
 
-    setSession(
-      null
-    );
+    setSession(null);
   }
 
   const todayKey =
@@ -2139,10 +2149,7 @@ export default function Home() {
           workSettings.startHour +
           1,
       },
-      (
-        _,
-        index
-      ) =>
+      (_, index) =>
         workSettings.startHour +
         index
     );
@@ -2173,16 +2180,24 @@ export default function Home() {
           return (
             client.name
               .toLowerCase()
-              .includes(search) ||
+              .includes(
+                search
+              ) ||
             client.phone
               .toLowerCase()
-              .includes(search) ||
+              .includes(
+                search
+              ) ||
             client.telegram
               .toLowerCase()
-              .includes(search) ||
+              .includes(
+                search
+              ) ||
             client.instagram
               .toLowerCase()
-              .includes(search)
+              .includes(
+                search
+              )
           );
         }
       )
@@ -2448,9 +2463,7 @@ export default function Home() {
     );
 
   function connectionLabel() {
-    if (
-      !isOnline
-    ) {
+    if (!isOnline) {
       return t.offline;
     }
 
@@ -2465,9 +2478,7 @@ export default function Home() {
   }
 
   function connectionClass() {
-    if (
-      !isOnline
-    ) {
+    if (!isOnline) {
       return "border-orange-300 bg-orange-50 text-orange-700";
     }
 
@@ -3010,14 +3021,9 @@ export default function Home() {
       table:
         "appointments",
 
-      recordId:
-        id,
-
-      column:
-        "id",
-
-      value:
-        id,
+      recordId: id,
+      column: "id",
+      value: id,
     });
 
     setIsAppointmentModalOpen(
@@ -3030,25 +3036,11 @@ export default function Home() {
       null
     );
 
-    setClientName(
-      ""
-    );
-
-    setClientPhone(
-      ""
-    );
-
-    setClientTelegram(
-      ""
-    );
-
-    setClientInstagram(
-      ""
-    );
-
-    setClientNote(
-      ""
-    );
+    setClientName("");
+    setClientPhone("");
+    setClientTelegram("");
+    setClientInstagram("");
+    setClientNote("");
 
     setIsClientModalOpen(
       true
@@ -3149,16 +3141,12 @@ export default function Home() {
       const changedAppointments =
         appointments
           .filter(
-            (
-              appointment
-            ) =>
+            (appointment) =>
               appointment.clientId ===
               editingClientId
           )
           .map(
-            (
-              appointment
-            ) => ({
+            (appointment) => ({
               ...appointment,
               name:
                 client.name,
@@ -3168,9 +3156,7 @@ export default function Home() {
       setAppointments(
         (current) =>
           current.map(
-            (
-              appointment
-            ) => {
+            (appointment) => {
               const changed =
                 changedAppointments.find(
                   (item) =>
@@ -3272,8 +3258,6 @@ export default function Home() {
         note:
           client.note,
 
-        // Старое объединённое поле больше
-        // не используем.
         social: "",
       },
     });
@@ -3347,17 +3331,11 @@ export default function Home() {
       null
     );
 
-    setServiceName(
-      ""
-    );
-
+    setServiceName("");
     setServiceDuration(
       "90"
     );
-
-    setServicePrice(
-      ""
-    );
+    setServicePrice("");
 
     setIsServiceModalOpen(
       true
@@ -3674,10 +3652,7 @@ export default function Home() {
       setReminderCopied(
         true
       );
-    } catch {
-      // Просто открываем Telegram,
-      // даже если clipboard недоступен.
-    }
+    } catch {}
 
     const url =
       getTelegramUrl(
@@ -3707,9 +3682,7 @@ export default function Home() {
       setReminderCopied(
         true
       );
-    } catch {
-      // Просто открываем Instagram.
-    }
+    } catch {}
 
     const url =
       getInstagramUrl(
@@ -3835,6 +3808,7 @@ export default function Home() {
       }
     >
       <div className="mx-auto flex h-dvh max-w-md flex-col overflow-hidden bg-rose-50/45 shadow-2xl backdrop-blur-[1px]">
+
         {activeTab ===
           "calendar" && (
           <div className="flex min-h-0 flex-1 flex-col">
@@ -4830,70 +4804,152 @@ export default function Home() {
           </div>
         )}
 
-        <nav className="grid shrink-0 grid-cols-4 border-t border-neutral-600/50 bg-rose-50/80 backdrop-blur-md">
-          <NavButton
-            active={
-              activeTab ===
-              "calendar"
-            }
-            onClick={() =>
-              setActiveTab(
+        <nav className="shrink-0 bg-rose-50/80 px-3 pb-3 pt-2 backdrop-blur-md">
+          <div className="grid grid-cols-4 gap-2">
+
+            <NavButton
+              active={
+                activeTab ===
                 "calendar"
-              )
-            }
-          >
-            {
-              t.calendar
-            }
-          </NavButton>
+              }
+              onClick={() =>
+                setActiveTab(
+                  "calendar"
+                )
+              }
+              icon={
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="h-5 w-5"
+                >
+                  <rect
+                    x="3"
+                    y="5"
+                    width="18"
+                    height="16"
+                    rx="3"
+                  />
+                  <path d="M7 3v4M17 3v4M3 10h18" />
+                </svg>
+              }
+            >
+              {
+                t.calendar
+              }
+            </NavButton>
 
-          <NavButton
-            active={
-              activeTab ===
-              "clients"
-            }
-            onClick={() =>
-              setActiveTab(
+            <NavButton
+              active={
+                activeTab ===
                 "clients"
-              )
-            }
-          >
-            {
-              t.clients
-            }
-          </NavButton>
+              }
+              onClick={() =>
+                setActiveTab(
+                  "clients"
+                )
+              }
+              icon={
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="h-5 w-5"
+                >
+                  <circle
+                    cx="9"
+                    cy="8"
+                    r="3"
+                  />
+                  <path d="M3.5 20c.7-4 2.8-6 5.5-6s4.8 2 5.5 6" />
+                  <circle
+                    cx="17"
+                    cy="9"
+                    r="2.3"
+                  />
+                  <path d="M15.5 14.5c2.6.3 4.3 2.2 5 5.5" />
+                </svg>
+              }
+            >
+              {
+                t.clients
+              }
+            </NavButton>
 
-          <NavButton
-            active={
-              activeTab ===
-              "analytics"
-            }
-            onClick={() =>
-              setActiveTab(
+            <NavButton
+              active={
+                activeTab ===
                 "analytics"
-              )
-            }
-          >
-            {
-              t.analytics
-            }
-          </NavButton>
+              }
+              onClick={() =>
+                setActiveTab(
+                  "analytics"
+                )
+              }
+              icon={
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="h-5 w-5"
+                >
+                  <path d="M5 20V11" />
+                  <path d="M12 20V5" />
+                  <path d="M19 20v-7" />
+                  <path d="M3 20h18" />
+                </svg>
+              }
+            >
+              {
+                t.analytics
+              }
+            </NavButton>
 
-          <NavButton
-            active={
-              activeTab ===
-              "settings"
-            }
-            onClick={() =>
-              setActiveTab(
+            <NavButton
+              active={
+                activeTab ===
                 "settings"
-              )
-            }
-          >
-            {
-              t.settings
-            }
-          </NavButton>
+              }
+              onClick={() =>
+                setActiveTab(
+                  "settings"
+                )
+              }
+              icon={
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="h-5 w-5"
+                >
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="3"
+                  />
+                  <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.8 2.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21h-4v-.1a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1L4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9A1.7 1.7 0 0 0 3 14H3v-4h.1a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9L4.2 7 7 4.2l.1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.6V3h4v.1a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1L19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.1v4H21a1.7 1.7 0 0 0-1.6 1Z" />
+                </svg>
+              }
+            >
+              {
+                t.settings
+              }
+            </NavButton>
+
+          </div>
         </nav>
 
         {isAppointmentModalOpen && (
@@ -5132,14 +5188,19 @@ export default function Home() {
                 }
                 className="h-12 w-full rounded-xl border border-rose-200 bg-white px-3"
               >
-                {[
-                  30,
-                  60,
-                  90,
-                  120,
-                  150,
-                  180,
-                ].map(
+                {Array.from(
+                  {
+                    length:
+                      12,
+                  },
+                  (
+                    _,
+                    index
+                  ) =>
+                    (index +
+                      1) *
+                    30
+                ).map(
                   (
                     minutes
                   ) => (
@@ -5151,12 +5212,10 @@ export default function Home() {
                         minutes
                       }
                     >
-                      {
-                        minutes
-                      }{" "}
-                      {
-                        t.minutes
-                      }
+                      {formatDurationLabel(
+                        minutes,
+                        language
+                      )}
                     </option>
                   )
                 )}
@@ -5768,14 +5827,19 @@ export default function Home() {
                 }
                 className="h-12 w-full rounded-xl border border-rose-200 bg-white px-3"
               >
-                {[
-                  30,
-                  60,
-                  90,
-                  120,
-                  150,
-                  180,
-                ].map(
+                {Array.from(
+                  {
+                    length:
+                      12,
+                  },
+                  (
+                    _,
+                    index
+                  ) =>
+                    (index +
+                      1) *
+                    30
+                ).map(
                   (
                     minutes
                   ) => (
@@ -5787,12 +5851,10 @@ export default function Home() {
                         minutes
                       }
                     >
-                      {
-                        minutes
-                      }{" "}
-                      {
-                        t.minutes
-                      }
+                      {formatDurationLabel(
+                        minutes,
+                        language
+                      )}
                     </option>
                   )
                 )}
@@ -5909,6 +5971,7 @@ export default function Home() {
             </button>
           </Modal>
         )}
+
       </div>
     </main>
   );
@@ -5917,10 +5980,12 @@ export default function Home() {
 function NavButton({
   active,
   onClick,
+  icon,
   children,
 }: {
   active: boolean;
   onClick: () => void;
+  icon: ReactNode;
   children: ReactNode;
 }) {
   return (
@@ -5928,15 +5993,23 @@ function NavButton({
       onClick={
         onClick
       }
-      className={`px-1 py-4 text-xs ${
+      className={`flex h-[58px] min-w-0 flex-col items-center justify-center gap-1 rounded-2xl border text-[10px] font-medium transition-all ${
         active
-          ? "font-semibold text-neutral-900"
-          : "text-neutral-400"
+          ? "border-neutral-900 bg-neutral-900 text-white shadow-md"
+          : "border-white/70 bg-white/65 text-neutral-500 shadow-sm"
       }`}
     >
-      {
-        children
-      }
+      <span className="flex h-6 items-center justify-center">
+        {
+          icon
+        }
+      </span>
+
+      <span className="max-w-full truncate px-1">
+        {
+          children
+        }
+      </span>
     </button>
   );
 }
