@@ -29,6 +29,7 @@ type Appointment = {
   name: string;
   serviceId?: number;
   service: string;
+  addonServiceIds: number[];
   duration: number;
   price: number;
   status: AppointmentStatus;
@@ -49,6 +50,7 @@ type Service = {
   name: string;
   duration: number;
   price: number;
+  isAddon: boolean;
 };
 
 type WorkSettings = {
@@ -154,9 +156,11 @@ const translations = {
     day: "День",
     month: "Месяц",
     records: "Записей",
+    weekend: "Выходной",
 
     clientBase: "База клиентов",
-    searchClient: "Поиск по имени, телефону, Telegram...",
+    searchClient:
+      "Поиск по имени, телефону, Telegram...",
     noClients: "Клиентов пока нет",
 
     financeRecords: "Финансы и записи",
@@ -188,17 +192,29 @@ const translations = {
 
     appointmentNew: "Новая запись",
     appointmentEdit: "Редактировать запись",
+
     client: "Клиент",
-    manualName: "Ввести имя вручную",
+    manualName: "Новый клиент",
     clientName: "Имя клиента",
+    clientPhone: "Телефон клиента",
+
     service: "Услуга",
+    mainService: "Основная услуга",
+    extraServices: "Доп. услуги",
+    noExtraServices: "Дополнительных услуг пока нет",
     manualService: "Ввести вручную",
     serviceName: "Название услуги",
+
+    serviceType: "Тип услуги",
+    mainServiceType: "Основная",
+    addonServiceType: "Доп. услуга",
+
     date: "Дата",
     time: "Время",
     duration: "Длительность",
     price: "Цена, грн",
     status: "Статус",
+    total: "Итого",
 
     createAppointment: "Создать запись",
     saveChanges: "Сохранить изменения",
@@ -212,6 +228,7 @@ const translations = {
 
     newClient: "Новый клиент",
     editClient: "Редактировать клиента",
+
     name: "Имя",
     phone: "Телефон",
     telegram: "Telegram",
@@ -249,9 +266,12 @@ const translations = {
     conflict: "Это время пересекается с записью",
 
     deleteAppointmentConfirm: "Удалить эту запись?",
+
     deleteClientConfirm:
       "Удалить клиента? Его записи останутся в календаре.",
-    deleteServiceConfirm: "Удалить эту услугу?",
+
+    deleteServiceConfirm:
+      "Удалить эту услугу?",
   },
 
   uk: {
@@ -263,14 +283,17 @@ const translations = {
     today: "Сьогодні",
     currentMonth: "Поточний місяць",
     returnToday: "Повернутися на сьогодні",
-    returnCurrentMonth: "Повернутися на поточний місяць",
+    returnCurrentMonth:
+      "Повернутися на поточний місяць",
 
     day: "День",
     month: "Місяць",
     records: "Записів",
+    weekend: "Вихідний",
 
     clientBase: "База клієнтів",
-    searchClient: "Пошук за ім'ям, телефоном, Telegram...",
+    searchClient:
+      "Пошук за ім'ям, телефоном, Telegram...",
     noClients: "Клієнтів поки немає",
 
     financeRecords: "Фінанси та записи",
@@ -302,17 +325,29 @@ const translations = {
 
     appointmentNew: "Новий запис",
     appointmentEdit: "Редагувати запис",
+
     client: "Клієнт",
-    manualName: "Ввести ім'я вручну",
+    manualName: "Новий клієнт",
     clientName: "Ім'я клієнта",
+    clientPhone: "Телефон клієнта",
+
     service: "Послуга",
+    mainService: "Основна послуга",
+    extraServices: "Дод. послуги",
+    noExtraServices: "Додаткових послуг поки немає",
     manualService: "Ввести вручну",
     serviceName: "Назва послуги",
+
+    serviceType: "Тип послуги",
+    mainServiceType: "Основна",
+    addonServiceType: "Дод. послуга",
+
     date: "Дата",
     time: "Час",
     duration: "Тривалість",
     price: "Ціна, грн",
     status: "Статус",
+    total: "Разом",
 
     createAppointment: "Створити запис",
     saveChanges: "Зберегти зміни",
@@ -326,6 +361,7 @@ const translations = {
 
     newClient: "Новий клієнт",
     editClient: "Редагувати клієнта",
+
     name: "Ім'я",
     phone: "Телефон",
     telegram: "Telegram",
@@ -360,30 +396,46 @@ const translations = {
     dateRequired: "Вкажи дату.",
     timeRequired: "Вкажи час.",
 
-    conflict: "Цей час перетинається із записом",
+    conflict:
+      "Цей час перетинається із записом",
 
-    deleteAppointmentConfirm: "Видалити цей запис?",
+    deleteAppointmentConfirm:
+      "Видалити цей запис?",
+
     deleteClientConfirm:
       "Видалити клієнта? Його записи залишаться в календарі.",
-    deleteServiceConfirm: "Видалити цю послугу?",
+
+    deleteServiceConfirm:
+      "Видалити цю послугу?",
   },
 };
 
 function formatDateKey(date: Date) {
-  const year = date.getFullYear();
+  const year =
+    date.getFullYear();
 
-  const month = String(
-    date.getMonth() + 1
-  ).padStart(2, "0");
+  const month =
+    String(
+      date.getMonth() + 1
+    ).padStart(
+      2,
+      "0"
+    );
 
-  const day = String(
-    date.getDate()
-  ).padStart(2, "0");
+  const day =
+    String(
+      date.getDate()
+    ).padStart(
+      2,
+      "0"
+    );
 
   return `${year}-${month}-${day}`;
 }
 
-function getLocale(language: Language) {
+function getLocale(
+  language: Language
+) {
   return language === "uk"
     ? "uk-UA"
     : "ru-RU";
@@ -394,12 +446,16 @@ function formatDateTitle(
   language: Language
 ) {
   return new Intl.DateTimeFormat(
-    getLocale(language),
+    getLocale(
+      language
+    ),
     {
       day: "numeric",
       month: "long",
     }
-  ).format(date);
+  ).format(
+    date
+  );
 }
 
 function formatMonthTitle(
@@ -407,12 +463,16 @@ function formatMonthTitle(
   language: Language
 ) {
   return new Intl.DateTimeFormat(
-    getLocale(language),
+    getLocale(
+      language
+    ),
     {
       month: "long",
       year: "numeric",
     }
-  ).format(date);
+  ).format(
+    date
+  );
 }
 
 function formatFullDate(
@@ -420,7 +480,9 @@ function formatFullDate(
   language: Language
 ) {
   return new Intl.DateTimeFormat(
-    getLocale(language),
+    getLocale(
+      language
+    ),
     {
       day: "numeric",
       month: "long",
@@ -438,11 +500,15 @@ function formatWeekday(
   language: Language
 ) {
   return new Intl.DateTimeFormat(
-    getLocale(language),
+    getLocale(
+      language
+    ),
     {
       weekday: "long",
     }
-  ).format(date);
+  ).format(
+    date
+  );
 }
 
 function formatUkrainianReminderDate(
@@ -461,26 +527,46 @@ function formatUkrainianReminderDate(
   );
 }
 
-function timeToMinutes(time: string) {
-  const [hours, minutes] =
-    time.split(":").map(Number);
+function timeToMinutes(
+  time: string
+) {
+  const [
+    hours,
+    minutes,
+  ] =
+    time
+      .split(":")
+      .map(
+        Number
+      );
 
-  return hours * 60 + minutes;
+  return (
+    hours * 60 +
+    minutes
+  );
 }
 
 function minutesToTime(
   totalMinutes: number
 ) {
   const hours =
-    Math.floor(totalMinutes / 60);
+    Math.floor(
+      totalMinutes /
+        60
+    );
 
   const minutes =
-    totalMinutes % 60;
+    totalMinutes %
+    60;
 
-  return `${String(hours).padStart(
+  return `${String(
+    hours
+  ).padStart(
     2,
     "0"
-  )}:${String(minutes).padStart(
+  )}:${String(
+    minutes
+  ).padStart(
     2,
     "0"
   )}`;
@@ -490,24 +576,37 @@ function formatDurationLabel(
   minutes: number,
   language: Language
 ) {
-  if (minutes === 30) {
-    return language === "uk"
+  if (
+    minutes === 30
+  ) {
+    return language ===
+      "uk"
       ? "30 хвилин"
       : "30 минут";
   }
 
   const hours =
-    Math.floor(minutes / 60);
+    Math.floor(
+      minutes /
+        60
+    );
 
   const half =
-    minutes % 60 === 30;
+    minutes %
+      60 ===
+    30;
 
   if (half) {
     return `${hours}:30`;
   }
 
-  if (language === "uk") {
-    if (hours === 1) {
+  if (
+    language ===
+    "uk"
+  ) {
+    if (
+      hours === 1
+    ) {
       return "1 година";
     }
 
@@ -521,13 +620,15 @@ function formatDurationLabel(
     return `${hours} годин`;
   }
 
-  if (hours === 1) {
+  if (
+    hours === 1
+  ) {
     return "1 час";
   }
 
   if (
     hours >= 2 &&
-    hours <= 4
+      hours <= 4
   ) {
     return `${hours} часа`;
   }
@@ -540,8 +641,11 @@ function getAppointmentTop(
   startHour: number
 ) {
   return (
-    ((timeToMinutes(time) -
-      startHour * 60) /
+    ((timeToMinutes(
+      time
+    ) -
+      startHour *
+        60) /
       60) *
     HOUR_HEIGHT
   );
@@ -551,7 +655,8 @@ function getAppointmentHeight(
   duration: number
 ) {
   return Math.max(
-    (duration / 60) *
+    (duration /
+      60) *
       HOUR_HEIGHT,
     48
   );
@@ -566,9 +671,13 @@ function safeArray<T>(
 
   try {
     const parsed =
-      JSON.parse(value);
+      JSON.parse(
+        value
+      );
 
-    return Array.isArray(parsed)
+    return Array.isArray(
+      parsed
+    )
       ? parsed
       : [];
   } catch {
@@ -608,11 +717,26 @@ function cleanUsername(
       /^https?:\/\/(www\.)?/,
       ""
     )
-    .replace(/^t\.me\//, "")
-    .replace(/^telegram\.me\//, "")
-    .replace(/^instagram\.com\//, "")
-    .replace(/^www\.instagram\.com\//, "")
-    .replace(/^@/, "")
+    .replace(
+      /^t\.me\//,
+      ""
+    )
+    .replace(
+      /^telegram\.me\//,
+      ""
+    )
+    .replace(
+      /^instagram\.com\//,
+      ""
+    )
+    .replace(
+      /^www\.instagram\.com\//,
+      ""
+    )
+    .replace(
+      /^@/,
+      ""
+    )
     .split("/")[0]
     .split("?")[0];
 }
@@ -621,7 +745,9 @@ function getTelegramUrl(
   value: string
 ) {
   const username =
-    cleanUsername(value);
+    cleanUsername(
+      value
+    );
 
   return username
     ? `https://t.me/${username}`
@@ -632,11 +758,22 @@ function getInstagramUrl(
   value: string
 ) {
   const username =
-    cleanUsername(value);
+    cleanUsername(
+      value
+    );
 
   return username
     ? `https://instagram.com/${username}`
     : "";
+}
+
+function normalizePhone(
+  phone: string
+) {
+  return phone.replace(
+    /\D/g,
+    ""
+  );
 }
 
 function normalizeClient(
@@ -651,25 +788,48 @@ function normalizeClient(
   }
 ): Client {
   const legacy =
-    client.social?.trim() || "";
+    client.social?.trim() ||
+    "";
 
-  let legacyTelegram = "";
-  let legacyInstagram = "";
+  let legacyTelegram =
+    "";
+
+  let legacyInstagram =
+    "";
 
   if (
-    legacy.startsWith("@") ||
-    legacy.includes("t.me") ||
-    legacy.includes("telegram")
+    legacy.startsWith(
+      "@"
+    ) ||
+    legacy.includes(
+      "t.me"
+    ) ||
+    legacy.includes(
+      "telegram"
+    )
   ) {
-    legacyTelegram = legacy;
-  } else if (legacy) {
-    legacyInstagram = legacy;
+    legacyTelegram =
+      legacy;
+  } else if (
+    legacy
+  ) {
+    legacyInstagram =
+      legacy;
   }
 
   return {
-    id: Number(client.id),
-    name: client.name ?? "",
-    phone: client.phone ?? "",
+    id:
+      Number(
+        client.id
+      ),
+
+    name:
+      client.name ??
+      "",
+
+    phone:
+      client.phone ??
+      "",
 
     telegram:
       client.telegram?.trim() ||
@@ -679,7 +839,43 @@ function normalizeClient(
       client.instagram?.trim() ||
       legacyInstagram,
 
-    note: client.note ?? "",
+    note:
+      client.note ??
+      "",
+  };
+}
+
+function normalizeService(
+  service: Partial<Service> & {
+    id: number;
+  }
+): Service {
+  return {
+    id:
+      Number(
+        service.id
+      ),
+
+    name:
+      service.name ??
+      "",
+
+    duration:
+      Number(
+        service.duration ??
+          90
+      ),
+
+    price:
+      Number(
+        service.price ??
+          0
+      ),
+
+    isAddon:
+      Boolean(
+        service.isAddon
+      ),
   };
 }
 
@@ -687,7 +883,9 @@ function getWeekDates(
   date: Date
 ) {
   const current =
-    new Date(date);
+    new Date(
+      date
+    );
 
   const day =
     current.getDay();
@@ -698,7 +896,9 @@ function getWeekDates(
       : 1 - day;
 
   const monday =
-    new Date(current);
+    new Date(
+      current
+    );
 
   monday.setDate(
     current.getDate() +
@@ -706,10 +906,17 @@ function getWeekDates(
   );
 
   return Array.from(
-    { length: 7 },
-    (_, index) => {
+    {
+      length: 7,
+    },
+    (
+      _,
+      index
+    ) => {
       const item =
-        new Date(monday);
+        new Date(
+          monday
+        );
 
       item.setDate(
         monday.getDate() +
@@ -747,7 +954,9 @@ function getMonthCalendarDays(
   let weekday =
     first.getDay();
 
-  if (weekday === 0) {
+  if (
+    weekday === 0
+  ) {
     weekday = 7;
   }
 
@@ -760,37 +969,48 @@ function getMonthCalendarDays(
   }[] = [];
 
   for (
-    let index = before;
+    let index =
+      before;
     index > 0;
     index--
   ) {
     cells.push({
-      date: new Date(
-        year,
-        month,
-        1 - index
-      ),
-      isCurrentMonth: false,
+      date:
+        new Date(
+          year,
+          month,
+          1 -
+            index
+        ),
+
+      isCurrentMonth:
+        false,
     });
   }
 
   for (
     let day = 1;
-    day <= last.getDate();
+    day <=
+    last.getDate();
     day++
   ) {
     cells.push({
-      date: new Date(
-        year,
-        month,
-        day
-      ),
-      isCurrentMonth: true,
+      date:
+        new Date(
+          year,
+          month,
+          day
+        ),
+
+      isCurrentMonth:
+        true,
     });
   }
 
   while (
-    cells.length % 7 !== 0
+    cells.length %
+      7 !==
+    0
   ) {
     const day =
       cells.length -
@@ -799,12 +1019,16 @@ function getMonthCalendarDays(
       1;
 
     cells.push({
-      date: new Date(
-        year,
-        month + 1,
-        day
-      ),
-      isCurrentMonth: false,
+      date:
+        new Date(
+          year,
+          month +
+            1,
+          day
+        ),
+
+      isCurrentMonth:
+        false,
     });
   }
 
@@ -814,15 +1038,24 @@ function getMonthCalendarDays(
 function getStatusBadgeClass(
   status: AppointmentStatus
 ) {
-  if (status === "completed") {
+  if (
+    status ===
+    "completed"
+  ) {
     return "border-emerald-200 bg-emerald-50/90 text-emerald-700";
   }
 
-  if (status === "cancelled") {
+  if (
+    status ===
+    "cancelled"
+  ) {
     return "border-rose-200 bg-rose-50/90 text-rose-700";
   }
 
-  if (status === "no-show") {
+  if (
+    status ===
+    "no-show"
+  ) {
     return "border-amber-200 bg-amber-50/90 text-amber-700";
   }
 
@@ -832,15 +1065,24 @@ function getStatusBadgeClass(
 function getAppointmentAccentClass(
   status: AppointmentStatus
 ) {
-  if (status === "completed") {
+  if (
+    status ===
+    "completed"
+  ) {
     return "bg-emerald-400";
   }
 
-  if (status === "cancelled") {
+  if (
+    status ===
+    "cancelled"
+  ) {
     return "bg-rose-400";
   }
 
-  if (status === "no-show") {
+  if (
+    status ===
+    "no-show"
+  ) {
     return "bg-amber-400";
   }
 
@@ -851,10 +1093,14 @@ function sumPrices(
   items: Appointment[]
 ) {
   return items.reduce(
-    (sum, item) =>
+    (
+      sum,
+      item
+    ) =>
       sum +
       Number(
-        item.price || 0
+        item.price ||
+          0
       ),
     0
   );
@@ -863,15 +1109,20 @@ function sumPrices(
 export default function Home() {
   const supabase =
     useMemo(
-      () => createClient(),
+      () =>
+        createClient(),
       []
     );
 
   const settingsReadyRef =
-    useRef(false);
+    useRef(
+      false
+    );
 
   const syncingRef =
-    useRef(false);
+    useRef(
+      false
+    );
 
   const [
     today,
@@ -895,7 +1146,9 @@ export default function Home() {
     authChecked,
     setAuthChecked,
   ] =
-    useState(false);
+    useState(
+      false
+    );
 
   const [
     loginEmail,
@@ -919,7 +1172,9 @@ export default function Home() {
     loginLoading,
     setLoginLoading,
   ] =
-    useState(false);
+    useState(
+      false
+    );
 
   const [
     language,
@@ -930,7 +1185,9 @@ export default function Home() {
     );
 
   const t =
-    translations[language];
+    translations[
+      language
+    ];
 
   const [
     databaseStatus,
@@ -944,19 +1201,25 @@ export default function Home() {
     isOnline,
     setIsOnline,
   ] =
-    useState(true);
+    useState(
+      true
+    );
 
   const [
     pendingCount,
     setPendingCount,
   ] =
-    useState(0);
+    useState(
+      0
+    );
 
   const [
     isSyncing,
     setIsSyncing,
   ] =
-    useState(false);
+    useState(
+      false
+    );
 
   const [
     activeTab,
@@ -1006,17 +1269,17 @@ export default function Home() {
     clients,
     setClients,
   ] =
-    useState<Client[]>(
-      []
-    );
+    useState<
+      Client[]
+    >([]);
 
   const [
     services,
     setServices,
   ] =
-    useState<Service[]>(
-      []
-    );
+    useState<
+      Service[]
+    >([]);
 
   const [
     workSettings,
@@ -1030,37 +1293,49 @@ export default function Home() {
     isLoaded,
     setIsLoaded,
   ] =
-    useState(false);
+    useState(
+      false
+    );
 
   const [
     isAppointmentModalOpen,
     setIsAppointmentModalOpen,
   ] =
-    useState(false);
+    useState(
+      false
+    );
 
   const [
     isClientModalOpen,
     setIsClientModalOpen,
   ] =
-    useState(false);
+    useState(
+      false
+    );
 
   const [
     isClientDetailsOpen,
     setIsClientDetailsOpen,
   ] =
-    useState(false);
+    useState(
+      false
+    );
 
   const [
     isServiceModalOpen,
     setIsServiceModalOpen,
   ] =
-    useState(false);
+    useState(
+      false
+    );
 
   const [
     isReminderModalOpen,
     setIsReminderModalOpen,
   ] =
-    useState(false);
+    useState(
+      false
+    );
 
   const [
     editingAppointmentId,
@@ -1107,8 +1382,22 @@ export default function Home() {
     useState("");
 
   const [
+    selectedAddonServiceIds,
+    setSelectedAddonServiceIds,
+  ] =
+    useState<number[]>(
+      []
+    );
+
+  const [
     appointmentName,
     setAppointmentName,
+  ] =
+    useState("");
+
+  const [
+    appointmentPhone,
+    setAppointmentPhone,
   ] =
     useState("");
 
@@ -1134,7 +1423,9 @@ export default function Home() {
     appointmentDuration,
     setAppointmentDuration,
   ] =
-    useState("90");
+    useState(
+      "90"
+    );
 
   const [
     appointmentPrice,
@@ -1160,7 +1451,9 @@ export default function Home() {
     hasConflict,
     setHasConflict,
   ] =
-    useState(false);
+    useState(
+      false
+    );
 
   const [
     clientName,
@@ -1202,13 +1495,23 @@ export default function Home() {
     serviceDuration,
     setServiceDuration,
   ] =
-    useState("90");
+    useState(
+      "90"
+    );
 
   const [
     servicePrice,
     setServicePrice,
   ] =
     useState("");
+
+  const [
+    serviceIsAddon,
+    setServiceIsAddon,
+  ] =
+    useState(
+      false
+    );
 
   const [
     clientSearch,
@@ -1226,7 +1529,9 @@ export default function Home() {
     reminderCopied,
     setReminderCopied,
   ] =
-    useState(false);
+    useState(
+      false
+    );
 
   const [
     reminderClientId,
@@ -1249,7 +1554,9 @@ export default function Home() {
   ) {
     localStorage.setItem(
       OFFLINE_QUEUE_STORAGE_KEY,
-      JSON.stringify(queue)
+      JSON.stringify(
+        queue
+      )
     );
 
     setPendingCount(
@@ -1265,7 +1572,9 @@ export default function Home() {
 
     queue =
       queue.filter(
-        (item) =>
+        (
+          item
+        ) =>
           !(
             item.table ===
               operation.table &&
@@ -1292,7 +1601,9 @@ export default function Home() {
           operation.type ===
           "upsert"
         ) {
-          const { error } =
+          const {
+            error,
+          } =
             await supabase
               .from(
                 operation.table
@@ -1305,14 +1616,18 @@ export default function Home() {
                 }
               );
 
-          if (error) {
+          if (
+            error
+          ) {
             throw error;
           }
 
           return;
         }
 
-        const { error } =
+        const {
+          error,
+        } =
           await supabase
             .from(
               operation.table
@@ -1323,11 +1638,15 @@ export default function Home() {
               operation.value
             );
 
-        if (error) {
+        if (
+          error
+        ) {
           throw error;
         }
       },
-      [supabase]
+      [
+        supabase,
+      ]
     );
 
   const syncOfflineQueue =
@@ -1352,7 +1671,8 @@ export default function Home() {
         );
 
         if (
-          queue.length === 0
+          queue.length ===
+          0
         ) {
           setDatabaseStatus(
             "connected"
@@ -1364,14 +1684,17 @@ export default function Home() {
         syncingRef.current =
           true;
 
-        setIsSyncing(true);
+        setIsSyncing(
+          true
+        );
 
         setDatabaseStatus(
           "connecting"
         );
 
         while (
-          queue.length > 0
+          queue.length >
+          0
         ) {
           const operation =
             queue[0];
@@ -1382,7 +1705,9 @@ export default function Home() {
             );
 
             queue =
-              queue.slice(1);
+              queue.slice(
+                1
+              );
 
             localStorage.setItem(
               OFFLINE_QUEUE_STORAGE_KEY,
@@ -1394,7 +1719,9 @@ export default function Home() {
             setPendingCount(
               queue.length
             );
-          } catch (error) {
+          } catch (
+            error
+          ) {
             console.error(
               "Sync failed:",
               error
@@ -1416,7 +1743,8 @@ export default function Home() {
         );
 
         if (
-          queue.length === 0
+          queue.length ===
+          0
         ) {
           setDatabaseStatus(
             "connected"
@@ -1438,7 +1766,9 @@ export default function Home() {
         operation
       );
 
-      setIsOnline(false);
+      setIsOnline(
+        false
+      );
 
       setDatabaseStatus(
         "offline"
@@ -1455,7 +1785,9 @@ export default function Home() {
       setDatabaseStatus(
         "connected"
       );
-    } catch (error) {
+    } catch (
+      error
+    ) {
       console.error(
         "Cloud unavailable. Saved to offline queue:",
         error
@@ -1479,9 +1811,25 @@ export default function Home() {
         )
       );
 
+    const rawServices =
+      safeArray<Service>(
+        localStorage.getItem(
+          SERVICES_STORAGE_KEY
+        )
+      );
+
+    const rawAppointments =
+      safeArray<Appointment>(
+        localStorage.getItem(
+          APPOINTMENTS_STORAGE_KEY
+        )
+      );
+
     setClients(
       rawClients.map(
-        (client) =>
+        (
+          client
+        ) =>
           normalizeClient(
             client
           )
@@ -1489,18 +1837,32 @@ export default function Home() {
     );
 
     setServices(
-      safeArray<Service>(
-        localStorage.getItem(
-          SERVICES_STORAGE_KEY
-        )
+      rawServices.map(
+        (
+          service
+        ) =>
+          normalizeService(
+            service
+          )
       )
     );
 
     setAppointments(
-      safeArray<Appointment>(
-        localStorage.getItem(
-          APPOINTMENTS_STORAGE_KEY
-        )
+      rawAppointments.map(
+        (
+          appointment
+        ) => ({
+          ...appointment,
+
+          addonServiceIds:
+            Array.isArray(
+              appointment.addonServiceIds
+            )
+              ? appointment.addonServiceIds.map(
+                  Number
+                )
+              : [],
+        })
       )
     );
 
@@ -1519,8 +1881,10 @@ export default function Home() {
       );
 
     if (
-      storedLanguage === "ru" ||
-      storedLanguage === "uk"
+      storedLanguage ===
+        "ru" ||
+      storedLanguage ===
+        "uk"
     ) {
       setLanguage(
         storedLanguage
@@ -1564,13 +1928,17 @@ export default function Home() {
     );
 
     function handleOnline() {
-      setIsOnline(true);
+      setIsOnline(
+        true
+      );
 
       void syncOfflineQueue();
     }
 
     function handleOffline() {
-      setIsOnline(false);
+      setIsOnline(
+        false
+      );
 
       setDatabaseStatus(
         "offline"
@@ -1598,7 +1966,9 @@ export default function Home() {
         handleOffline
       );
     };
-  }, [syncOfflineQueue]);
+  }, [
+    syncOfflineQueue,
+  ]);
 
   useEffect(() => {
     const storedLanguage =
@@ -1607,8 +1977,10 @@ export default function Home() {
       );
 
     if (
-      storedLanguage === "ru" ||
-      storedLanguage === "uk"
+      storedLanguage ===
+        "ru" ||
+      storedLanguage ===
+        "uk"
     ) {
       setLanguage(
         storedLanguage
@@ -1618,7 +1990,9 @@ export default function Home() {
     supabase.auth
       .getSession()
       .then(
-        ({ data }) => {
+        ({
+          data,
+        }) => {
           setSession(
             data.session
           );
@@ -1652,10 +2026,14 @@ export default function Home() {
     return () => {
       subscription.unsubscribe();
     };
-  }, [supabase]);
+  }, [
+    supabase,
+  ]);
 
   useEffect(() => {
-    if (!session) {
+    if (
+      !session
+    ) {
       return;
     }
 
@@ -1701,29 +2079,45 @@ export default function Home() {
               .from(
                 "clients"
               )
-              .select("*")
-              .order("name"),
+              .select(
+                "*"
+              )
+              .order(
+                "name"
+              ),
 
             supabase
               .from(
                 "services"
               )
-              .select("*")
-              .order("name"),
+              .select(
+                "*"
+              )
+              .order(
+                "name"
+              ),
 
             supabase
               .from(
                 "appointments"
               )
-              .select("*")
-              .order("date")
-              .order("time"),
+              .select(
+                "*"
+              )
+              .order(
+                "date"
+              )
+              .order(
+                "time"
+              ),
 
             supabase
               .from(
                 "settings"
               )
-              .select("*")
+              .select(
+                "*"
+              )
               .eq(
                 "id",
                 "main"
@@ -1760,26 +2154,35 @@ export default function Home() {
             clientsResult.data ??
             []
           ).map(
-            (row) =>
+            (
+              row
+            ) =>
               normalizeClient({
-                id: Number(
-                  row.id
-                ),
+                id:
+                  Number(
+                    row.id
+                  ),
+
                 name:
                   row.name ??
                   "",
+
                 phone:
                   row.phone ??
                   "",
+
                 telegram:
                   row.telegram ??
                   "",
+
                 instagram:
                   row.instagram ??
                   "",
+
                 social:
                   row.social ??
                   "",
+
                 note:
                   row.note ??
                   "",
@@ -1791,24 +2194,36 @@ export default function Home() {
             servicesResult.data ??
             []
           ).map(
-            (row) => ({
-              id: Number(
-                row.id
-              ),
-              name:
-                row.name ??
-                "",
-              duration:
-                Number(
-                  row.duration ??
-                    90
-                ),
-              price:
-                Number(
-                  row.price ??
-                    0
-                ),
-            })
+            (
+              row
+            ) =>
+              normalizeService({
+                id:
+                  Number(
+                    row.id
+                  ),
+
+                name:
+                  row.name ??
+                  "",
+
+                duration:
+                  Number(
+                    row.duration ??
+                      90
+                  ),
+
+                price:
+                  Number(
+                    row.price ??
+                      0
+                  ),
+
+                isAddon:
+                  Boolean(
+                    row.is_addon
+                  ),
+              })
           );
 
         const nextAppointments: Appointment[] =
@@ -1816,13 +2231,18 @@ export default function Home() {
             appointmentsResult.data ??
             []
           ).map(
-            (row) => ({
-              id: Number(
-                row.id
-              ),
+            (
+              row
+            ) => ({
+              id:
+                Number(
+                  row.id
+                ),
+
               date:
                 row.date ??
                 "",
+
               time:
                 String(
                   row.time ??
@@ -1831,6 +2251,7 @@ export default function Home() {
                   0,
                   5
                 ),
+
               clientId:
                 row.client_id !==
                   null &&
@@ -1840,9 +2261,11 @@ export default function Home() {
                       row.client_id
                     )
                   : undefined,
+
               name:
                 row.name ??
                 "",
+
               serviceId:
                 row.service_id !==
                   null &&
@@ -1852,22 +2275,37 @@ export default function Home() {
                       row.service_id
                     )
                   : undefined,
+
               service:
                 row.service ??
                 "",
+
+              addonServiceIds:
+                Array.isArray(
+                  row.addon_service_ids
+                )
+                  ? row.addon_service_ids.map(
+                      Number
+                    )
+                  : [],
+
               duration:
                 Number(
                   row.duration ??
                     90
                 ),
+
               price:
                 Number(
                   row.price ??
                     0
                 ),
+
               status:
-                (row.status ??
-                  "scheduled") as AppointmentStatus,
+                (
+                  row.status ??
+                  "scheduled"
+                ) as AppointmentStatus,
             })
           );
 
@@ -1923,7 +2361,9 @@ export default function Home() {
         setDatabaseStatus(
           "connected"
         );
-      } catch (error) {
+      } catch (
+        error
+      ) {
         console.error(
           "Load failed, using local data:",
           error
@@ -1954,7 +2394,9 @@ export default function Home() {
   ]);
 
   useEffect(() => {
-    if (!isLoaded) {
+    if (
+      !isLoaded
+    ) {
       return;
     }
 
@@ -1970,7 +2412,9 @@ export default function Home() {
   ]);
 
   useEffect(() => {
-    if (!isLoaded) {
+    if (
+      !isLoaded
+    ) {
       return;
     }
 
@@ -1986,7 +2430,9 @@ export default function Home() {
   ]);
 
   useEffect(() => {
-    if (!isLoaded) {
+    if (
+      !isLoaded
+    ) {
       return;
     }
 
@@ -2002,7 +2448,9 @@ export default function Home() {
   ]);
 
   useEffect(() => {
-    if (!isLoaded) {
+    if (
+      !isLoaded
+    ) {
       return;
     }
 
@@ -2041,7 +2489,8 @@ export default function Home() {
               "main",
 
             payload: {
-              id: "main",
+              id:
+                "main",
 
               language,
 
@@ -2082,7 +2531,8 @@ export default function Home() {
       !navigator.onLine
     ) {
       setLoginError(
-        language === "uk"
+        language ===
+          "uk"
           ? "Для входу потрібен інтернет."
           : "Для входа нужен интернет."
       );
@@ -2094,9 +2544,13 @@ export default function Home() {
       true
     );
 
-    setLoginError("");
+    setLoginError(
+      ""
+    );
 
-    const { error } =
+    const {
+      error,
+    } =
       await supabase.auth.signInWithPassword(
         {
           email:
@@ -2107,9 +2561,12 @@ export default function Home() {
         }
       );
 
-    if (error) {
+    if (
+      error
+    ) {
       setLoginError(
-        language === "uk"
+        language ===
+          "uk"
           ? "Невірний email або пароль."
           : "Неверный email или пароль."
       );
@@ -2152,15 +2609,25 @@ export default function Home() {
     visibleMonth.getMonth() ===
       today.getMonth();
 
+  const selectedDateIsWorkDay =
+    workSettings.workDays.includes(
+      selectedDate.getDay()
+    );
+
   const selectedDayAppointments =
     appointments
       .filter(
-        (appointment) =>
+        (
+          appointment
+        ) =>
           appointment.date ===
           selectedDateKey
       )
       .sort(
-        (a, b) =>
+        (
+          a,
+          b
+        ) =>
           a.time.localeCompare(
             b.time
           )
@@ -2183,8 +2650,10 @@ export default function Home() {
     );
 
   const calendarHeight =
-    (workSettings.endHour -
-      workSettings.startHour) *
+    (
+      workSettings.endHour -
+      workSettings.startHour
+    ) *
     HOUR_HEIGHT;
 
   const monthDays =
@@ -2197,37 +2666,70 @@ export default function Home() {
       selectedDate
     );
 
+  const mainServices =
+    services.filter(
+      (
+        service
+      ) =>
+        !service.isAddon
+    );
+
+  const addonServices =
+    services.filter(
+      (
+        service
+      ) =>
+        service.isAddon
+    );
+
   const filteredClients =
-    [...clients]
+    [
+      ...clients,
+    ]
       .filter(
-        (client) => {
+        (
+          client
+        ) => {
           const search =
             clientSearch
               .trim()
               .toLowerCase();
 
-          if (!search) {
+          if (
+            !search
+          ) {
             return true;
           }
 
           return (
             client.name
               .toLowerCase()
-              .includes(search) ||
+              .includes(
+                search
+              ) ||
             client.phone
               .toLowerCase()
-              .includes(search) ||
+              .includes(
+                search
+              ) ||
             client.telegram
               .toLowerCase()
-              .includes(search) ||
+              .includes(
+                search
+              ) ||
             client.instagram
               .toLowerCase()
-              .includes(search)
+              .includes(
+                search
+              )
           );
         }
       )
       .sort(
-        (a, b) =>
+        (
+          a,
+          b
+        ) =>
           a.name.localeCompare(
             b.name,
             getLocale(
@@ -2240,7 +2742,9 @@ export default function Home() {
     selectedClientDetailsId !==
     null
       ? clients.find(
-          (client) =>
+          (
+            client
+          ) =>
             client.id ===
             selectedClientDetailsId
         )
@@ -2250,7 +2754,9 @@ export default function Home() {
     reminderClientId !==
     null
       ? clients.find(
-          (client) =>
+          (
+            client
+          ) =>
             client.id ===
             reminderClientId
         )
@@ -2260,7 +2766,9 @@ export default function Home() {
     selectedClientDetailsId !==
     null
       ? appointments.filter(
-          (appointment) =>
+          (
+            appointment
+          ) =>
             appointment.clientId ===
             selectedClientDetailsId
         )
@@ -2269,14 +2777,19 @@ export default function Home() {
   const futureClientAppointments =
     clientAppointments
       .filter(
-        (appointment) =>
+        (
+          appointment
+        ) =>
           appointment.date >=
             todayKey &&
           appointment.status ===
             "scheduled"
       )
       .sort(
-        (a, b) => {
+        (
+          a,
+          b
+        ) => {
           if (
             a.date !==
             b.date
@@ -2295,14 +2808,19 @@ export default function Home() {
   const pastClientAppointments =
     clientAppointments
       .filter(
-        (appointment) =>
+        (
+          appointment
+        ) =>
           appointment.date <
             todayKey ||
           appointment.status !==
             "scheduled"
       )
       .sort(
-        (a, b) => {
+        (
+          a,
+          b
+        ) => {
           if (
             a.date !==
             b.date
@@ -2319,17 +2837,24 @@ export default function Home() {
       );
 
   const sevenDaysAgo =
-    useMemo(() => {
-      const date =
-        new Date(today);
+    useMemo(
+      () => {
+        const date =
+          new Date(
+            today
+          );
 
-      date.setDate(
-        date.getDate() -
-          6
-      );
+        date.setDate(
+          date.getDate() -
+            6
+        );
 
-      return date;
-    }, [today]);
+        return date;
+      },
+      [
+        today,
+      ]
+    );
 
   const sevenDaysAgoKey =
     formatDateKey(
@@ -2357,7 +2882,9 @@ export default function Home() {
 
   const completedAppointments =
     appointments.filter(
-      (appointment) =>
+      (
+        appointment
+      ) =>
         appointment.status ===
         "completed"
     );
@@ -2365,7 +2892,9 @@ export default function Home() {
   const todayIncome =
     sumPrices(
       completedAppointments.filter(
-        (appointment) =>
+        (
+          appointment
+        ) =>
           appointment.date ===
           todayKey
       )
@@ -2374,7 +2903,9 @@ export default function Home() {
   const weekIncome =
     sumPrices(
       completedAppointments.filter(
-        (appointment) =>
+        (
+          appointment
+        ) =>
           appointment.date >=
             sevenDaysAgoKey &&
           appointment.date <=
@@ -2384,7 +2915,9 @@ export default function Home() {
 
   const currentMonthAppointments =
     appointments.filter(
-      (appointment) =>
+      (
+        appointment
+      ) =>
         appointment.date >=
           monthStartKey &&
         appointment.date <=
@@ -2393,7 +2926,9 @@ export default function Home() {
 
   const currentMonthCompleted =
     currentMonthAppointments.filter(
-      (appointment) =>
+      (
+        appointment
+      ) =>
         appointment.status ===
         "completed"
     );
@@ -2414,28 +2949,36 @@ export default function Home() {
 
   const monthScheduledCount =
     currentMonthAppointments.filter(
-      (appointment) =>
+      (
+        appointment
+      ) =>
         appointment.status ===
         "scheduled"
     ).length;
 
   const monthCompletedCount =
     currentMonthAppointments.filter(
-      (appointment) =>
+      (
+        appointment
+      ) =>
         appointment.status ===
         "completed"
     ).length;
 
   const monthCancelledCount =
     currentMonthAppointments.filter(
-      (appointment) =>
+      (
+        appointment
+      ) =>
         appointment.status ===
         "cancelled"
     ).length;
 
   const monthNoShowCount =
     currentMonthAppointments.filter(
-      (appointment) =>
+      (
+        appointment
+      ) =>
         appointment.status ===
         "no-show"
     ).length;
@@ -2459,19 +3002,30 @@ export default function Home() {
             "Без услуги";
 
           if (
-            !result[key]
+            !result[
+              key
+            ]
           ) {
-            result[key] = {
-              name: key,
-              count: 0,
-              income: 0,
+            result[
+              key
+            ] = {
+              name:
+                key,
+              count:
+                0,
+              income:
+                0,
             };
           }
 
-          result[key].count +=
+          result[
+            key
+          ].count +=
             1;
 
-          result[key].income +=
+          result[
+            key
+          ].income +=
             Number(
               appointment.price ||
                 0
@@ -2482,7 +3036,10 @@ export default function Home() {
         {}
       )
     ).sort(
-      (a, b) =>
+      (
+        a,
+        b
+      ) =>
         b.count -
         a.count
     );
@@ -2496,7 +3053,8 @@ export default function Home() {
 
     if (
       isSyncing ||
-      pendingCount > 0
+      pendingCount >
+        0
     ) {
       return `${t.syncing}: ${pendingCount}`;
     }
@@ -2513,7 +3071,8 @@ export default function Home() {
 
     if (
       isSyncing ||
-      pendingCount > 0
+      pendingCount >
+        0
     ) {
       return "border-amber-300 bg-amber-50/90 text-amber-700";
     }
@@ -2546,6 +3105,169 @@ export default function Home() {
     }
 
     return t.scheduledStatus;
+  }
+
+  function getAppointmentClient(
+    appointment: Appointment
+  ) {
+    if (
+      appointment.clientId ===
+      undefined
+    ) {
+      return undefined;
+    }
+
+    return clients.find(
+      (
+        client
+      ) =>
+        client.id ===
+        appointment.clientId
+    );
+  }
+
+  function getAppointmentServiceLabel(
+    appointment: Appointment
+  ) {
+    const addons =
+      appointment.addonServiceIds
+        .map(
+          (
+            id
+          ) =>
+            services.find(
+              (
+                service
+              ) =>
+                service.id ===
+                id
+            )
+        )
+        .filter(
+          (
+            service
+          ): service is Service =>
+            Boolean(
+              service
+            )
+        );
+
+    if (
+      addons.length ===
+      0
+    ) {
+      return appointment.service;
+    }
+
+    return `${appointment.service} + ${addons
+      .map(
+        (
+          addon
+        ) =>
+          addon.name
+      )
+      .join(" + ")}`;
+  }
+
+  function calculateServiceTotals(
+    mainId: string,
+    addonIds: number[]
+  ) {
+    let duration =
+      0;
+
+    let price =
+      0;
+
+    const main =
+      services.find(
+        (
+          service
+        ) =>
+          service.id ===
+          Number(
+            mainId
+          )
+      );
+
+    if (
+      main
+    ) {
+      duration +=
+        Number(
+          main.duration ||
+            0
+        );
+
+      price +=
+        Number(
+          main.price ||
+            0
+        );
+    }
+
+    for (
+      const addonId of
+      addonIds
+    ) {
+      const addon =
+        services.find(
+          (
+            service
+          ) =>
+            service.id ===
+            addonId
+        );
+
+      if (
+        addon
+      ) {
+        duration +=
+          Number(
+            addon.duration ||
+              0
+          );
+
+        price +=
+          Number(
+            addon.price ||
+              0
+          );
+      }
+    }
+
+    return {
+      duration,
+      price,
+    };
+  }
+
+  function applyServiceTotals(
+    mainId: string,
+    addonIds: number[]
+  ) {
+    const totals =
+      calculateServiceTotals(
+        mainId,
+        addonIds
+      );
+
+    if (
+      totals.duration >
+      0
+    ) {
+      setAppointmentDuration(
+        String(
+          totals.duration
+        )
+      );
+    }
+
+    setAppointmentPrice(
+      String(
+        totals.price
+      )
+    );
   }
 
   function changeDay(
@@ -2617,7 +3339,15 @@ export default function Home() {
       ""
     );
 
+    setSelectedAddonServiceIds(
+      []
+    );
+
     setAppointmentName(
+      ""
+    );
+
+    setAppointmentPhone(
       ""
     );
 
@@ -2707,12 +3437,33 @@ export default function Home() {
       appointment.status
     );
 
+    setSelectedAddonServiceIds(
+      appointment.addonServiceIds ??
+        []
+    );
+
     setSelectedClientId(
       appointment.clientId
         ? String(
             appointment.clientId
           )
         : ""
+    );
+
+    const linkedClient =
+      appointment.clientId
+        ? clients.find(
+            (
+              client
+            ) =>
+              client.id ===
+              appointment.clientId
+          )
+        : undefined;
+
+    setAppointmentPhone(
+      linkedClient?.phone ??
+        ""
     );
 
     setSelectedServiceId(
@@ -2758,7 +3509,9 @@ export default function Home() {
       duration;
 
     return appointments.find(
-      (appointment) => {
+      (
+        appointment
+      ) => {
         if (
           appointment.date !==
           date
@@ -2803,19 +3556,214 @@ export default function Home() {
     );
   }
 
-  async function actuallySaveAppointment() {
-    const client =
-      clients.find(
-        (item) =>
-          item.id ===
+  async function ensureAppointmentClient() {
+    if (
+      selectedClientId
+    ) {
+      return clients.find(
+        (
+          client
+        ) =>
+          client.id ===
           Number(
             selectedClientId
           )
       );
+    }
+
+    const name =
+      appointmentName.trim();
+
+    const phone =
+      appointmentPhone.trim();
+
+    if (
+      !name
+    ) {
+      return undefined;
+    }
+
+    const normalizedPhone =
+      normalizePhone(
+        phone
+      );
+
+    let existingClient:
+      | Client
+      | undefined;
+
+    if (
+      normalizedPhone
+    ) {
+      existingClient =
+        clients.find(
+          (
+            client
+          ) =>
+            normalizePhone(
+              client.phone
+            ) ===
+            normalizedPhone
+        );
+    }
+
+    if (
+      !existingClient
+    ) {
+      existingClient =
+        clients.find(
+          (
+            client
+          ) =>
+            client.name
+              .trim()
+              .toLowerCase() ===
+            name.toLowerCase()
+        );
+    }
+
+    if (
+      existingClient
+    ) {
+      if (
+        phone &&
+        !existingClient.phone
+      ) {
+        const updatedClient: Client =
+          {
+            ...existingClient,
+            phone,
+          };
+
+        setClients(
+          (
+            current
+          ) =>
+            current.map(
+              (
+                client
+              ) =>
+                client.id ===
+                updatedClient.id
+                  ? updatedClient
+                  : client
+            )
+        );
+
+        await saveOrQueue({
+          queueId:
+            createQueueId(),
+
+          type:
+            "upsert",
+
+          table:
+            "clients",
+
+          recordId:
+            updatedClient.id,
+
+          payload: {
+            id:
+              updatedClient.id,
+
+            name:
+              updatedClient.name,
+
+            phone:
+              updatedClient.phone,
+
+            telegram:
+              updatedClient.telegram,
+
+            instagram:
+              updatedClient.instagram,
+
+            note:
+              updatedClient.note,
+          },
+        });
+
+        return updatedClient;
+      }
+
+      return existingClient;
+    }
+
+    const newClient: Client =
+      {
+        id:
+          Date.now(),
+
+        name,
+
+        phone,
+
+        telegram:
+          "",
+
+        instagram:
+          "",
+
+        note:
+          "",
+      };
+
+    setClients(
+      (
+        current
+      ) => [
+        ...current,
+        newClient,
+      ]
+    );
+
+    await saveOrQueue({
+      queueId:
+        createQueueId(),
+
+      type:
+        "upsert",
+
+      table:
+        "clients",
+
+      recordId:
+        newClient.id,
+
+      payload: {
+        id:
+          newClient.id,
+
+        name:
+          newClient.name,
+
+        phone:
+          newClient.phone,
+
+        telegram:
+          "",
+
+        instagram:
+          "",
+
+        note:
+          "",
+      },
+    });
+
+    return newClient;
+  }
+
+  async function actuallySaveAppointment() {
+    const client =
+      await ensureAppointmentClient();
 
     const service =
       services.find(
-        (item) =>
+        (
+          item
+        ) =>
           item.id ===
           Number(
             selectedServiceId
@@ -2847,9 +3795,15 @@ export default function Home() {
         service:
           service?.name ||
           appointmentService.trim() ||
-          (language === "uk"
-            ? "Манікюр"
-            : "Маникюр"),
+          (
+            language ===
+            "uk"
+              ? "Манікюр"
+              : "Маникюр"
+          ),
+
+        addonServiceIds:
+          selectedAddonServiceIds,
 
         duration:
           Number(
@@ -2867,13 +3821,17 @@ export default function Home() {
       };
 
     setAppointments(
-      (current) => {
+      (
+        current
+      ) => {
         if (
           editingAppointmentId !==
           null
         ) {
           return current.map(
-            (item) =>
+            (
+              item
+            ) =>
               item.id ===
               editingAppointmentId
                 ? appointment
@@ -2925,6 +3883,9 @@ export default function Home() {
         service:
           appointment.service,
 
+        addon_service_ids:
+          appointment.addonServiceIds,
+
         duration:
           appointment.duration,
 
@@ -2944,9 +3905,11 @@ export default function Home() {
   }
 
   async function saveAppointment() {
-    const client =
+    const selectedClient =
       clients.find(
-        (item) =>
+        (
+          item
+        ) =>
           item.id ===
           Number(
             selectedClientId
@@ -2954,10 +3917,12 @@ export default function Home() {
       );
 
     const finalName =
-      client?.name ||
+      selectedClient?.name ||
       appointmentName.trim();
 
-    if (!finalName) {
+    if (
+      !finalName
+    ) {
       setAppointmentError(
         t.clientRequired
       );
@@ -3033,10 +3998,15 @@ export default function Home() {
     }
 
     setAppointments(
-      (current) =>
+      (
+        current
+      ) =>
         current.filter(
-          (item) =>
-            item.id !== id
+          (
+            item
+          ) =>
+            item.id !==
+            id
         )
     );
 
@@ -3161,13 +4131,17 @@ export default function Home() {
       };
 
     setClients(
-      (current) => {
+      (
+        current
+      ) => {
         if (
           editingClientId !==
           null
         ) {
           return current.map(
-            (item) =>
+            (
+              item
+            ) =>
               item.id ===
               editingClientId
                 ? client
@@ -3189,12 +4163,16 @@ export default function Home() {
       const changedAppointments =
         appointments
           .filter(
-            (appointment) =>
+            (
+              appointment
+            ) =>
               appointment.clientId ===
               editingClientId
           )
           .map(
-            (appointment) => ({
+            (
+              appointment
+            ) => ({
               ...appointment,
               name:
                 client.name,
@@ -3202,12 +4180,18 @@ export default function Home() {
           );
 
       setAppointments(
-        (current) =>
+        (
+          current
+        ) =>
           current.map(
-            (appointment) => {
+            (
+              appointment
+            ) => {
               const changed =
                 changedAppointments.find(
-                  (item) =>
+                  (
+                    item
+                  ) =>
                     item.id ===
                     appointment.id
                 );
@@ -3260,6 +4244,9 @@ export default function Home() {
 
             service:
               appointment.service,
+
+            addon_service_ids:
+              appointment.addonServiceIds,
 
             duration:
               appointment.duration,
@@ -3325,17 +4312,26 @@ export default function Home() {
     }
 
     setClients(
-      (current) =>
+      (
+        current
+      ) =>
         current.filter(
-          (client) =>
-            client.id !== id
+          (
+            client
+          ) =>
+            client.id !==
+            id
         )
     );
 
     setAppointments(
-      (current) =>
+      (
+        current
+      ) =>
         current.map(
-          (appointment) =>
+          (
+            appointment
+          ) =>
             appointment.clientId ===
             id
               ? {
@@ -3389,6 +4385,10 @@ export default function Home() {
       ""
     );
 
+    setServiceIsAddon(
+      false
+    );
+
     setIsServiceModalOpen(
       true
     );
@@ -3415,6 +4415,10 @@ export default function Home() {
       String(
         service.price
       )
+    );
+
+    setServiceIsAddon(
+      service.isAddon
     );
 
     setIsServiceModalOpen(
@@ -3448,16 +4452,23 @@ export default function Home() {
             servicePrice ||
               0
           ),
+
+        isAddon:
+          serviceIsAddon,
       };
 
     setServices(
-      (current) => {
+      (
+        current
+      ) => {
         if (
           editingServiceId !==
           null
         ) {
           return current.map(
-            (item) =>
+            (
+              item
+            ) =>
               item.id ===
               editingServiceId
                 ? service
@@ -3497,6 +4508,9 @@ export default function Home() {
 
         price:
           service.price,
+
+        is_addon:
+          service.isAddon,
       },
     });
 
@@ -3517,10 +4531,15 @@ export default function Home() {
     }
 
     setServices(
-      (current) =>
+      (
+        current
+      ) =>
         current.filter(
-          (service) =>
-            service.id !== id
+          (
+            service
+          ) =>
+            service.id !==
+            id
         )
     );
 
@@ -3559,8 +4578,10 @@ export default function Home() {
       Math.max(
         0,
         Math.round(
-          (y /
-            HOUR_HEIGHT) *
+          (
+            y /
+            HOUR_HEIGHT
+          ) *
             2
         ) *
           30
@@ -3596,18 +4617,26 @@ export default function Home() {
       value
     );
 
-    if (!value) {
+    if (
+      !value
+    ) {
       return;
     }
 
     const service =
       services.find(
-        (item) =>
+        (
+          item
+        ) =>
           item.id ===
-          Number(value)
+          Number(
+            value
+          )
       );
 
-    if (!service) {
+    if (
+      !service
+    ) {
       return;
     }
 
@@ -3615,16 +4644,38 @@ export default function Home() {
       service.name
     );
 
-    setAppointmentDuration(
-      String(
-        service.duration
+    applyServiceTotals(
+      value,
+      selectedAddonServiceIds
+    );
+  }
+
+  function toggleAddonService(
+    id: number
+  ) {
+    const next =
+      selectedAddonServiceIds.includes(
+        id
       )
+        ? selectedAddonServiceIds.filter(
+            (
+              item
+            ) =>
+              item !==
+              id
+          )
+        : [
+            ...selectedAddonServiceIds,
+            id,
+          ];
+
+    setSelectedAddonServiceIds(
+      next
     );
 
-    setAppointmentPrice(
-      String(
-        service.price
-      )
+    applyServiceTotals(
+      selectedServiceId,
+      next
     );
   }
 
@@ -3632,7 +4683,9 @@ export default function Home() {
     day: number
   ) {
     setWorkSettings(
-      (current) => ({
+      (
+        current
+      ) => ({
         ...current,
 
         workDays:
@@ -3640,7 +4693,9 @@ export default function Home() {
             day
           )
             ? current.workDays.filter(
-                (item) =>
+                (
+                  item
+                ) =>
                   item !==
                   day
               )
@@ -3655,12 +4710,17 @@ export default function Home() {
   function openReminder(
     appointment: Appointment
   ) {
+    const serviceLabel =
+      getAppointmentServiceLabel(
+        appointment
+      );
+
     const text =
       `Привіт, ${appointment.name}! ` +
       `Нагадую про ваш запис ${formatUkrainianReminderDate(
         appointment.date
       )} о ${appointment.time}. ` +
-      `Послуга: ${appointment.service}. ` +
+      `Послуга: ${serviceLabel}. ` +
       `Чекаю на вас ❤️`;
 
     setReminderText(
@@ -3719,7 +4779,9 @@ export default function Home() {
         reminderClient.telegram
       );
 
-    if (url) {
+    if (
+      url
+    ) {
       window.open(
         url,
         "_blank"
@@ -3749,7 +4811,9 @@ export default function Home() {
         reminderClient.instagram
       );
 
-    if (url) {
+    if (
+      url
+    ) {
       window.open(
         url,
         "_blank"
@@ -3757,7 +4821,9 @@ export default function Home() {
     }
   }
 
-  if (!authChecked) {
+  if (
+    !authChecked
+  ) {
     return (
       <main
         className="flex h-dvh items-center justify-center"
@@ -3772,7 +4838,9 @@ export default function Home() {
     );
   }
 
-  if (!session) {
+  if (
+    !session
+  ) {
     return (
       <main
         className="flex h-dvh items-center justify-center px-5"
@@ -3799,8 +4867,7 @@ export default function Home() {
               event
             ) =>
               setLoginEmail(
-                event.target
-                  .value
+                event.target.value
               )
             }
             placeholder="Email"
@@ -3816,8 +4883,7 @@ export default function Home() {
               event
             ) =>
               setLoginPassword(
-                event.target
-                  .value
+                event.target.value
               )
             }
             placeholder="Пароль"
@@ -3845,7 +4911,9 @@ export default function Home() {
     );
   }
 
-  if (!isLoaded) {
+  if (
+    !isLoaded
+  ) {
     return (
       <main
         className="flex h-dvh items-center justify-center"
@@ -3868,13 +4936,11 @@ export default function Home() {
       }
     >
       <div className="mx-auto flex h-dvh max-w-md flex-col overflow-hidden bg-rose-50/20 backdrop-blur-[1px]">
-
         {activeTab ===
           "calendar" && (
           <div className="relative flex min-h-0 flex-1 flex-col">
             <header className="shrink-0 px-3 pb-2 pt-3">
               <div className="rounded-[28px] border border-white/70 bg-white/55 p-4 shadow-[0_12px_40px_rgba(120,80,95,0.12)] backdrop-blur-xl">
-
                 <div className="flex items-center justify-between">
                   <button
                     onClick={() =>
@@ -3956,9 +5022,7 @@ export default function Home() {
                           : "text-neutral-500"
                       }`}
                     >
-                      {
-                        t.day
-                      }
+                      {t.day}
                     </button>
 
                     <button
@@ -3974,18 +5038,14 @@ export default function Home() {
                           : "text-neutral-500"
                       }`}
                     >
-                      {
-                        t.month
-                      }
+                      {t.month}
                     </button>
                   </div>
 
                   <span
                     className={`rounded-full border px-3 py-1.5 text-[10px] font-medium ${connectionClass()}`}
                   >
-                    {
-                      connectionLabel()
-                    }
+                    {connectionLabel()}
                   </span>
                 </div>
 
@@ -4014,6 +5074,11 @@ export default function Home() {
                               dateKey
                           ).length;
 
+                        const isWorkDay =
+                          workSettings.workDays.includes(
+                            date.getDay()
+                          );
+
                         return (
                           <button
                             key={
@@ -4034,8 +5099,12 @@ export default function Home() {
                             }}
                             className={`relative flex min-w-0 flex-col items-center rounded-2xl px-1 py-2 transition ${
                               selected
-                                ? "bg-rose-200/80 shadow-sm"
-                                : "bg-white/15"
+                                ? isWorkDay
+                                  ? "bg-rose-200/80 shadow-sm"
+                                  : "bg-neutral-300/75 shadow-sm"
+                                : isWorkDay
+                                ? "bg-white/15"
+                                : "bg-neutral-200/35 opacity-70"
                             }`}
                           >
                             <span className="text-[9px] font-medium capitalize text-neutral-500">
@@ -4059,10 +5128,14 @@ export default function Home() {
                                   : "text-neutral-600"
                               }`}
                             >
-                              {
-                                date.getDate()
-                              }
+                              {date.getDate()}
                             </span>
+
+                            {!isWorkDay && (
+                              <span className="mt-0.5 text-[7px] font-medium text-neutral-500">
+                                {t.weekend}
+                              </span>
+                            )}
 
                             {count >
                               0 && (
@@ -4080,7 +5153,19 @@ export default function Home() {
             {calendarView ===
               "day" && (
               <section className="min-h-0 flex-1 overflow-y-auto px-3 pb-3">
-                <div className="relative min-h-full overflow-hidden rounded-[30px] border border-white/70 bg-white/42 shadow-[0_12px_45px_rgba(105,75,90,0.10)] backdrop-blur-md">
+                <div
+  className={`relative min-h-full overflow-hidden rounded-[30px] border shadow-[0_12px_45px_rgba(105,75,90,0.10)] backdrop-blur-md ${
+    selectedDateIsWorkDay
+      ? "border-white/70 bg-white/42"
+      : "border-rose-200/70 bg-[linear-gradient(180deg,rgba(255,155,170,0.20)_0%,rgba(255,120,140,0.11)_45%,rgba(255,145,160,0.16)_100%)]"
+  }`}
+>
+                  {!selectedDateIsWorkDay && (
+                    <div className="pointer-events-none absolute right-4 top-3 z-20 rounded-full border border-white/70 bg-white/70 px-3 py-1 text-[10px] font-semibold text-neutral-500 shadow-sm backdrop-blur-md">
+                      {t.weekend}
+                    </div>
+                  )}
+
                   <div
                     className="grid grid-cols-[62px_1fr]"
                     style={{
@@ -4088,47 +5173,62 @@ export default function Home() {
                     }}
                   >
                     <div className="relative bg-white/10">
-                      {hours.map((hour) => {
-  const isFirst =
-    hour ===
-    workSettings.startHour;
+                      {hours.map(
+                        (
+                          hour
+                        ) => {
+                          const isFirst =
+                            hour ===
+                            workSettings.startHour;
 
-  const isLast =
-    hour ===
-    workSettings.endHour;
+                          const isLast =
+                            hour ===
+                            workSettings.endHour;
 
-  let top =
-    (hour -
-      workSettings.startHour) *
-      HOUR_HEIGHT -
-    7;
+                          let top =
+                            (
+                              hour -
+                              workSettings.startHour
+                            ) *
+                              HOUR_HEIGHT -
+                            7;
 
-  if (isFirst) {
-    top = 8;
-  }
+                          if (
+                            isFirst
+                          ) {
+                            top =
+                              8;
+                          }
 
-  if (isLast) {
-    top =
-      calendarHeight -
-      22;
-  }
+                          if (
+                            isLast
+                          ) {
+                            top =
+                              calendarHeight -
+                              22;
+                          }
 
-  return (
-    <div
-      key={hour}
-      className="absolute left-0 right-0 pr-3 text-right text-[11px] font-medium text-neutral-500"
-      style={{
-        top: `${top}px`,
-      }}
-    >
-      {String(hour).padStart(
-        2,
-        "0"
-      )}
-      :00
-    </div>
-  );
-})}
+                          return (
+                            <div
+                              key={
+                                hour
+                              }
+                              className="absolute left-0 right-0 pr-3 text-right text-[11px] font-medium text-neutral-500"
+                              style={{
+                                top: `${top}px`,
+                              }}
+                            >
+                              {String(
+                                hour
+                              ).padStart(
+                                2,
+                                "0"
+                              )}
+                              :00
+                            </div>
+                          );
+                        }
+                      )}
                     </div>
 
                     <div
@@ -4150,8 +5250,10 @@ export default function Home() {
                             className="absolute left-0 right-0 h-px bg-white/80 shadow-[0_1px_1px_rgba(110,90,100,0.18)]"
                             style={{
                               top: `${
-                                (hour -
-                                  workSettings.startHour) *
+                                (
+                                  hour -
+                                  workSettings.startHour
+                                ) *
                                 HOUR_HEIGHT
                               }px`,
                             }}
@@ -4182,6 +5284,20 @@ export default function Home() {
                                 appointment.duration
                             );
 
+                          const linkedClient =
+                            getAppointmentClient(
+                              appointment
+                            );
+
+                          const phone =
+                            linkedClient?.phone ??
+                            "";
+
+                          const serviceLabel =
+                            getAppointmentServiceLabel(
+                              appointment
+                            );
+
                           return (
                             <button
                               key={
@@ -4199,6 +5315,7 @@ export default function Home() {
                               className="absolute left-3 right-3 z-10 overflow-hidden rounded-[20px] border border-white/90 bg-white/75 text-left shadow-[0_8px_24px_rgba(120,85,100,0.14)] backdrop-blur-xl transition active:scale-[0.99]"
                               style={{
                                 top: `${top + 6}px`,
+
                                 height: `${Math.max(
                                   height -
                                     12,
@@ -4216,27 +5333,26 @@ export default function Home() {
                                 <div className="flex items-start justify-between gap-3">
                                   <div className="min-w-0">
                                     <p className="truncate text-[14px] font-semibold text-neutral-900">
-                                      {
-                                        appointment.name
-                                      }
+                                      {appointment.name}
                                     </p>
 
-                                    <p className="mt-0.5 truncate text-[11px] text-neutral-500">
-                                      {
-                                        appointment.service
-                                      }
-                                    </p>
+                                    {phone && (
+                                      <p className="mt-0.5 truncate text-[10px] font-medium text-neutral-500">
+                                        {phone}
+                                      </p>
+                                    )}
+
+                                    {height >=
+                                      82 && (
+                                      <p className="mt-0.5 truncate text-[11px] text-neutral-500">
+                                        {serviceLabel}
+                                      </p>
+                                    )}
                                   </div>
 
                                   <div className="shrink-0 text-right">
                                     <p className="text-[10px] font-medium text-neutral-500">
-                                      {
-                                        appointment.time
-                                      }{" "}
-                                      –{" "}
-                                      {
-                                        endTime
-                                      }
+                                      {appointment.time} – {endTime}
                                     </p>
 
                                     {height >=
@@ -4279,11 +5395,9 @@ export default function Home() {
                           }
                           className="py-2 text-center text-[10px] font-medium text-neutral-400"
                         >
-                          {
-                            day[
-                              language
-                            ]
-                          }
+                          {day[
+                            language
+                          ]}
                         </div>
                       )
                     )}
@@ -4310,6 +5424,11 @@ export default function Home() {
                           dateKey ===
                           selectedDateKey;
 
+                        const isWorkDay =
+                          workSettings.workDays.includes(
+                            item.date.getDay()
+                          );
+
                         return (
                           <button
                             key={
@@ -4334,17 +5453,26 @@ export default function Home() {
                             }}
                             className={`relative min-h-[58px] rounded-2xl p-2 transition ${
                               selected
-                                ? "bg-rose-200/90 shadow-sm"
-                                : item.isCurrentMonth
+                                ? isWorkDay
+                                  ? "bg-rose-200/90 shadow-sm"
+                                  : "bg-neutral-300/80 shadow-sm"
+                                : !item.isCurrentMonth
+                                ? "text-neutral-300"
+                                : isWorkDay
                                 ? "bg-white/40"
-                                : "text-neutral-300"
+                                : "bg-neutral-200/40 text-neutral-400"
                             }`}
                           >
                             <div className="text-sm font-medium">
-                              {
-                                item.date.getDate()
-                              }
+                              {item.date.getDate()}
                             </div>
+
+                            {!isWorkDay &&
+                              item.isCurrentMonth && (
+                                <div className="mt-1 text-[7px]">
+                                  {t.weekend}
+                                </div>
+                              )}
 
                             {count >
                               0 && (
@@ -4378,15 +5506,11 @@ export default function Home() {
                 <div className="flex justify-between">
                   <div>
                     <p className="text-xs font-medium text-neutral-400">
-                      {
-                        t.clientBase
-                      }
+                      {t.clientBase}
                     </p>
 
                     <h1 className="mt-1 text-2xl font-semibold">
-                      {
-                        t.clients
-                      }
+                      {t.clients}
                     </h1>
                   </div>
 
@@ -4408,8 +5532,7 @@ export default function Home() {
                     event
                   ) =>
                     setClientSearch(
-                      event.target
-                        .value
+                      event.target.value
                     )
                   }
                   placeholder={
@@ -4424,9 +5547,7 @@ export default function Home() {
               {filteredClients.length ===
                 0 && (
                 <div className="rounded-[24px] border border-white/70 bg-white/55 p-6 text-center text-neutral-500 backdrop-blur-lg">
-                  {
-                    t.noClients
-                  }
+                  {t.noClients}
                 </div>
               )}
 
@@ -4452,16 +5573,12 @@ export default function Home() {
                     <div className="flex justify-between gap-3">
                       <div className="min-w-0">
                         <p className="truncate font-semibold">
-                          {
-                            client.name
-                          }
+                          {client.name}
                         </p>
 
                         {client.phone && (
                           <p className="mt-1 truncate text-sm text-neutral-500">
-                            {
-                              client.phone
-                            }
+                            {client.phone}
                           </p>
                         )}
 
@@ -4509,15 +5626,11 @@ export default function Home() {
             <header className="shrink-0 px-4 pb-2 pt-4">
               <div className="rounded-[28px] border border-white/70 bg-white/55 p-4 shadow-[0_12px_40px_rgba(120,80,95,0.12)] backdrop-blur-xl">
                 <p className="text-xs font-medium text-neutral-400">
-                  {
-                    t.financeRecords
-                  }
+                  {t.financeRecords}
                 </p>
 
                 <h1 className="mt-1 text-2xl font-semibold">
-                  {
-                    t.analytics
-                  }
+                  {t.analytics}
                 </h1>
               </div>
             </header>
@@ -4594,9 +5707,7 @@ export default function Home() {
               </div>
 
               <h2 className="mt-6 text-lg font-semibold">
-                {
-                  t.topServices
-                }
+                {t.topServices}
               </h2>
 
               <div className="mt-3 space-y-2">
@@ -4613,23 +5724,16 @@ export default function Home() {
                       <div className="flex justify-between">
                         <div>
                           <p className="font-semibold">
-                            {
-                              service.name
-                            }
+                            {service.name}
                           </p>
 
                           <p className="text-sm text-neutral-500">
-                            {
-                              service.count
-                            }
+                            {service.count}
                           </p>
                         </div>
 
                         <p className="font-semibold">
-                          {
-                            service.income
-                          }{" "}
-                          грн
+                          {service.income} грн
                         </p>
                       </div>
                     </div>
@@ -4646,9 +5750,7 @@ export default function Home() {
             <header className="shrink-0 px-4 pb-2 pt-4">
               <div className="rounded-[28px] border border-white/70 bg-white/55 p-4 shadow-[0_12px_40px_rgba(120,80,95,0.12)] backdrop-blur-xl">
                 <h1 className="text-2xl font-semibold">
-                  {
-                    t.settings
-                  }
+                  {t.settings}
                 </h1>
               </div>
             </header>
@@ -4656,27 +5758,20 @@ export default function Home() {
             <section className="min-h-0 flex-1 overflow-y-auto px-4 pb-4">
               <div className="rounded-[24px] border border-white/70 bg-white/55 p-4 backdrop-blur-lg">
                 <h2 className="font-semibold">
-                  {
-                    t.sync
-                  }
+                  {t.sync}
                 </h2>
 
                 <div
                   className={`mt-3 rounded-2xl border p-4 ${connectionClass()}`}
                 >
                   <p className="font-medium">
-                    {
-                      connectionLabel()
-                    }
+                    {connectionLabel()}
                   </p>
 
                   {pendingCount >
                     0 && (
                     <p className="mt-1 text-xs">
-                      В очереди:{" "}
-                      {
-                        pendingCount
-                      }
+                      В очереди: {pendingCount}
                     </p>
                   )}
                 </div>
@@ -4684,9 +5779,7 @@ export default function Home() {
 
               <div className="mt-3 rounded-[24px] border border-white/70 bg-white/55 p-4 backdrop-blur-lg">
                 <h2 className="font-semibold">
-                  {
-                    t.language
-                  }
+                  {t.language}
                 </h2>
 
                 <div className="mt-3 grid grid-cols-2 gap-2">
@@ -4726,17 +5819,13 @@ export default function Home() {
 
               <div className="mt-3 rounded-[24px] border border-white/70 bg-white/55 p-4 backdrop-blur-lg">
                 <h2 className="font-semibold">
-                  {
-                    t.workSchedule
-                  }
+                  {t.workSchedule}
                 </h2>
 
                 <div className="mt-3 grid grid-cols-2 gap-3">
                   <div>
                     <p className="mb-1 text-xs text-neutral-500">
-                      {
-                        t.startDay
-                      }
+                      {t.startDay}
                     </p>
 
                     <select
@@ -4797,9 +5886,7 @@ export default function Home() {
 
                   <div>
                     <p className="mb-1 text-xs text-neutral-500">
-                      {
-                        t.endDay
-                      }
+                      {t.endDay}
                     </p>
 
                     <select
@@ -4862,9 +5949,7 @@ export default function Home() {
                 </div>
 
                 <p className="mt-4 text-xs text-neutral-500">
-                  {
-                    t.workDays
-                  }
+                  {t.workDays}
                 </p>
 
                 <div className="mt-2 grid grid-cols-7 gap-1">
@@ -4886,14 +5971,12 @@ export default function Home() {
                             day.value
                           )
                             ? "bg-neutral-900 text-white"
-                            : "bg-white/65"
+                            : "bg-white/65 text-neutral-400"
                         }`}
                       >
-                        {
-                          day[
-                            language
-                          ]
-                        }
+                        {day[
+                          language
+                        ]}
                       </button>
                     )
                   )}
@@ -4903,9 +5986,7 @@ export default function Home() {
               <div className="mt-3 rounded-[24px] border border-white/70 bg-white/55 p-4 backdrop-blur-lg">
                 <div className="flex items-center justify-between">
                   <h2 className="font-semibold">
-                    {
-                      t.services
-                    }
+                    {t.services}
                   </h2>
 
                   <button
@@ -4929,23 +6010,33 @@ export default function Home() {
                         }
                         className="rounded-2xl bg-white/70 p-4"
                       >
-                        <p className="font-semibold">
-                          {
-                            service.name
-                          }
-                        </p>
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <p className="font-semibold">
+                              {service.name}
+                            </p>
 
-                        <p className="mt-1 text-sm text-neutral-500">
-                          {formatDurationLabel(
-                            service.duration,
-                            language
-                          )}{" "}
-                          ·{" "}
-                          {
-                            service.price
-                          }{" "}
-                          грн
-                        </p>
+                            <p className="mt-1 text-sm text-neutral-500">
+                              {formatDurationLabel(
+                                service.duration,
+                                language
+                              )}{" "}
+                              · {service.price} грн
+                            </p>
+                          </div>
+
+                          <span
+                            className={`rounded-full px-2.5 py-1 text-[10px] font-medium ${
+                              service.isAddon
+                                ? "bg-violet-100 text-violet-700"
+                                : "bg-rose-100 text-rose-700"
+                            }`}
+                          >
+                            {service.isAddon
+                              ? t.addonServiceType
+                              : t.mainServiceType}
+                          </span>
+                        </div>
 
                         <div className="mt-3 flex gap-2">
                           <button
@@ -4956,9 +6047,7 @@ export default function Home() {
                             }
                             className="h-10 rounded-xl bg-white px-3 text-xs"
                           >
-                            {
-                              t.edit
-                            }
+                            {t.edit}
                           </button>
 
                           <button
@@ -4969,9 +6058,7 @@ export default function Home() {
                             }
                             className="h-10 rounded-xl bg-red-50 px-3 text-xs text-red-600"
                           >
-                            {
-                              t.delete
-                            }
+                            {t.delete}
                           </button>
                         </div>
                       </div>
@@ -4986,9 +6073,7 @@ export default function Home() {
                 }
                 className="mt-3 h-12 w-full rounded-2xl bg-red-50/90 text-red-600"
               >
-                {
-                  t.logout
-                }
+                {t.logout}
               </button>
             </section>
           </div>
@@ -4996,7 +6081,6 @@ export default function Home() {
 
         <nav className="shrink-0 px-3 pb-3 pt-2">
           <div className="grid grid-cols-4 gap-1 rounded-[28px] border border-white/75 bg-white/62 p-2 shadow-[0_12px_40px_rgba(110,75,90,0.16)] backdrop-blur-xl">
-
             <NavButton
               active={
                 activeTab ===
@@ -5028,9 +6112,7 @@ export default function Home() {
                 </svg>
               }
             >
-              {
-                t.calendar
-              }
+              {t.calendar}
             </NavButton>
 
             <NavButton
@@ -5068,9 +6150,7 @@ export default function Home() {
                 </svg>
               }
             >
-              {
-                t.clients
-              }
+              {t.clients}
             </NavButton>
 
             <NavButton
@@ -5100,9 +6180,7 @@ export default function Home() {
                 </svg>
               }
             >
-              {
-                t.analytics
-              }
+              {t.analytics}
             </NavButton>
 
             <NavButton
@@ -5134,11 +6212,8 @@ export default function Home() {
                 </svg>
               }
             >
-              {
-                t.settings
-              }
+              {t.settings}
             </NavButton>
-
           </div>
         </nav>
 
@@ -5162,9 +6237,7 @@ export default function Home() {
                 0 && (
                 <div>
                   <label className="mb-1 block text-sm text-neutral-500">
-                    {
-                      t.client
-                    }
+                    {t.client}
                   </label>
 
                   <select
@@ -5174,16 +6247,41 @@ export default function Home() {
                     onChange={(
                       event
                     ) => {
+                      const value =
+                        event.target.value;
+
                       setSelectedClientId(
-                        event.target
-                          .value
+                        value
                       );
 
                       if (
-                        event.target
-                          .value
+                        value
                       ) {
+                        const client =
+                          clients.find(
+                            (
+                              item
+                            ) =>
+                              item.id ===
+                              Number(
+                                value
+                              )
+                          );
+
                         setAppointmentName(
+                          ""
+                        );
+
+                        setAppointmentPhone(
+                          client?.phone ??
+                            ""
+                        );
+                      } else {
+                        setAppointmentName(
+                          ""
+                        );
+
+                        setAppointmentPhone(
                           ""
                         );
                       }
@@ -5191,9 +6289,7 @@ export default function Home() {
                     className="h-12 w-full rounded-2xl border border-white/80 bg-white/80 px-3 shadow-sm"
                   >
                     <option value="">
-                      {
-                        t.manualName
-                      }
+                      {t.manualName}
                     </option>
 
                     {clients.map(
@@ -5208,9 +6304,10 @@ export default function Home() {
                             client.id
                           }
                         >
-                          {
-                            client.name
-                          }
+                          {client.name}
+                          {client.phone
+                            ? ` · ${client.phone}`
+                            : ""}
                         </option>
                       )
                     )}
@@ -5219,32 +6316,59 @@ export default function Home() {
               )}
 
               {!selectedClientId && (
-                <input
-                  value={
-                    appointmentName
-                  }
-                  onChange={(
-                    event
-                  ) =>
-                    setAppointmentName(
-                      event.target
-                        .value
-                    )
-                  }
-                  placeholder={
-                    t.clientName
-                  }
-                  className="h-12 w-full rounded-2xl border border-white/80 bg-white/80 px-3 shadow-sm"
-                />
+                <>
+                  <FieldLabel
+                    label={
+                      t.clientName
+                    }
+                  >
+                    <input
+                      value={
+                        appointmentName
+                      }
+                      onChange={(
+                        event
+                      ) =>
+                        setAppointmentName(
+                          event.target.value
+                        )
+                      }
+                      placeholder={
+                        t.clientName
+                      }
+                      className="h-12 w-full rounded-2xl border border-white/80 bg-white/80 px-3 shadow-sm"
+                    />
+                  </FieldLabel>
+
+                  <FieldLabel
+                    label={
+                      t.clientPhone
+                    }
+                  >
+                    <input
+                      value={
+                        appointmentPhone
+                      }
+                      onChange={(
+                        event
+                      ) =>
+                        setAppointmentPhone(
+                          event.target.value
+                        )
+                      }
+                      placeholder="+380..."
+                      inputMode="tel"
+                      className="h-12 w-full rounded-2xl border border-white/80 bg-white/80 px-3 shadow-sm"
+                    />
+                  </FieldLabel>
+                </>
               )}
 
-              {services.length >
+              {mainServices.length >
                 0 && (
                 <div>
                   <label className="mb-1 block text-sm text-neutral-500">
-                    {
-                      t.service
-                    }
+                    {t.mainService}
                   </label>
 
                   <select
@@ -5255,19 +6379,16 @@ export default function Home() {
                       event
                     ) =>
                       handleServiceSelection(
-                        event.target
-                          .value
+                        event.target.value
                       )
                     }
                     className="h-12 w-full rounded-2xl border border-white/80 bg-white/80 px-3 shadow-sm"
                   >
                     <option value="">
-                      {
-                        t.manualService
-                      }
+                      {t.manualService}
                     </option>
 
-                    {services.map(
+                    {mainServices.map(
                       (
                         service
                       ) => (
@@ -5279,14 +6400,11 @@ export default function Home() {
                             service.id
                           }
                         >
-                          {
-                            service.name
-                          }{" "}
-                          —{" "}
-                          {
-                            service.price
-                          }{" "}
-                          грн
+                          {service.name} — {service.price} грн ·{" "}
+                          {formatDurationLabel(
+                            service.duration,
+                            language
+                          )}
                         </option>
                       )
                     )}
@@ -5295,31 +6413,103 @@ export default function Home() {
               )}
 
               {!selectedServiceId && (
-                <input
-                  value={
-                    appointmentService
+                <FieldLabel
+                  label={
+                    t.mainService
                   }
-                  onChange={(
-                    event
-                  ) =>
-                    setAppointmentService(
-                      event.target
-                        .value
-                    )
-                  }
-                  placeholder={
-                    t.serviceName
-                  }
-                  className="h-12 w-full rounded-2xl border border-white/80 bg-white/80 px-3 shadow-sm"
-                />
+                >
+                  <input
+                    value={
+                      appointmentService
+                    }
+                    onChange={(
+                      event
+                    ) =>
+                      setAppointmentService(
+                        event.target.value
+                      )
+                    }
+                    placeholder={
+                      t.serviceName
+                    }
+                    className="h-12 w-full rounded-2xl border border-white/80 bg-white/80 px-3 shadow-sm"
+                  />
+                </FieldLabel>
               )}
+
+              <div>
+                <label className="mb-2 block text-sm text-neutral-500">
+                  {t.extraServices}
+                </label>
+
+                {addonServices.length >
+                0 ? (
+                  <div className="space-y-2">
+                    {addonServices.map(
+                      (
+                        service
+                      ) => {
+                        const checked =
+                          selectedAddonServiceIds.includes(
+                            service.id
+                          );
+
+                        return (
+                          <button
+                            type="button"
+                            key={
+                              service.id
+                            }
+                            onClick={() =>
+                              toggleAddonService(
+                                service.id
+                              )
+                            }
+                            className={`flex min-h-12 w-full items-center justify-between gap-3 rounded-2xl border px-3 py-2 text-left transition ${
+                              checked
+                                ? "border-violet-300 bg-violet-50/90 shadow-sm"
+                                : "border-white/80 bg-white/70"
+                            }`}
+                          >
+                            <div className="min-w-0">
+                              <p className="truncate text-sm font-medium">
+                                {service.name}
+                              </p>
+
+                              <p className="mt-0.5 text-[11px] text-neutral-500">
+                                +{service.price} грн ·{" "}
+                                +{formatDurationLabel(
+                                  service.duration,
+                                  language
+                                )}
+                              </p>
+                            </div>
+
+                            <span
+                              className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-xs ${
+                                checked
+                                  ? "border-violet-500 bg-violet-500 text-white"
+                                  : "border-neutral-300 bg-white text-transparent"
+                              }`}
+                            >
+                              ✓
+                            </span>
+                          </button>
+                        );
+                      }
+                    )}
+                  </div>
+                ) : (
+                  <div className="rounded-2xl bg-white/45 p-3 text-sm text-neutral-400">
+                    {t.noExtraServices}
+                  </div>
+                )}
+              </div>
 
               <div className="flex min-w-0 items-start gap-5">
                 <div className="w-[40%] min-w-0">
                   <label className="mb-1 block text-sm text-neutral-500">
-                    {
-                      t.date
-                    }
+                    {t.date}
                   </label>
 
                   <input
@@ -5331,8 +6521,7 @@ export default function Home() {
                       event
                     ) =>
                       setAppointmentDate(
-                        event.target
-                          .value
+                        event.target.value
                       )
                     }
                     className="block h-12 w-full min-w-0 appearance-none rounded-2xl border border-white/80 bg-white/80 px-3 py-0 text-base leading-[48px] text-black shadow-sm"
@@ -5341,9 +6530,7 @@ export default function Home() {
 
                 <div className="w-[40%] min-w-0">
                   <label className="mb-1 block text-sm text-neutral-500">
-                    {
-                      t.time
-                    }
+                    {t.time}
                   </label>
 
                   <input
@@ -5355,8 +6542,7 @@ export default function Home() {
                       event
                     ) =>
                       setAppointmentTime(
-                        event.target
-                          .value
+                        event.target.value
                       )
                     }
                     className="block h-12 w-full min-w-0 appearance-none rounded-2xl border border-white/80 bg-white/80 px-3 py-0 text-base leading-[48px] text-black shadow-sm"
@@ -5364,72 +6550,110 @@ export default function Home() {
                 </div>
               </div>
 
-              <select
-                value={
-                  appointmentDuration
-                }
-                onChange={(
-                  event
-                ) =>
-                  setAppointmentDuration(
-                    event.target
-                      .value
-                  )
-                }
-                className="h-12 w-full rounded-2xl border border-white/80 bg-white/80 px-3 shadow-sm"
-              >
-                {Array.from(
-                  {
-                    length:
-                      12,
-                  },
-                  (
-                    _,
-                    index
-                  ) =>
-                    (index +
-                      1) *
-                    30
-                ).map(
-                  (
-                    minutes
-                  ) => (
-                    <option
-                      key={
+              <div className="grid grid-cols-2 gap-3">
+                <FieldLabel
+                  label={
+                    t.duration
+                  }
+                >
+                  <select
+                    value={
+                      appointmentDuration
+                    }
+                    onChange={(
+                      event
+                    ) =>
+                      setAppointmentDuration(
+                        event.target.value
+                      )
+                    }
+                    className="h-12 w-full rounded-2xl border border-white/80 bg-white/80 px-3 shadow-sm"
+                  >
+                    {Array.from(
+                      {
+                        length:
+                          12,
+                      },
+                      (
+                        _,
+                        index
+                      ) =>
+                        (
+                          index +
+                          1
+                        ) *
+                        30
+                    ).map(
+                      (
                         minutes
-                      }
-                      value={
-                        minutes
-                      }
-                    >
+                      ) => (
+                        <option
+                          key={
+                            minutes
+                          }
+                          value={
+                            minutes
+                          }
+                        >
+                          {formatDurationLabel(
+                            minutes,
+                            language
+                          )}
+                        </option>
+                      )
+                    )}
+                  </select>
+                </FieldLabel>
+
+                <FieldLabel
+                  label={
+                    t.price
+                  }
+                >
+                  <input
+                    type="number"
+                    min="0"
+                    value={
+                      appointmentPrice
+                    }
+                    onChange={(
+                      event
+                    ) =>
+                      setAppointmentPrice(
+                        event.target.value
+                      )
+                    }
+                    className="h-12 w-full rounded-2xl border border-white/80 bg-white/80 px-3 shadow-sm"
+                  />
+                </FieldLabel>
+              </div>
+
+              {(selectedServiceId ||
+                selectedAddonServiceIds.length >
+                  0) && (
+                <div className="rounded-2xl border border-white/70 bg-white/55 p-3">
+                  <p className="text-[11px] font-medium uppercase tracking-wide text-neutral-400">
+                    {t.total}
+                  </p>
+
+                  <div className="mt-1 flex items-end justify-between gap-3">
+                    <p className="font-semibold">
+                      {appointmentPrice ||
+                        0}{" "}
+                      грн
+                    </p>
+
+                    <p className="text-sm text-neutral-500">
                       {formatDurationLabel(
-                        minutes,
+                        Number(
+                          appointmentDuration
+                        ),
                         language
                       )}
-                    </option>
-                  )
-                )}
-              </select>
-
-              <input
-                type="number"
-                min="0"
-                value={
-                  appointmentPrice
-                }
-                onChange={(
-                  event
-                ) =>
-                  setAppointmentPrice(
-                    event.target
-                      .value
-                  )
-                }
-                placeholder={
-                  t.price
-                }
-                className="h-12 w-full rounded-2xl border border-white/80 bg-white/80 px-3 shadow-sm"
-              />
+                    </p>
+                  </div>
+                </div>
+              )}
 
               <select
                 value={
@@ -5439,34 +6663,25 @@ export default function Home() {
                   event
                 ) =>
                   setAppointmentStatus(
-                    event.target
-                      .value as AppointmentStatus
+                    event.target.value as AppointmentStatus
                   )
                 }
                 className="h-12 w-full rounded-2xl border border-white/80 bg-white/80 px-3 shadow-sm"
               >
                 <option value="scheduled">
-                  {
-                    t.scheduledStatus
-                  }
+                  {t.scheduledStatus}
                 </option>
 
                 <option value="completed">
-                  {
-                    t.completedStatus
-                  }
+                  {t.completedStatus}
                 </option>
 
                 <option value="no-show">
-                  {
-                    t.noShowStatus
-                  }
+                  {t.noShowStatus}
                 </option>
 
                 <option value="cancelled">
-                  {
-                    t.cancelledStatus
-                  }
+                  {t.cancelledStatus}
                 </option>
               </select>
 
@@ -5499,17 +6714,13 @@ export default function Home() {
                     }}
                     className="h-12 w-full rounded-2xl bg-sky-50 font-medium text-sky-700"
                   >
-                    {
-                      t.remindClient
-                    }
+                    {t.remindClient}
                   </button>
                 )}
 
               {appointmentError && (
                 <div className="rounded-2xl bg-red-50 p-3 text-sm text-red-700">
-                  {
-                    appointmentError
-                  }
+                  {appointmentError}
 
                   {hasConflict && (
                     <button
@@ -5518,9 +6729,7 @@ export default function Home() {
                       }
                       className="mt-3 h-12 w-full rounded-2xl bg-white"
                     >
-                      {
-                        t.forceSave
-                      }
+                      {t.forceSave}
                     </button>
                   )}
                 </div>
@@ -5548,9 +6757,7 @@ export default function Home() {
                   }
                   className="h-12 w-full rounded-2xl bg-red-50 text-red-600"
                 >
-                  {
-                    t.deleteAppointment
-                  }
+                  {t.deleteAppointment}
                 </button>
               )}
             </div>
@@ -5586,8 +6793,7 @@ export default function Home() {
                     event
                   ) =>
                     setClientName(
-                      event.target
-                        .value
+                      event.target.value
                     )
                   }
                   placeholder={
@@ -5610,8 +6816,7 @@ export default function Home() {
                     event
                   ) =>
                     setClientPhone(
-                      event.target
-                        .value
+                      event.target.value
                     )
                   }
                   placeholder="+380..."
@@ -5629,8 +6834,7 @@ export default function Home() {
                     event
                   ) =>
                     setClientTelegram(
-                      event.target
-                        .value
+                      event.target.value
                     )
                   }
                   placeholder="@user"
@@ -5649,8 +6853,7 @@ export default function Home() {
                     event
                   ) =>
                     setClientInstagram(
-                      event.target
-                        .value
+                      event.target.value
                     )
                   }
                   placeholder="user"
@@ -5673,14 +6876,15 @@ export default function Home() {
                     event
                   ) =>
                     setClientNote(
-                      event.target
-                        .value
+                      event.target.value
                     )
                   }
                   placeholder={
                     t.note
                   }
-                  rows={3}
+                  rows={
+                    3
+                  }
                   className="w-full resize-none rounded-2xl border border-white/80 bg-white/80 p-3 text-base shadow-sm"
                 />
               </FieldLabel>
@@ -5691,9 +6895,7 @@ export default function Home() {
                 }
                 className="h-12 w-full rounded-2xl bg-neutral-900 font-medium text-white shadow-lg"
               >
-                {
-                  t.save
-                }
+                {t.save}
               </button>
             </div>
           </Modal>
@@ -5709,9 +6911,7 @@ export default function Home() {
               }
             >
               <h2 className="text-2xl font-semibold">
-                {
-                  selectedClient.name
-                }
+                {selectedClient.name}
               </h2>
 
               <div className="mt-4 space-y-2">
@@ -5744,9 +6944,7 @@ export default function Home() {
 
               {selectedClient.note && (
                 <p className="mt-3 rounded-2xl bg-white/70 p-3 text-sm">
-                  {
-                    selectedClient.note
-                  }
+                  {selectedClient.note}
                 </p>
               )}
 
@@ -5759,9 +6957,7 @@ export default function Home() {
                     )}`}
                     className="flex h-12 flex-1 items-center justify-center rounded-2xl bg-neutral-900 text-center text-sm font-medium text-white"
                   >
-                    {
-                      t.call
-                    }
+                    {t.call}
                   </a>
                 )}
 
@@ -5806,12 +7002,40 @@ export default function Home() {
                     )
                   );
 
+                  setAppointmentPhone(
+                    selectedClient.phone
+                  );
+
                   setAppointmentDate(
                     selectedDateKey
                   );
 
                   setAppointmentName(
                     ""
+                  );
+
+                  setSelectedServiceId(
+                    ""
+                  );
+
+                  setSelectedAddonServiceIds(
+                    []
+                  );
+
+                  setAppointmentService(
+                    ""
+                  );
+
+                  setAppointmentDuration(
+                    "90"
+                  );
+
+                  setAppointmentPrice(
+                    ""
+                  );
+
+                  setAppointmentStatus(
+                    "scheduled"
                   );
 
                   setEditingAppointmentId(
@@ -5832,9 +7056,7 @@ export default function Home() {
                 }}
                 className="mt-4 h-12 w-full rounded-2xl bg-neutral-900 font-medium text-white shadow-lg"
               >
-                {
-                  t.bookClient
-                }
+                {t.bookClient}
               </button>
 
               <button
@@ -5845,66 +7067,84 @@ export default function Home() {
                 }
                 className="mt-2 h-12 w-full rounded-2xl bg-white/80 font-medium shadow-sm"
               >
-                {
-                  t.editClientButton
-                }
+                {t.editClientButton}
               </button>
 
               <h3 className="mt-6 font-semibold">
-                {
-                  t.futureAppointments
-                }
+                {t.futureAppointments}
               </h3>
 
               <div className="mt-2 space-y-2">
-                {futureClientAppointments.map(
-                  (
-                    appointment
-                  ) => (
-                    <div
-                      key={
-                        appointment.id
-                      }
-                      className="rounded-2xl bg-white/70 p-3 shadow-sm"
-                    >
-                      <p className="font-medium">
-                        {formatFullDate(
-                          appointment.date,
-                          language
-                        )}{" "}
-                        ·{" "}
-                        {
-                          appointment.time
-                        }
-                      </p>
+                {futureClientAppointments.map((appointment) => (
+  <div
+    key={appointment.id}
+    onClick={() => {
+      setIsClientDetailsOpen(false);
 
-                      <p className="mt-1 text-sm text-neutral-500">
-                        {
-                          appointment.service
-                        }
-                      </p>
+      setSelectedDate(
+        new Date(
+          `${appointment.date}T12:00:00`
+        )
+      );
 
-                      <button
-                        onClick={() =>
-                          openReminder(
-                            appointment
-                          )
-                        }
-                        className="mt-3 h-10 rounded-xl bg-sky-50 px-4 text-sm font-medium text-sky-700"
-                      >
-                        {
-                          t.remind
-                        }
-                      </button>
-                    </div>
-                  )
-                )}
+      setVisibleMonth(
+        new Date(
+          Number(
+            appointment.date.slice(
+              0,
+              4
+            )
+          ),
+          Number(
+            appointment.date.slice(
+              5,
+              7
+            )
+          ) - 1,
+          1
+        )
+      );
+
+      setActiveTab("calendar");
+
+      openEditAppointment(
+        appointment
+      );
+    }}
+    className="cursor-pointer rounded-2xl bg-white/70 p-3 shadow-sm transition active:scale-[0.99]"
+  >
+    <p className="font-medium">
+      {formatFullDate(
+        appointment.date,
+        language
+      )}{" "}
+      · {appointment.time}
+    </p>
+
+    <p className="mt-1 text-sm text-neutral-500">
+      {getAppointmentServiceLabel(
+        appointment
+      )}
+    </p>
+
+    <button
+      onClick={(event) => {
+        event.stopPropagation();
+
+        openReminder(
+          appointment
+        );
+      }}
+      className="mt-3 h-10 rounded-xl bg-sky-50 px-4 text-sm font-medium text-sky-700"
+    >
+      {t.remind}
+    </button>
+  </div>
+))}
               </div>
 
               <h3 className="mt-6 font-semibold">
-                {
-                  t.history
-                }
+                {t.history}
               </h3>
 
               <div className="mt-2 space-y-2">
@@ -5923,9 +7163,9 @@ export default function Home() {
                         language
                       )}{" "}
                       ·{" "}
-                      {
-                        appointment.service
-                      }
+                      {getAppointmentServiceLabel(
+                        appointment
+                      )}
                     </div>
                   )
                 )}
@@ -5939,9 +7179,7 @@ export default function Home() {
                 }
                 className="mt-6 h-12 w-full rounded-2xl bg-red-50 text-red-600"
               >
-                {
-                  t.deleteClient
-                }
+                {t.deleteClient}
               </button>
             </Modal>
           )}
@@ -5962,90 +7200,147 @@ export default function Home() {
             </h2>
 
             <div className="mt-5 space-y-3">
-              <input
-                value={
-                  serviceName
-                }
-                onChange={(
-                  event
-                ) =>
-                  setServiceName(
-                    event.target
-                      .value
-                  )
-                }
-                placeholder={
+              <FieldLabel
+                label={
                   t.serviceName
                 }
-                className="h-12 w-full rounded-2xl border border-white/80 bg-white/80 px-3 shadow-sm"
-              />
-
-              <select
-                value={
-                  serviceDuration
-                }
-                onChange={(
-                  event
-                ) =>
-                  setServiceDuration(
-                    event.target
-                      .value
-                  )
-                }
-                className="h-12 w-full rounded-2xl border border-white/80 bg-white/80 px-3 shadow-sm"
               >
-                {Array.from(
-                  {
-                    length:
-                      12,
-                  },
-                  (
-                    _,
-                    index
+                <input
+                  value={
+                    serviceName
+                  }
+                  onChange={(
+                    event
                   ) =>
-                    (index +
-                      1) *
-                    30
-                ).map(
-                  (
-                    minutes
-                  ) => (
-                    <option
-                      key={
-                        minutes
-                      }
-                      value={
-                        minutes
-                      }
-                    >
-                      {formatDurationLabel(
-                        minutes,
-                        language
-                      )}
-                    </option>
-                  )
-                )}
-              </select>
+                    setServiceName(
+                      event.target.value
+                    )
+                  }
+                  placeholder={
+                    t.serviceName
+                  }
+                  className="h-12 w-full rounded-2xl border border-white/80 bg-white/80 px-3 shadow-sm"
+                />
+              </FieldLabel>
 
-              <input
-                type="number"
-                min="0"
-                value={
-                  servicePrice
+              <FieldLabel
+                label={
+                  t.serviceType
                 }
-                onChange={(
-                  event
-                ) =>
-                  setServicePrice(
-                    event.target
-                      .value
-                  )
+              >
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setServiceIsAddon(
+                        false
+                      )
+                    }
+                    className={`h-12 rounded-2xl ${
+                      !serviceIsAddon
+                        ? "bg-neutral-900 text-white"
+                        : "bg-white/70 text-neutral-600"
+                    }`}
+                  >
+                    {t.mainServiceType}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setServiceIsAddon(
+                        true
+                      )
+                    }
+                    className={`h-12 rounded-2xl ${
+                      serviceIsAddon
+                        ? "bg-violet-500 text-white"
+                        : "bg-white/70 text-neutral-600"
+                    }`}
+                  >
+                    {t.addonServiceType}
+                  </button>
+                </div>
+              </FieldLabel>
+
+              <FieldLabel
+                label={
+                  t.duration
                 }
-                placeholder={
+              >
+                <select
+                  value={
+                    serviceDuration
+                  }
+                  onChange={(
+                    event
+                  ) =>
+                    setServiceDuration(
+                      event.target.value
+                    )
+                  }
+                  className="h-12 w-full rounded-2xl border border-white/80 bg-white/80 px-3 shadow-sm"
+                >
+                  {Array.from(
+                    {
+                      length:
+                        12,
+                    },
+                    (
+                      _,
+                      index
+                    ) =>
+                      (
+                        index +
+                        1
+                      ) *
+                      30
+                  ).map(
+                    (
+                      minutes
+                    ) => (
+                      <option
+                        key={
+                          minutes
+                        }
+                        value={
+                          minutes
+                        }
+                      >
+                        {formatDurationLabel(
+                          minutes,
+                          language
+                        )}
+                      </option>
+                    )
+                  )}
+                </select>
+              </FieldLabel>
+
+              <FieldLabel
+                label={
                   t.servicePrice
                 }
-                className="h-12 w-full rounded-2xl border border-white/80 bg-white/80 px-3 shadow-sm"
-              />
+              >
+                <input
+                  type="number"
+                  min="0"
+                  value={
+                    servicePrice
+                  }
+                  onChange={(
+                    event
+                  ) =>
+                    setServicePrice(
+                      event.target.value
+                    )
+                  }
+                  placeholder={
+                    t.servicePrice
+                  }
+                  className="h-12 w-full rounded-2xl border border-white/80 bg-white/80 px-3 shadow-sm"
+                />
+              </FieldLabel>
 
               <button
                 onClick={
@@ -6053,9 +7348,7 @@ export default function Home() {
                 }
                 className="h-12 w-full rounded-2xl bg-neutral-900 font-medium text-white shadow-lg"
               >
-                {
-                  t.save
-                }
+                {t.save}
               </button>
             </div>
           </Modal>
@@ -6074,9 +7367,7 @@ export default function Home() {
             }}
           >
             <h2 className="text-xl font-semibold">
-              {
-                t.reminder
-              }
+              {t.reminder}
             </h2>
 
             <textarea
@@ -6087,15 +7378,16 @@ export default function Home() {
                 event
               ) => {
                 setReminderText(
-                  event.target
-                    .value
+                  event.target.value
                 );
 
                 setReminderCopied(
                   false
                 );
               }}
-              rows={7}
+              rows={
+                7
+              }
               className="mt-5 w-full resize-none rounded-2xl border border-white/80 bg-white/80 p-3 text-base shadow-sm"
             />
 
@@ -6138,7 +7430,6 @@ export default function Home() {
             </button>
           </Modal>
         )}
-
       </div>
     </main>
   );
@@ -6167,15 +7458,11 @@ function NavButton({
       }`}
     >
       <span className="flex h-6 items-center justify-center">
-        {
-          icon
-        }
+        {icon}
       </span>
 
       <span className="max-w-full truncate px-1">
-        {
-          children
-        }
+        {children}
       </span>
     </button>
   );
@@ -6218,15 +7505,11 @@ function StatCard({
       className={`rounded-[22px] border border-white/75 p-4 shadow-[0_6px_20px_rgba(120,85,100,0.08)] backdrop-blur-lg ${tones[tone]}`}
     >
       <p className="text-xs text-neutral-500">
-        {
-          label
-        }
+        {label}
       </p>
 
       <p className="mt-2 text-xl font-semibold">
-        {
-          value
-        }
+        {value}
       </p>
     </div>
   );
@@ -6242,14 +7525,10 @@ function FieldLabel({
   return (
     <div>
       <label className="mb-1 block text-sm text-neutral-500">
-        {
-          label
-        }
+        {label}
       </label>
 
-      {
-        children
-      }
+      {children}
     </div>
   );
 }
@@ -6264,15 +7543,11 @@ function InfoRow({
   return (
     <div className="flex h-12 items-center rounded-2xl bg-white/70 px-3 shadow-sm">
       <span className="w-24 shrink-0 text-xs text-neutral-400">
-        {
-          label
-        }
+        {label}
       </span>
 
       <span className="truncate text-sm">
-        {
-          value
-        }
+        {value}
       </span>
     </div>
   );
@@ -6288,7 +7563,6 @@ function Modal({
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/30 backdrop-blur-[2px]">
       <div className="max-h-[92dvh] w-full max-w-md overflow-y-auto rounded-t-[32px] border-t border-white/80 bg-rose-50/90 p-5 shadow-[0_-20px_60px_rgba(80,50,65,0.18)] backdrop-blur-xl">
-
         <div className="mx-auto mb-2 h-1.5 w-10 rounded-full bg-neutral-300/80" />
 
         <div className="flex justify-end">
@@ -6302,9 +7576,7 @@ function Modal({
           </button>
         </div>
 
-        {
-          children
-        }
+        {children}
       </div>
     </div>
   );
