@@ -3567,7 +3567,14 @@ export default function Home() {
                     height: `${calendarHeight}px`,
                   }}
                 >
-                  <div className="relative border-r border-neutral-600/65">
+                  <div className="relative">
+                    <div
+  className="absolute bottom-0 right-0 top-0 w-[5px]"
+  style={{
+    background:
+      "linear-gradient(to right, rgba(150,150,150,0.65) 0px, rgba(150,150,150,0.65) 2px, rgba(255,255,255,0.95) 2px, rgba(255,255,255,0.95) 3px, rgba(150,150,150,0.65) 3px, rgba(150,150,150,0.65) 5px)",
+  }}
+/>
                     {hours.map(
                       (hour) => (
                         <div
@@ -3600,20 +3607,22 @@ export default function Home() {
                     }
                   >
                     {hours.map(
-                      (hour) => (
-                        <div
-                          key={hour}
-                          className="absolute left-0 right-0 border-t border-neutral-600/65"
-                          style={{
-                            top: `${
-                              (hour -
-                                workSettings.startHour) *
-                              HOUR_HEIGHT
-                            }px`,
-                          }}
-                        />
-                      )
-                    )}
+  (hour) => (
+    <div
+      key={hour}
+      className="absolute left-0 right-0 h-[5px]"
+      style={{
+        top: `${
+          (hour -
+            workSettings.startHour) *
+          HOUR_HEIGHT
+        }px`,
+        background:
+          "linear-gradient(to bottom, rgba(150,150,150,0.65) 0px, rgba(150,150,150,0.65) 2px, rgba(255,255,255,0.95) 2px, rgba(255,255,255,0.95) 3px, rgba(150,150,150,0.65) 3px, rgba(150,150,150,0.65) 5px)",
+      }}
+    />
+  )
+)}
 
                     {selectedDayAppointments.map(
                       (
