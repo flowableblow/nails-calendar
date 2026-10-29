@@ -372,22 +372,14 @@ const translations = {
 
 function formatDateKey(date: Date) {
   const year = date.getFullYear();
-
-  const month = String(
-    date.getMonth() + 1
-  ).padStart(2, "0");
-
-  const day = String(
-    date.getDate()
-  ).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
 
   return `${year}-${month}-${day}`;
 }
 
 function getLocale(language: Language) {
-  return language === "uk"
-    ? "uk-UA"
-    : "ru-RU";
+  return language === "uk" ? "uk-UA" : "ru-RU";
 }
 
 function formatDateTitle(
@@ -428,9 +420,7 @@ function formatFullDate(
       year: "numeric",
     }
   ).format(
-    new Date(
-      `${dateString}T12:00:00`
-    )
+    new Date(`${dateString}T12:00:00`)
   );
 }
 
@@ -456,9 +446,7 @@ function formatUkrainianReminderDate(
       month: "long",
     }
   ).format(
-    new Date(
-      `${dateString}T12:00:00`
-    )
+    new Date(`${dateString}T12:00:00`)
   );
 }
 
@@ -582,9 +570,7 @@ function safeObject<T>(
   if (!value) return fallback;
 
   try {
-    return JSON.parse(
-      value
-    ) as T;
+    return JSON.parse(value) as T;
   } catch {
     return fallback;
   }
@@ -596,36 +582,20 @@ function createQueueId() {
     .slice(2)}`;
 }
 
-function cleanUsername(
-  value: string
-) {
+function cleanUsername(value: string) {
   return value
     .trim()
-    .replace(
-      /^https?:\/\/(www\.)?/,
-      ""
-    )
+    .replace(/^https?:\/\/(www\.)?/, "")
     .replace(/^t\.me\//, "")
-    .replace(
-      /^telegram\.me\//,
-      ""
-    )
-    .replace(
-      /^instagram\.com\//,
-      ""
-    )
-    .replace(
-      /^www\.instagram\.com\//,
-      ""
-    )
+    .replace(/^telegram\.me\//, "")
+    .replace(/^instagram\.com\//, "")
+    .replace(/^www\.instagram\.com\//, "")
     .replace(/^@/, "")
     .split("/")[0]
     .split("?")[0];
 }
 
-function getTelegramUrl(
-  value: string
-) {
+function getTelegramUrl(value: string) {
   const username =
     cleanUsername(value);
 
@@ -634,9 +604,7 @@ function getTelegramUrl(
     : "";
 }
 
-function getInstagramUrl(
-  value: string
-) {
+function getInstagramUrl(value: string) {
   const username =
     cleanUsername(value);
 
@@ -676,27 +644,19 @@ function normalizeClient(
     id: Number(client.id),
     name: client.name ?? "",
     phone: client.phone ?? "",
-
     telegram:
       client.telegram ??
       legacyTelegram,
-
     instagram:
       client.instagram ??
       legacyInstagram,
-
     note: client.note ?? "",
   };
 }
 
-function getMonthCalendarDays(
-  date: Date
-) {
-  const year =
-    date.getFullYear();
-
-  const month =
-    date.getMonth();
+function getMonthCalendarDays(date: Date) {
+  const year = date.getFullYear();
+  const month = date.getMonth();
 
   const first =
     new Date(year, month, 1);
@@ -730,7 +690,6 @@ function getMonthCalendarDays(
         month,
         1 - index
       ),
-
       isCurrentMonth: false,
     });
   }
@@ -746,7 +705,6 @@ function getMonthCalendarDays(
         month,
         day
       ),
-
       isCurrentMonth: true,
     });
   }
@@ -766,7 +724,6 @@ function getMonthCalendarDays(
         month + 1,
         day
       ),
-
       isCurrentMonth: false,
     });
   }
@@ -777,21 +734,15 @@ function getMonthCalendarDays(
 function getStatusBadgeClass(
   status: AppointmentStatus
 ) {
-  if (
-    status === "completed"
-  ) {
+  if (status === "completed") {
     return "border-green-300 bg-green-50 text-green-700";
   }
 
-  if (
-    status === "cancelled"
-  ) {
+  if (status === "cancelled") {
     return "border-red-300 bg-red-50 text-red-700";
   }
 
-  if (
-    status === "no-show"
-  ) {
+  if (status === "no-show") {
     return "border-orange-300 bg-orange-50 text-orange-700";
   }
 
@@ -801,36 +752,25 @@ function getStatusBadgeClass(
 function getAppointmentCardClass(
   status: AppointmentStatus
 ) {
-  if (
-    status === "completed"
-  ) {
+  if (status === "completed") {
     return "border-green-400 bg-green-50/95";
   }
 
-  if (
-    status === "cancelled"
-  ) {
+  if (status === "cancelled") {
     return "border-red-400 bg-red-50/95";
   }
 
-  if (
-    status === "no-show"
-  ) {
+  if (status === "no-show") {
     return "border-orange-400 bg-orange-50/95";
   }
 
   return "border-sky-400 bg-sky-50/95";
 }
 
-function sumPrices(
-  items: Appointment[]
-) {
+function sumPrices(items: Appointment[]) {
   return items.reduce(
     (sum, item) =>
-      sum +
-      Number(
-        item.price || 0
-      ),
+      sum + Number(item.price || 0),
     0
   );
 }
@@ -848,14 +788,12 @@ export default function Home() {
   const syncingRef =
     useRef(false);
 
-  const [
-    today,
-    setToday,
-  ] = useState(
-    new Date(
-      "2000-01-01T12:00:00"
-    )
-  );
+  const [today, setToday] =
+    useState(
+      new Date(
+        "2000-01-01T12:00:00"
+      )
+    );
 
   const [
     session,
@@ -899,9 +837,7 @@ export default function Home() {
     language,
     setLanguage,
   ] =
-    useState<Language>(
-      "uk"
-    );
+    useState<Language>("uk");
 
   const t =
     translations[language];
@@ -936,17 +872,13 @@ export default function Home() {
     activeTab,
     setActiveTab,
   ] =
-    useState<Tab>(
-      "calendar"
-    );
+    useState<Tab>("calendar");
 
   const [
     calendarView,
     setCalendarView,
   ] =
-    useState<CalendarView>(
-      "day"
-    );
+    useState<CalendarView>("day");
 
   const [
     selectedDate,
@@ -972,25 +904,19 @@ export default function Home() {
     appointments,
     setAppointments,
   ] =
-    useState<
-      Appointment[]
-    >([]);
+    useState<Appointment[]>([]);
 
   const [
     clients,
     setClients,
   ] =
-    useState<Client[]>(
-      []
-    );
+    useState<Client[]>([]);
 
   const [
     services,
     setServices,
   ] =
-    useState<Service[]>(
-      []
-    );
+    useState<Service[]>([]);
 
   const [
     workSettings,
@@ -1226,16 +1152,13 @@ export default function Home() {
       JSON.stringify(queue)
     );
 
-    setPendingCount(
-      queue.length
-    );
+    setPendingCount(queue.length);
   }
 
   function enqueueOperation(
     operation: PendingOperation
   ) {
-    let queue =
-      getQueue();
+    let queue = getQueue();
 
     queue =
       queue.filter(
@@ -1248,13 +1171,9 @@ export default function Home() {
           )
       );
 
-    queue.push(
-      operation
-    );
+    queue.push(operation);
 
-    saveQueue(
-      queue
-    );
+    saveQueue(queue);
   }
 
   const executeOperation =
@@ -1268,14 +1187,11 @@ export default function Home() {
         ) {
           const { error } =
             await supabase
-              .from(
-                operation.table
-              )
+              .from(operation.table)
               .upsert(
                 operation.payload,
                 {
-                  onConflict:
-                    "id",
+                  onConflict: "id",
                 }
               );
 
@@ -1288,9 +1204,7 @@ export default function Home() {
 
         const { error } =
           await supabase
-            .from(
-              operation.table
-            )
+            .from(operation.table)
             .delete()
             .eq(
               operation.column,
@@ -1339,7 +1253,6 @@ export default function Home() {
           true;
 
         setIsSyncing(true);
-
         setDatabaseStatus(
           "connecting"
         );
@@ -1360,9 +1273,7 @@ export default function Home() {
 
             localStorage.setItem(
               OFFLINE_QUEUE_STORAGE_KEY,
-              JSON.stringify(
-                queue
-              )
+              JSON.stringify(queue)
             );
 
             setPendingCount(
@@ -1401,19 +1312,10 @@ export default function Home() {
   async function saveOrQueue(
     operation: PendingOperation
   ) {
-    if (
-      !navigator.onLine
-    ) {
-      enqueueOperation(
-        operation
-      );
-
+    if (!navigator.onLine) {
+      enqueueOperation(operation);
       setIsOnline(false);
-
-      setDatabaseStatus(
-        "offline"
-      );
-
+      setDatabaseStatus("offline");
       return;
     }
 
@@ -1431,9 +1333,7 @@ export default function Home() {
         error
       );
 
-      enqueueOperation(
-        operation
-      );
+      enqueueOperation(operation);
 
       setDatabaseStatus(
         "error"
@@ -1452,9 +1352,7 @@ export default function Home() {
     setClients(
       rawClients.map(
         (client) =>
-          normalizeClient(
-            client
-          )
+          normalizeClient(client)
       )
     );
 
@@ -1503,10 +1401,7 @@ export default function Home() {
       new Date();
 
     setToday(current);
-
-    setSelectedDate(
-      current
-    );
+    setSelectedDate(current);
 
     setVisibleMonth(
       new Date(
@@ -1519,9 +1414,7 @@ export default function Home() {
     const online =
       navigator.onLine;
 
-    setIsOnline(
-      online
-    );
+    setIsOnline(online);
 
     const queue =
       safeArray<PendingOperation>(
@@ -1536,16 +1429,12 @@ export default function Home() {
 
     function handleOnline() {
       setIsOnline(true);
-
       void syncOfflineQueue();
     }
 
     function handleOffline() {
       setIsOnline(false);
-
-      setDatabaseStatus(
-        "offline"
-      );
+      setDatabaseStatus("offline");
     }
 
     window.addEventListener(
@@ -1588,17 +1477,10 @@ export default function Home() {
 
     supabase.auth
       .getSession()
-      .then(
-        ({ data }) => {
-          setSession(
-            data.session
-          );
-
-          setAuthChecked(
-            true
-          );
-        }
-      );
+      .then(({ data }) => {
+        setSession(data.session);
+        setAuthChecked(true);
+      });
 
     const {
       data: {
@@ -1614,9 +1496,7 @@ export default function Home() {
             nextSession
           );
 
-          setAuthChecked(
-            true
-          );
+          setAuthChecked(true);
         }
       );
 
@@ -1633,9 +1513,7 @@ export default function Home() {
     async function loadData() {
       setIsLoaded(false);
 
-      if (
-        !navigator.onLine
-      ) {
+      if (!navigator.onLine) {
         loadLocalData();
 
         setDatabaseStatus(
@@ -1646,7 +1524,6 @@ export default function Home() {
           true;
 
         setIsLoaded(true);
-
         return;
       }
 
@@ -1665,16 +1542,12 @@ export default function Home() {
         ] =
           await Promise.all([
             supabase
-              .from(
-                "clients"
-              )
+              .from("clients")
               .select("*")
               .order("name"),
 
             supabase
-              .from(
-                "services"
-              )
+              .from("services")
               .select("*")
               .order("name"),
 
@@ -1687,14 +1560,9 @@ export default function Home() {
               .order("time"),
 
             supabase
-              .from(
-                "settings"
-              )
+              .from("settings")
               .select("*")
-              .eq(
-                "id",
-                "main"
-              )
+              .eq("id", "main")
               .maybeSingle(),
           ]);
 
@@ -1729,33 +1597,18 @@ export default function Home() {
           ).map(
             (row) =>
               normalizeClient({
-                id: Number(
-                  row.id
-                ),
-
-                name:
-                  row.name ??
-                  "",
-
-                phone:
-                  row.phone ??
-                  "",
-
+                id: Number(row.id),
+                name: row.name ?? "",
+                phone: row.phone ?? "",
                 telegram:
                   row.telegram ??
                   undefined,
-
                 instagram:
                   row.instagram ??
                   undefined,
-
                 social:
-                  row.social ??
-                  "",
-
-                note:
-                  row.note ??
-                  "",
+                  row.social ?? "",
+                note: row.note ?? "",
               })
           );
 
@@ -1765,20 +1618,13 @@ export default function Home() {
             []
           ).map(
             (row) => ({
-              id: Number(
-                row.id
-              ),
-
-              name:
-                row.name ??
-                "",
-
+              id: Number(row.id),
+              name: row.name ?? "",
               duration:
                 Number(
                   row.duration ??
                     90
                 ),
-
               price:
                 Number(
                   row.price ??
@@ -1793,22 +1639,12 @@ export default function Home() {
             []
           ).map(
             (row) => ({
-              id: Number(
-                row.id
-              ),
-
-              date:
-                row.date ??
-                "",
-
+              id: Number(row.id),
+              date: row.date ?? "",
               time:
                 String(
-                  row.time ??
-                    ""
-                ).slice(
-                  0,
-                  5
-                ),
+                  row.time ?? ""
+                ).slice(0, 5),
 
               clientId:
                 row.client_id !==
@@ -1820,9 +1656,7 @@ export default function Home() {
                     )
                   : undefined,
 
-              name:
-                row.name ??
-                "",
+              name: row.name ?? "",
 
               serviceId:
                 row.service_id !==
@@ -1835,8 +1669,7 @@ export default function Home() {
                   : undefined,
 
               service:
-                row.service ??
-                "",
+                row.service ?? "",
 
               duration:
                 Number(
@@ -1875,8 +1708,7 @@ export default function Home() {
             settingsResult.data;
 
           setLanguage(
-            row.language ===
-              "ru"
+            row.language === "ru"
               ? "ru"
               : "uk"
           );
@@ -1937,41 +1769,25 @@ export default function Home() {
   ]);
 
   useEffect(() => {
-    if (!isLoaded) {
-      return;
-    }
+    if (!isLoaded) return;
 
     localStorage.setItem(
       CLIENTS_STORAGE_KEY,
-      JSON.stringify(
-        clients
-      )
+      JSON.stringify(clients)
     );
-  }, [
-    clients,
-    isLoaded,
-  ]);
+  }, [clients, isLoaded]);
 
   useEffect(() => {
-    if (!isLoaded) {
-      return;
-    }
+    if (!isLoaded) return;
 
     localStorage.setItem(
       SERVICES_STORAGE_KEY,
-      JSON.stringify(
-        services
-      )
+      JSON.stringify(services)
     );
-  }, [
-    services,
-    isLoaded,
-  ]);
+  }, [services, isLoaded]);
 
   useEffect(() => {
-    if (!isLoaded) {
-      return;
-    }
+    if (!isLoaded) return;
 
     localStorage.setItem(
       APPOINTMENTS_STORAGE_KEY,
@@ -1985,9 +1801,7 @@ export default function Home() {
   ]);
 
   useEffect(() => {
-    if (!isLoaded) {
-      return;
-    }
+    if (!isLoaded) return;
 
     localStorage.setItem(
       LANGUAGE_STORAGE_KEY,
@@ -2015,25 +1829,18 @@ export default function Home() {
               createQueueId(),
 
             type: "upsert",
-
             table: "settings",
-
             recordId: "main",
 
             payload: {
               id: "main",
-
               language,
-
               start_hour:
                 workSettings.startHour,
-
               end_hour:
                 workSettings.endHour,
-
               work_days:
                 workSettings.workDays,
-
               updated_at:
                 new Date().toISOString(),
             },
@@ -2058,9 +1865,7 @@ export default function Home() {
   ) {
     event.preventDefault();
 
-    if (
-      !navigator.onLine
-    ) {
+    if (!navigator.onLine) {
       setLoginError(
         language === "uk"
           ? "Для входу потрібен інтернет."
@@ -2078,7 +1883,6 @@ export default function Home() {
         {
           email:
             loginEmail.trim(),
-
           password:
             loginPassword,
         }
@@ -2092,15 +1896,11 @@ export default function Home() {
       );
     }
 
-    setLoginLoading(
-      false
-    );
+    setLoginLoading(false);
   }
 
   async function handleLogout() {
-    if (
-      navigator.onLine
-    ) {
+    if (navigator.onLine) {
       await supabase.auth.signOut();
     }
 
@@ -2108,9 +1908,7 @@ export default function Home() {
   }
 
   const todayKey =
-    formatDateKey(
-      today
-    );
+    formatDateKey(today);
 
   const selectedDateKey =
     formatDateKey(
@@ -2166,48 +1964,36 @@ export default function Home() {
 
   const filteredClients =
     [...clients]
-      .filter(
-        (client) => {
-          const search =
-            clientSearch
-              .trim()
-              .toLowerCase();
+      .filter((client) => {
+        const search =
+          clientSearch
+            .trim()
+            .toLowerCase();
 
-          if (!search) {
-            return true;
-          }
-
-          return (
-            client.name
-              .toLowerCase()
-              .includes(
-                search
-              ) ||
-            client.phone
-              .toLowerCase()
-              .includes(
-                search
-              ) ||
-            client.telegram
-              .toLowerCase()
-              .includes(
-                search
-              ) ||
-            client.instagram
-              .toLowerCase()
-              .includes(
-                search
-              )
-          );
+        if (!search) {
+          return true;
         }
-      )
+
+        return (
+          client.name
+            .toLowerCase()
+            .includes(search) ||
+          client.phone
+            .toLowerCase()
+            .includes(search) ||
+          client.telegram
+            .toLowerCase()
+            .includes(search) ||
+          client.instagram
+            .toLowerCase()
+            .includes(search)
+        );
+      })
       .sort(
         (a, b) =>
           a.name.localeCompare(
             b.name,
-            getLocale(
-              language
-            )
+            getLocale(language)
           )
       );
 
@@ -2299,8 +2085,7 @@ export default function Home() {
         new Date(today);
 
       date.setDate(
-        date.getDate() -
-          6
+        date.getDate() - 6
       );
 
       return date;
@@ -2433,9 +2218,7 @@ export default function Home() {
             appointment.service ||
             "Без услуги";
 
-          if (
-            !result[key]
-          ) {
+          if (!result[key]) {
             result[key] = {
               name: key,
               count: 0,
@@ -2443,8 +2226,7 @@ export default function Home() {
             };
           }
 
-          result[key].count +=
-            1;
+          result[key].count += 1;
 
           result[key].income +=
             Number(
@@ -2495,24 +2277,15 @@ export default function Home() {
   function statusLabel(
     status: AppointmentStatus
   ) {
-    if (
-      status ===
-      "completed"
-    ) {
+    if (status === "completed") {
       return t.completedStatus;
     }
 
-    if (
-      status ===
-      "cancelled"
-    ) {
+    if (status === "cancelled") {
       return t.cancelledStatus;
     }
 
-    if (
-      status ===
-      "no-show"
-    ) {
+    if (status === "no-show") {
       return t.noShowStatus;
     }
 
@@ -2523,18 +2296,14 @@ export default function Home() {
     amount: number
   ) {
     const next =
-      new Date(
-        selectedDate
-      );
+      new Date(selectedDate);
 
     next.setDate(
       next.getDate() +
         amount
     );
 
-    setSelectedDate(
-      next
-    );
+    setSelectedDate(next);
 
     setVisibleMonth(
       new Date(
@@ -2562,9 +2331,7 @@ export default function Home() {
     const current =
       new Date();
 
-    setSelectedDate(
-      current
-    );
+    setSelectedDate(current);
 
     setVisibleMonth(
       new Date(
@@ -2580,49 +2347,25 @@ export default function Home() {
       null
     );
 
-    setSelectedClientId(
-      ""
-    );
-
-    setSelectedServiceId(
-      ""
-    );
-
-    setAppointmentName(
-      ""
-    );
+    setSelectedClientId("");
+    setSelectedServiceId("");
+    setAppointmentName("");
 
     setAppointmentDate(
       selectedDateKey
     );
 
-    setAppointmentTime(
-      ""
-    );
-
-    setAppointmentService(
-      ""
-    );
-
-    setAppointmentDuration(
-      "90"
-    );
-
-    setAppointmentPrice(
-      ""
-    );
+    setAppointmentTime("");
+    setAppointmentService("");
+    setAppointmentDuration("90");
+    setAppointmentPrice("");
 
     setAppointmentStatus(
       "scheduled"
     );
 
-    setAppointmentError(
-      ""
-    );
-
-    setHasConflict(
-      false
-    );
+    setAppointmentError("");
+    setHasConflict(false);
   }
 
   function openNewAppointment(
@@ -2634,9 +2377,7 @@ export default function Home() {
       selectedDateKey
     );
 
-    setAppointmentTime(
-      time
-    );
+    setAppointmentTime(time);
 
     setIsAppointmentModalOpen(
       true
@@ -2700,13 +2441,8 @@ export default function Home() {
         : appointment.name
     );
 
-    setAppointmentError(
-      ""
-    );
-
-    setHasConflict(
-      false
-    );
+    setAppointmentError("");
+    setHasConflict(false);
 
     setIsAppointmentModalOpen(
       true
@@ -2720,9 +2456,7 @@ export default function Home() {
     ignoreId: number | null
   ) {
     const start =
-      timeToMinutes(
-        time
-      );
+      timeToMinutes(time);
 
     const end =
       start +
@@ -2863,12 +2597,8 @@ export default function Home() {
       queueId:
         createQueueId(),
 
-      type:
-        "upsert",
-
-      table:
-        "appointments",
-
+      type: "upsert",
+      table: "appointments",
       recordId:
         appointment.id,
 
@@ -2932,27 +2662,20 @@ export default function Home() {
       setAppointmentError(
         t.clientRequired
       );
-
       return;
     }
 
-    if (
-      !appointmentDate
-    ) {
+    if (!appointmentDate) {
       setAppointmentError(
         t.dateRequired
       );
-
       return;
     }
 
-    if (
-      !appointmentTime
-    ) {
+    if (!appointmentTime) {
       setAppointmentError(
         t.timeRequired
       );
-
       return;
     }
 
@@ -2982,10 +2705,7 @@ export default function Home() {
         )}`
       );
 
-      setHasConflict(
-        true
-      );
-
+      setHasConflict(true);
       return;
     }
 
@@ -3014,13 +2734,8 @@ export default function Home() {
     await saveOrQueue({
       queueId:
         createQueueId(),
-
-      type:
-        "delete",
-
-      table:
-        "appointments",
-
+      type: "delete",
+      table: "appointments",
       recordId: id,
       column: "id",
       value: id,
@@ -3032,19 +2747,14 @@ export default function Home() {
   }
 
   function openNewClient() {
-    setEditingClientId(
-      null
-    );
-
+    setEditingClientId(null);
     setClientName("");
     setClientPhone("");
     setClientTelegram("");
     setClientInstagram("");
     setClientNote("");
 
-    setIsClientModalOpen(
-      true
-    );
+    setIsClientModalOpen(true);
   }
 
   function openEditClient(
@@ -3084,9 +2794,7 @@ export default function Home() {
   }
 
   async function saveClient() {
-    if (
-      !clientName.trim()
-    ) {
+    if (!clientName.trim()) {
       return;
     }
 
@@ -3148,8 +2856,7 @@ export default function Home() {
           .map(
             (appointment) => ({
               ...appointment,
-              name:
-                client.name,
+              name: client.name,
             })
           );
 
@@ -3180,45 +2887,32 @@ export default function Home() {
           queueId:
             createQueueId(),
 
-          type:
-            "upsert",
-
-          table:
-            "appointments",
-
+          type: "upsert",
+          table: "appointments",
           recordId:
             appointment.id,
 
           payload: {
             id:
               appointment.id,
-
             date:
               appointment.date,
-
             time:
               appointment.time,
-
             client_id:
               appointment.clientId ??
               null,
-
             name:
               appointment.name,
-
             service_id:
               appointment.serviceId ??
               null,
-
             service:
               appointment.service,
-
             duration:
               appointment.duration,
-
             price:
               appointment.price,
-
             status:
               appointment.status,
           },
@@ -3229,42 +2923,29 @@ export default function Home() {
     await saveOrQueue({
       queueId:
         createQueueId(),
-
-      type:
-        "upsert",
-
-      table:
-        "clients",
-
+      type: "upsert",
+      table: "clients",
       recordId:
         client.id,
 
       payload: {
         id:
           client.id,
-
         name:
           client.name,
-
         phone:
           client.phone,
-
         telegram:
           client.telegram,
-
         instagram:
           client.instagram,
-
         note:
           client.note,
-
         social: "",
       },
     });
 
-    setIsClientModalOpen(
-      false
-    );
+    setIsClientModalOpen(false);
   }
 
   async function deleteClient(
@@ -3304,21 +2985,11 @@ export default function Home() {
     await saveOrQueue({
       queueId:
         createQueueId(),
-
-      type:
-        "delete",
-
-      table:
-        "clients",
-
-      recordId:
-        id,
-
-      column:
-        "id",
-
-      value:
-        id,
+      type: "delete",
+      table: "clients",
+      recordId: id,
+      column: "id",
+      value: id,
     });
 
     setIsClientDetailsOpen(
@@ -3327,19 +2998,11 @@ export default function Home() {
   }
 
   function openNewService() {
-    setEditingServiceId(
-      null
-    );
-
+    setEditingServiceId(null);
     setServiceName("");
-    setServiceDuration(
-      "90"
-    );
+    setServiceDuration("90");
     setServicePrice("");
-
-    setIsServiceModalOpen(
-      true
-    );
+    setIsServiceModalOpen(true);
   }
 
   function openEditService(
@@ -3365,15 +3028,11 @@ export default function Home() {
       )
     );
 
-    setIsServiceModalOpen(
-      true
-    );
+    setIsServiceModalOpen(true);
   }
 
   async function saveService() {
-    if (
-      !serviceName.trim()
-    ) {
+    if (!serviceName.trim()) {
       return;
     }
 
@@ -3423,34 +3082,24 @@ export default function Home() {
     await saveOrQueue({
       queueId:
         createQueueId(),
-
-      type:
-        "upsert",
-
-      table:
-        "services",
-
+      type: "upsert",
+      table: "services",
       recordId:
         service.id,
 
       payload: {
         id:
           service.id,
-
         name:
           service.name,
-
         duration:
           service.duration,
-
         price:
           service.price,
       },
     });
 
-    setIsServiceModalOpen(
-      false
-    );
+    setIsServiceModalOpen(false);
   }
 
   async function deleteService(
@@ -3475,21 +3124,11 @@ export default function Home() {
     await saveOrQueue({
       queueId:
         createQueueId(),
-
-      type:
-        "delete",
-
-      table:
-        "services",
-
-      recordId:
-        id,
-
-      column:
-        "id",
-
-      value:
-        id,
+      type: "delete",
+      table: "services",
+      recordId: id,
+      column: "id",
+      value: id,
     });
   }
 
@@ -3520,9 +3159,7 @@ export default function Home() {
     }
 
     openNewAppointment(
-      `${String(
-        hour
-      ).padStart(
+      `${String(hour).padStart(
         2,
         "0"
       )}:00`
@@ -3532,13 +3169,9 @@ export default function Home() {
   function handleServiceSelection(
     value: string
   ) {
-    setSelectedServiceId(
-      value
-    );
+    setSelectedServiceId(value);
 
-    if (!value) {
-      return;
-    }
+    if (!value) return;
 
     const service =
       services.find(
@@ -3547,9 +3180,7 @@ export default function Home() {
           Number(value)
       );
 
-    if (!service) {
-      return;
-    }
+    if (!service) return;
 
     setAppointmentService(
       service.name
@@ -3603,22 +3234,15 @@ export default function Home() {
       `Послуга: ${appointment.service}. ` +
       `Чекаю на вас ❤️`;
 
-    setReminderText(
-      text
-    );
+    setReminderText(text);
 
     setReminderClientId(
       appointment.clientId ??
         null
     );
 
-    setReminderCopied(
-      false
-    );
-
-    setIsReminderModalOpen(
-      true
-    );
+    setReminderCopied(false);
+    setIsReminderModalOpen(true);
   }
 
   async function copyReminder() {
@@ -3627,9 +3251,7 @@ export default function Home() {
         reminderText
       );
 
-      setReminderCopied(
-        true
-      );
+      setReminderCopied(true);
     } catch {
       window.alert(
         reminderText
@@ -3649,9 +3271,7 @@ export default function Home() {
         reminderText
       );
 
-      setReminderCopied(
-        true
-      );
+      setReminderCopied(true);
     } catch {}
 
     const url =
@@ -3679,9 +3299,7 @@ export default function Home() {
         reminderText
       );
 
-      setReminderCopied(
-        true
-      );
+      setReminderCopied(true);
     } catch {}
 
     const url =
@@ -3902,12 +3520,8 @@ export default function Home() {
                   onClick={() =>
                     calendarView ===
                     "day"
-                      ? changeDay(
-                          -1
-                        )
-                      : changeMonth(
-                          -1
-                        )
+                      ? changeDay(-1)
+                      : changeMonth(-1)
                   }
                   className="text-2xl"
                 >
@@ -3934,12 +3548,8 @@ export default function Home() {
                   onClick={() =>
                     calendarView ===
                     "day"
-                      ? changeDay(
-                          1
-                        )
-                      : changeMonth(
-                          1
-                        )
+                      ? changeDay(1)
+                      : changeMonth(1)
                   }
                   className="text-2xl"
                 >
@@ -3959,13 +3569,9 @@ export default function Home() {
                 >
                   <div className="relative border-r border-neutral-600/65">
                     {hours.map(
-                      (
-                        hour
-                      ) => (
+                      (hour) => (
                         <div
-                          key={
-                            hour
-                          }
+                          key={hour}
                           className="absolute left-0 w-full px-3 text-sm text-neutral-600"
                           style={{
                             top: `${
@@ -3994,13 +3600,9 @@ export default function Home() {
                     }
                   >
                     {hours.map(
-                      (
-                        hour
-                      ) => (
+                      (hour) => (
                         <div
-                          key={
-                            hour
-                          }
+                          key={hour}
                           className="absolute left-0 right-0 border-t border-neutral-600/65"
                           style={{
                             top: `${
@@ -4097,9 +3699,7 @@ export default function Home() {
                 <div className="rounded-2xl bg-white/65 p-3 backdrop-blur-sm">
                   <div className="grid grid-cols-7 gap-1">
                     {WEEKDAYS.map(
-                      (
-                        day
-                      ) => (
+                      (day) => (
                         <div
                           key={
                             day.value
@@ -4116,9 +3716,7 @@ export default function Home() {
                     )}
 
                     {monthDays.map(
-                      (
-                        item
-                      ) => {
+                      (item) => {
                         const dateKey =
                           formatDateKey(
                             item.date
@@ -4176,9 +3774,7 @@ export default function Home() {
                             {count >
                               0 && (
                               <div className="mt-1 text-xs">
-                                {
-                                  count
-                                }
+                                {count}
                               </div>
                             )}
                           </button>
@@ -4251,9 +3847,7 @@ export default function Home() {
               )}
 
               {filteredClients.map(
-                (
-                  client
-                ) => (
+                (client) => (
                   <button
                     key={
                       client.id
@@ -4419,9 +4013,7 @@ export default function Home() {
 
               <div className="mt-3 space-y-2">
                 {serviceStats.map(
-                  (
-                    service
-                  ) => (
+                  (service) => (
                     <div
                       key={
                         service.name
@@ -4582,16 +4174,10 @@ export default function Home() {
                         index +
                         6
                     ).map(
-                      (
-                        hour
-                      ) => (
+                      (hour) => (
                         <option
-                          key={
-                            hour
-                          }
-                          value={
-                            hour
-                          }
+                          key={hour}
+                          value={hour}
                         >
                           {String(
                             hour
@@ -4645,19 +4231,12 @@ export default function Home() {
                         index +
                         7
                     ).map(
-                      (
-                        hour
-                      ) => (
+                      (hour) => (
                         <option
-                          key={
-                            hour
-                          }
-                          value={
-                            hour
-                          }
+                          key={hour}
+                          value={hour}
                         >
-                          {hour ===
-                          24
+                          {hour === 24
                             ? "24:00"
                             : `${String(
                                 hour
@@ -4680,9 +4259,7 @@ export default function Home() {
 
               <div className="mt-2 grid grid-cols-7 gap-1">
                 {WEEKDAYS.map(
-                  (
-                    day
-                  ) => (
+                  (day) => (
                     <button
                       key={
                         day.value
@@ -4729,9 +4306,7 @@ export default function Home() {
 
               <div className="mt-3 space-y-2">
                 {services.map(
-                  (
-                    service
-                  ) => (
+                  (service) => (
                     <div
                       key={
                         service.id
@@ -4806,7 +4381,6 @@ export default function Home() {
 
         <nav className="shrink-0 bg-rose-50/80 px-3 pb-3 pt-2 backdrop-blur-md">
           <div className="grid grid-cols-4 gap-2">
-
             <NavButton
               active={
                 activeTab ===
@@ -4948,7 +4522,6 @@ export default function Home() {
                 t.settings
               }
             </NavButton>
-
           </div>
         </nav>
 
@@ -5007,9 +4580,7 @@ export default function Home() {
                     </option>
 
                     {clients.map(
-                      (
-                        client
-                      ) => (
+                      (client) => (
                         <option
                           key={
                             client.id
@@ -5078,9 +4649,7 @@ export default function Home() {
                     </option>
 
                     {services.map(
-                      (
-                        service
-                      ) => (
+                      (service) => (
                         <option
                           key={
                             service.id
@@ -5145,7 +4714,7 @@ export default function Home() {
                           .value
                       )
                     }
-                    className="block h-12 w-full min-w-0 rounded-xl border border-rose-200 bg-white px-2 text-base text-black"
+                    className="block h-12 w-full min-w-0 appearance-none rounded-xl border border-rose-200 bg-white px-3 py-0 text-base leading-[48px] text-black"
                   />
                 </div>
 
@@ -5169,7 +4738,7 @@ export default function Home() {
                           .value
                       )
                     }
-                    className="block h-12 w-full min-w-0 rounded-xl border border-rose-200 bg-white px-2 text-base text-black"
+                    className="block h-12 w-full min-w-0 appearance-none rounded-xl border border-rose-200 bg-white px-3 py-0 text-base leading-[48px] text-black"
                   />
                 </div>
               </div>
@@ -5190,20 +4759,16 @@ export default function Home() {
               >
                 {Array.from(
                   {
-                    length:
-                      12,
+                    length: 12,
                   },
                   (
                     _,
                     index
                   ) =>
-                    (index +
-                      1) *
+                    (index + 1) *
                     30
                 ).map(
-                  (
-                    minutes
-                  ) => (
+                  (minutes) => (
                     <option
                       key={
                         minutes
@@ -5691,9 +5256,7 @@ export default function Home() {
 
               <div className="mt-2 space-y-2">
                 {futureClientAppointments.map(
-                  (
-                    appointment
-                  ) => (
+                  (appointment) => (
                     <div
                       key={
                         appointment.id
@@ -5742,9 +5305,7 @@ export default function Home() {
 
               <div className="mt-2 space-y-2">
                 {pastClientAppointments.map(
-                  (
-                    appointment
-                  ) => (
+                  (appointment) => (
                     <div
                       key={
                         appointment.id
@@ -5829,20 +5390,16 @@ export default function Home() {
               >
                 {Array.from(
                   {
-                    length:
-                      12,
+                    length: 12,
                   },
                   (
                     _,
                     index
                   ) =>
-                    (index +
-                      1) *
+                    (index + 1) *
                     30
                 ).map(
-                  (
-                    minutes
-                  ) => (
+                  (minutes) => (
                     <option
                       key={
                         minutes
@@ -5971,7 +5528,6 @@ export default function Home() {
             </button>
           </Modal>
         )}
-
       </div>
     </main>
   );
@@ -6032,16 +5588,12 @@ function StatCard({
   const tones = {
     white:
       "bg-white/65",
-
     blue:
       "bg-sky-50/90",
-
     green:
       "bg-green-50/90",
-
     red:
       "bg-red-50/90",
-
     orange:
       "bg-orange-50/90",
   };
