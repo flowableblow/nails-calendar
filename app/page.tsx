@@ -12,6 +12,7 @@ import {
 } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
+import NotificationSettings from "./notification-settings";
 
 type Language = "ru" | "uk";
 
@@ -5817,10 +5818,14 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="mt-3 rounded-[24px] border border-white/70 bg-white/55 p-4 backdrop-blur-lg">
-                <h2 className="font-semibold">
-                  {t.workSchedule}
-                </h2>
+<NotificationSettings
+  language={language}
+/>
+
+<div className="mt-3 rounded-[24px] border border-white/70 bg-white/55 p-4 backdrop-blur-lg">
+  <h2 className="font-semibold">
+    {t.workSchedule}
+  </h2>
 
                 <div className="mt-3 grid grid-cols-2 gap-3">
                   <div>
