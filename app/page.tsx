@@ -1,6 +1,15 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type FormEvent,
+  type MouseEvent,
+  type ReactNode,
+} from "react";
 import type { Session } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
 
@@ -48,7 +57,35 @@ type WorkSettings = {
 
 type Tab = "calendar" | "clients" | "analytics" | "settings";
 type CalendarView = "day" | "month";
-type DatabaseStatus = "connecting" | "connected" | "error";
+
+type DatabaseStatus =
+  | "connecting"
+  | "connected"
+  | "offline"
+  | "error";
+
+type QueueTable =
+  | "appointments"
+  | "clients"
+  | "services"
+  | "settings";
+
+type PendingOperation =
+  | {
+      queueId: string;
+      type: "upsert";
+      table: QueueTable;
+      recordId: string | number;
+      payload: Record<string, unknown>;
+    }
+  | {
+      queueId: string;
+      type: "delete";
+      table: QueueTable;
+      recordId: string | number;
+      column: string;
+      value: string | number;
+    };
 
 const HOUR_HEIGHT = 96;
 
@@ -57,10 +94,12 @@ const CLIENTS_STORAGE_KEY = "nails-calendar-clients";
 const SERVICES_STORAGE_KEY = "nails-calendar-services";
 const WORK_SETTINGS_STORAGE_KEY = "nails-calendar-work-settings";
 const LANGUAGE_STORAGE_KEY = "nails-calendar-language";
-const MIGRATION_STORAGE_KEY = "nails-calendar-supabase-migrated";
+
+const OFFLINE_QUEUE_STORAGE_KEY =
+  "nails-calendar-offline-queue";
 
 const DEFAULT_WORK_SETTINGS: WorkSettings = {
-  startHour: 9,
+  startHour: 8,
   endHour: 21,
   workDays: [0, 1, 2, 3, 4, 5, 6],
 };
@@ -92,76 +131,49 @@ const translations = {
     settings: "Настройки",
 
     today: "Сегодня",
-    returnToday: "Вернуться на сегодня",
     currentMonth: "Текущий месяц",
-    returnCurrentMonth: "Вернуться на текущий месяц",
-
     day: "День",
     month: "Месяц",
     records: "Записей",
-    totalRecords: "Всего записей",
 
     clientBase: "База клиентов",
-    total: "Всего",
     searchClient: "Поиск по имени, телефону...",
     noClients: "Клиентов пока нет",
-    addFirstClient: "Нажми +, чтобы добавить первого клиента",
-    nothingFound: "Никого не нашли",
 
     financeRecords: "Финансы и записи",
-    completedOnlyIncome: "Доход только по завершённым записям",
     todayIncome: "Сегодня",
     sevenDays: "7 дней",
     currentMonthIncome: "Текущий месяц",
     averageCheck: "Средний чек",
     scheduled: "Запланировано",
+    completed: "Завершено",
     cancelled: "Отменено",
     noShow: "Не пришли",
     topServices: "Топ услуг",
-    noCompleted: "Пока нет завершённых записей",
 
-    app: "Приложение",
+    sync: "Синхронизация",
+    online: "Онлайн",
+    offline: "Офлайн",
+    syncing: "Синхронизация",
+
     language: "Язык приложения",
-    languageHint: "Изменяется весь интерфейс приложения",
-
     workSchedule: "Рабочий график",
-    workScheduleHint: "Эти настройки меняют дневной календарь",
     startDay: "Начало дня",
     endDay: "Конец дня",
     workDays: "Рабочие дни",
 
-    database: "Облачная база",
-    databaseConnected: "Supabase подключён",
-    databaseConnecting: "Подключение к Supabase...",
-    databaseError: "Ошибка подключения к Supabase",
-
-    account: "Аккаунт",
-    signedInAs: "Выполнен вход",
-    logout: "Выйти",
-
     services: "Услуги",
-    servicePriceDuration: "Цена и длительность",
-    addFirstService: "Добавь первую услугу",
     edit: "Изменить",
     delete: "Удалить",
 
-    dayOff: "Выходной день",
-    dayOffHint: "Запись всё равно можно создать, если нужно.",
-    dayOffShort: "выходной",
-
     appointmentNew: "Новая запись",
     appointmentEdit: "Редактировать запись",
-    appointmentSubtitle: "Клиент, услуга, время и статус",
-    close: "Закрыть",
-
     client: "Клиент",
     manualName: "Ввести имя вручную",
     clientName: "Имя клиента",
-
     service: "Услуга",
     manualService: "Ввести вручную",
     serviceName: "Название услуги",
-
     date: "Дата",
     time: "Время",
     duration: "Длительность",
@@ -186,38 +198,29 @@ const translations = {
     note: "Заметка",
     save: "Сохранить",
 
-    clientCard: "Карточка клиента",
     phoneMissing: "Телефон не указан",
-    totalAppointments: "Всего записей",
-    futureAppointmentsCount: "Будущих",
     bookClient: "Записать клиента",
     editClientButton: "Редактировать",
-
     futureAppointments: "Ближайшие записи",
-    noFutureAppointments: "Будущих записей нет",
     history: "История",
-    noHistory: "Прошлых записей нет",
     deleteClient: "Удалить клиента",
 
     call: "Позвонить",
     telegram: "Telegram",
     instagram: "Instagram",
+
     remind: "Напомнить",
     remindClient: "Напомнить клиенту",
-
     reminder: "Напоминание клиенту",
-    reminderHint: "Текст всегда формируется на украинском языке",
-    copyText: "Скопировать текст",
+    copyText: "Скопировать",
     copied: "Скопировано",
-    openTelegram: "Открыть Telegram",
-    openInstagram: "Открыть Instagram",
 
     newService: "Новая услуга",
     editService: "Редактировать услугу",
     servicePrice: "Цена, грн",
 
+    logout: "Выйти",
     minutes: "мин.",
-    completed: "завершено",
 
     clientRequired: "Укажи клиента.",
     dateRequired: "Укажи дату.",
@@ -228,9 +231,6 @@ const translations = {
     deleteClientConfirm:
       "Удалить клиента? Его записи останутся в календаре.",
     deleteServiceConfirm: "Удалить эту услугу?",
-
-    databaseSaveError: "Не удалось сохранить данные в облако.",
-    databaseDeleteError: "Не удалось удалить данные из облака.",
   },
 
   uk: {
@@ -240,76 +240,49 @@ const translations = {
     settings: "Налаштування",
 
     today: "Сьогодні",
-    returnToday: "Повернутися на сьогодні",
     currentMonth: "Поточний місяць",
-    returnCurrentMonth: "Повернутися на поточний місяць",
-
     day: "День",
     month: "Місяць",
     records: "Записів",
-    totalRecords: "Усього записів",
 
     clientBase: "База клієнтів",
-    total: "Усього",
     searchClient: "Пошук за ім'ям, телефоном...",
     noClients: "Клієнтів поки немає",
-    addFirstClient: "Натисни +, щоб додати першого клієнта",
-    nothingFound: "Нічого не знайдено",
 
     financeRecords: "Фінанси та записи",
-    completedOnlyIncome: "Дохід лише за завершеними записами",
     todayIncome: "Сьогодні",
     sevenDays: "7 днів",
     currentMonthIncome: "Поточний місяць",
     averageCheck: "Середній чек",
     scheduled: "Заплановано",
+    completed: "Завершено",
     cancelled: "Скасовано",
     noShow: "Не прийшли",
     topServices: "Топ послуг",
-    noCompleted: "Поки немає завершених записів",
 
-    app: "Застосунок",
+    sync: "Синхронізація",
+    online: "Онлайн",
+    offline: "Офлайн",
+    syncing: "Синхронізація",
+
     language: "Мова застосунку",
-    languageHint: "Змінюється весь інтерфейс застосунку",
-
     workSchedule: "Робочий графік",
-    workScheduleHint: "Ці налаштування змінюють денний календар",
     startDay: "Початок дня",
     endDay: "Кінець дня",
     workDays: "Робочі дні",
 
-    database: "Хмарна база",
-    databaseConnected: "Supabase підключено",
-    databaseConnecting: "Підключення до Supabase...",
-    databaseError: "Помилка підключення до Supabase",
-
-    account: "Акаунт",
-    signedInAs: "Виконано вхід",
-    logout: "Вийти",
-
     services: "Послуги",
-    servicePriceDuration: "Ціна та тривалість",
-    addFirstService: "Додай першу послугу",
     edit: "Змінити",
     delete: "Видалити",
 
-    dayOff: "Вихідний день",
-    dayOffHint: "Запис усе одно можна створити, якщо потрібно.",
-    dayOffShort: "вихідний",
-
     appointmentNew: "Новий запис",
     appointmentEdit: "Редагувати запис",
-    appointmentSubtitle: "Клієнт, послуга, час і статус",
-    close: "Закрити",
-
     client: "Клієнт",
     manualName: "Ввести ім'я вручну",
     clientName: "Ім'я клієнта",
-
     service: "Послуга",
     manualService: "Ввести вручну",
     serviceName: "Назва послуги",
-
     date: "Дата",
     time: "Час",
     duration: "Тривалість",
@@ -334,38 +307,29 @@ const translations = {
     note: "Нотатка",
     save: "Зберегти",
 
-    clientCard: "Картка клієнта",
     phoneMissing: "Телефон не вказано",
-    totalAppointments: "Усього записів",
-    futureAppointmentsCount: "Майбутніх",
     bookClient: "Записати клієнта",
     editClientButton: "Редагувати",
-
     futureAppointments: "Найближчі записи",
-    noFutureAppointments: "Майбутніх записів немає",
     history: "Історія",
-    noHistory: "Минулих записів немає",
     deleteClient: "Видалити клієнта",
 
     call: "Подзвонити",
     telegram: "Telegram",
     instagram: "Instagram",
+
     remind: "Нагадати",
     remindClient: "Нагадати клієнту",
-
     reminder: "Нагадування клієнту",
-    reminderHint: "Текст завжди формується українською мовою",
-    copyText: "Скопіювати текст",
+    copyText: "Скопіювати",
     copied: "Скопійовано",
-    openTelegram: "Відкрити Telegram",
-    openInstagram: "Відкрити Instagram",
 
     newService: "Нова послуга",
     editService: "Редагувати послугу",
     servicePrice: "Ціна, грн",
 
+    logout: "Вийти",
     minutes: "хв.",
-    completed: "завершено",
 
     clientRequired: "Вкажи клієнта.",
     dateRequired: "Вкажи дату.",
@@ -376,9 +340,6 @@ const translations = {
     deleteClientConfirm:
       "Видалити клієнта? Його записи залишаться в календарі.",
     deleteServiceConfirm: "Видалити цю послугу?",
-
-    databaseSaveError: "Не вдалося зберегти дані у хмарі.",
-    databaseDeleteError: "Не вдалося видалити дані з хмари.",
   },
 };
 
@@ -409,13 +370,11 @@ function formatMonthTitle(date: Date, language: Language) {
 }
 
 function formatFullDate(dateString: string, language: Language) {
-  const date = new Date(`${dateString}T12:00:00`);
-
   return new Intl.DateTimeFormat(getLocale(language), {
     day: "numeric",
     month: "long",
     year: "numeric",
-  }).format(date);
+  }).format(new Date(`${dateString}T12:00:00`));
 }
 
 function formatWeekday(date: Date, language: Language) {
@@ -425,21 +384,14 @@ function formatWeekday(date: Date, language: Language) {
 }
 
 function formatUkrainianReminderDate(dateString: string) {
-  const date = new Date(`${dateString}T12:00:00`);
-
   return new Intl.DateTimeFormat("uk-UA", {
     day: "numeric",
     month: "long",
-  }).format(date);
-}
-
-function isSameDay(first: Date, second: Date) {
-  return formatDateKey(first) === formatDateKey(second);
+  }).format(new Date(`${dateString}T12:00:00`));
 }
 
 function timeToMinutes(time: string) {
   const [hours, minutes] = time.split(":").map(Number);
-
   return hours * 60 + minutes;
 }
 
@@ -454,45 +406,67 @@ function minutesToTime(totalMinutes: number) {
 }
 
 function getAppointmentTop(time: string, startHour: number) {
-  const startMinutes = startHour * 60;
-  const appointmentMinutes = timeToMinutes(time);
-
-  return ((appointmentMinutes - startMinutes) / 60) * HOUR_HEIGHT;
+  return (
+    ((timeToMinutes(time) - startHour * 60) / 60) *
+    HOUR_HEIGHT
+  );
 }
 
 function getAppointmentHeight(duration: number) {
   return Math.max((duration / 60) * HOUR_HEIGHT, 48);
 }
 
+function safeArray<T>(value: string | null): T[] {
+  if (!value) return [];
+
+  try {
+    const parsed = JSON.parse(value);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function safeObject<T>(value: string | null, fallback: T): T {
+  if (!value) return fallback;
+
+  try {
+    return JSON.parse(value) as T;
+  } catch {
+    return fallback;
+  }
+}
+
+function createQueueId() {
+  return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+
 function getMonthCalendarDays(date: Date) {
   const year = date.getFullYear();
   const month = date.getMonth();
 
-  const firstDay = new Date(year, month, 1);
-  const lastDay = new Date(year, month + 1, 0);
+  const first = new Date(year, month, 1);
+  const last = new Date(year, month + 1, 0);
 
-  let firstWeekday = firstDay.getDay();
+  let weekday = first.getDay();
 
-  if (firstWeekday === 0) {
-    firstWeekday = 7;
-  }
+  if (weekday === 0) weekday = 7;
 
-  const daysBefore = firstWeekday - 1;
-  const daysInMonth = lastDay.getDate();
+  const before = weekday - 1;
 
   const cells: {
     date: Date;
     isCurrentMonth: boolean;
   }[] = [];
 
-  for (let index = daysBefore; index > 0; index--) {
+  for (let index = before; index > 0; index--) {
     cells.push({
       date: new Date(year, month, 1 - index),
       isCurrentMonth: false,
     });
   }
 
-  for (let day = 1; day <= daysInMonth; day++) {
+  for (let day = 1; day <= last.getDate(); day++) {
     cells.push({
       date: new Date(year, month, day),
       isCurrentMonth: true,
@@ -500,10 +474,11 @@ function getMonthCalendarDays(date: Date) {
   }
 
   while (cells.length % 7 !== 0) {
-    const nextDay = cells.length - daysBefore - daysInMonth + 1;
+    const day =
+      cells.length - before - last.getDate() + 1;
 
     cells.push({
-      date: new Date(year, month + 1, nextDay),
+      date: new Date(year, month + 1, day),
       isCurrentMonth: false,
     });
   }
@@ -511,87 +486,20 @@ function getMonthCalendarDays(date: Date) {
   return cells;
 }
 
-function sumPrices(appointments: Appointment[]) {
-  return appointments.reduce(
-    (total, appointment) => total + Number(appointment.price || 0),
-    0
-  );
-}
-
-function cleanUsername(value: string) {
-  let username = value.trim();
-
-  username = username.replace(/^https?:\/\/(www\.)?/, "");
-  username = username.replace(/^t\.me\//, "");
-  username = username.replace(/^telegram\.me\//, "");
-  username = username.replace(/^instagram\.com\//, "");
-  username = username.replace(/^www\.instagram\.com\//, "");
-  username = username.replace(/^@/, "");
-  username = username.split("/")[0];
-  username = username.split("?")[0];
-
-  return username;
-}
-
-function getTelegramUrl(social: string) {
-  const username = cleanUsername(social);
-
-  return username ? `https://t.me/${username}` : "";
-}
-
-function getInstagramUrl(social: string) {
-  const username = cleanUsername(social);
-
-  return username ? `https://instagram.com/${username}` : "";
-}
-
-function getSocialType(social: string) {
-  const normalized = social.toLowerCase();
-
-  if (
-    normalized.includes("t.me") ||
-    normalized.includes("telegram")
-  ) {
-    return "telegram";
-  }
-
-  if (normalized.includes("instagram")) {
-    return "instagram";
-  }
-
-  return "unknown";
-}
-
-function getPhoneUrl(phone: string) {
-  return `tel:${phone.replace(/[^+\d]/g, "")}`;
-}
-
-function safeParseArray<T>(value: string | null): T[] {
-  if (!value) return [];
-
-  try {
-    const parsed = JSON.parse(value);
-
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
-}
-
 function getStatusBadgeClass(status: AppointmentStatus) {
   if (status === "completed") {
-    return "border-green-200 bg-green-50 text-green-700";
+    return "border-green-300 bg-green-50 text-green-700";
   }
 
   if (status === "cancelled") {
-    return "border-red-200 bg-red-50 text-red-600";
+    return "border-red-300 bg-red-50 text-red-700";
   }
 
   if (status === "no-show") {
-    return "border-orange-200 bg-orange-50 text-orange-700";
+    return "border-orange-300 bg-orange-50 text-orange-700";
   }
 
-  return "border-sky-200 bg-sky-50 text-sky-700";
+  return "border-sky-300 bg-sky-50 text-sky-700";
 }
 
 function getAppointmentCardClass(status: AppointmentStatus) {
@@ -600,24 +508,55 @@ function getAppointmentCardClass(status: AppointmentStatus) {
   }
 
   if (status === "cancelled") {
-    return "border-red-300 bg-red-50/90";
+    return "border-red-400 bg-red-50/95";
   }
 
   if (status === "no-show") {
-    return "border-orange-300 bg-orange-50/90";
+    return "border-orange-400 bg-orange-50/95";
   }
 
-  return "border-sky-300 bg-sky-50/95";
+  return "border-sky-400 bg-sky-50/95";
+}
+
+function cleanUsername(value: string) {
+  return value
+    .trim()
+    .replace(/^https?:\/\/(www\.)?/, "")
+    .replace(/^t\.me\//, "")
+    .replace(/^telegram\.me\//, "")
+    .replace(/^instagram\.com\//, "")
+    .replace(/^www\.instagram\.com\//, "")
+    .replace(/^@/, "")
+    .split("/")[0]
+    .split("?")[0];
+}
+
+function getTelegramUrl(value: string) {
+  const username = cleanUsername(value);
+  return username ? `https://t.me/${username}` : "";
+}
+
+function getInstagramUrl(value: string) {
+  const username = cleanUsername(value);
+  return username ? `https://instagram.com/${username}` : "";
+}
+
+function sumPrices(items: Appointment[]) {
+  return items.reduce(
+    (sum, item) => sum + Number(item.price || 0),
+    0
+  );
 }
 
 export default function Home() {
   const supabase = useMemo(() => createClient(), []);
 
+  const settingsReadyRef = useRef(false);
+  const syncingRef = useRef(false);
+
   const [today, setToday] = useState(
     new Date("2000-01-01T12:00:00")
   );
-
-  const todayKey = formatDateKey(today);
 
   const [session, setSession] = useState<Session | null>(null);
   const [authChecked, setAuthChecked] = useState(false);
@@ -628,13 +567,17 @@ export default function Home() {
   const [loginLoading, setLoginLoading] = useState(false);
 
   const [language, setLanguage] = useState<Language>("uk");
+
   const t = translations[language];
 
   const [databaseStatus, setDatabaseStatus] =
     useState<DatabaseStatus>("connecting");
 
-  const [activeTab, setActiveTab] = useState<Tab>("calendar");
+  const [isOnline, setIsOnline] = useState(true);
+  const [pendingCount, setPendingCount] = useState(0);
+  const [isSyncing, setIsSyncing] = useState(false);
 
+  const [activeTab, setActiveTab] = useState<Tab>("calendar");
   const [calendarView, setCalendarView] =
     useState<CalendarView>("day");
 
@@ -646,9 +589,14 @@ export default function Home() {
     new Date("2000-01-01T12:00:00")
   );
 
-  const [appointments, setAppointments] = useState<Appointment[]>([]);
-  const [clients, setClients] = useState<Client[]>([]);
-  const [services, setServices] = useState<Service[]>([]);
+  const [appointments, setAppointments] =
+    useState<Appointment[]>([]);
+
+  const [clients, setClients] =
+    useState<Client[]>([]);
+
+  const [services, setServices] =
+    useState<Service[]>([]);
 
   const [workSettings, setWorkSettings] =
     useState<WorkSettings>(DEFAULT_WORK_SETTINGS);
@@ -689,7 +637,8 @@ export default function Home() {
   const [appointmentDate, setAppointmentDate] = useState("");
   const [appointmentTime, setAppointmentTime] = useState("");
   const [appointmentService, setAppointmentService] = useState("");
-  const [appointmentDuration, setAppointmentDuration] = useState("90");
+  const [appointmentDuration, setAppointmentDuration] =
+    useState("90");
   const [appointmentPrice, setAppointmentPrice] = useState("");
 
   const [appointmentStatus, setAppointmentStatus] =
@@ -710,11 +659,180 @@ export default function Home() {
   const [clientSearch, setClientSearch] = useState("");
 
   const [reminderText, setReminderText] = useState("");
-
-  const [reminderClientId, setReminderClientId] =
-    useState<number | null>(null);
-
   const [reminderCopied, setReminderCopied] = useState(false);
+
+  function getQueue() {
+    return safeArray<PendingOperation>(
+      localStorage.getItem(OFFLINE_QUEUE_STORAGE_KEY)
+    );
+  }
+
+  function saveQueue(queue: PendingOperation[]) {
+    localStorage.setItem(
+      OFFLINE_QUEUE_STORAGE_KEY,
+      JSON.stringify(queue)
+    );
+
+    setPendingCount(queue.length);
+  }
+
+  function enqueueOperation(operation: PendingOperation) {
+    let queue = getQueue();
+
+    queue = queue.filter((item) => {
+      if (
+        item.table !== operation.table ||
+        item.recordId !== operation.recordId
+      ) {
+        return true;
+      }
+
+      return false;
+    });
+
+    queue.push(operation);
+
+    saveQueue(queue);
+  }
+
+  const executeOperation = useCallback(
+    async (operation: PendingOperation) => {
+      if (operation.type === "upsert") {
+        const { error } = await supabase
+          .from(operation.table)
+          .upsert(operation.payload, {
+            onConflict: "id",
+          });
+
+        if (error) throw error;
+
+        return;
+      }
+
+      const { error } = await supabase
+        .from(operation.table)
+        .delete()
+        .eq(operation.column, operation.value);
+
+      if (error) throw error;
+    },
+    [supabase]
+  );
+
+  const syncOfflineQueue = useCallback(async () => {
+    if (
+      !navigator.onLine ||
+      syncingRef.current
+    ) {
+      return;
+    }
+
+    let queue = safeArray<PendingOperation>(
+      localStorage.getItem(OFFLINE_QUEUE_STORAGE_KEY)
+    );
+
+    setPendingCount(queue.length);
+
+    if (queue.length === 0) {
+      setDatabaseStatus("connected");
+      return;
+    }
+
+    syncingRef.current = true;
+
+    setIsSyncing(true);
+    setDatabaseStatus("connecting");
+
+    while (queue.length > 0) {
+      const operation = queue[0];
+
+      try {
+        await executeOperation(operation);
+
+        queue = queue.slice(1);
+
+        localStorage.setItem(
+          OFFLINE_QUEUE_STORAGE_KEY,
+          JSON.stringify(queue)
+        );
+
+        setPendingCount(queue.length);
+      } catch (error) {
+        console.error("Sync failed:", error);
+
+        setDatabaseStatus("error");
+        break;
+      }
+    }
+
+    syncingRef.current = false;
+    setIsSyncing(false);
+
+    if (queue.length === 0) {
+      setDatabaseStatus("connected");
+    }
+  }, [executeOperation]);
+
+  async function saveOrQueue(
+    operation: PendingOperation
+  ) {
+    if (!navigator.onLine) {
+      enqueueOperation(operation);
+      setIsOnline(false);
+      setDatabaseStatus("offline");
+      return;
+    }
+
+    try {
+      await executeOperation(operation);
+      setDatabaseStatus("connected");
+    } catch (error) {
+      console.error(
+        "Cloud unavailable. Saved to offline queue:",
+        error
+      );
+
+      enqueueOperation(operation);
+      setDatabaseStatus("error");
+    }
+  }
+
+  function loadLocalData() {
+    setClients(
+      safeArray<Client>(
+        localStorage.getItem(CLIENTS_STORAGE_KEY)
+      )
+    );
+
+    setServices(
+      safeArray<Service>(
+        localStorage.getItem(SERVICES_STORAGE_KEY)
+      )
+    );
+
+    setAppointments(
+      safeArray<Appointment>(
+        localStorage.getItem(APPOINTMENTS_STORAGE_KEY)
+      )
+    );
+
+    setWorkSettings(
+      safeObject<WorkSettings>(
+        localStorage.getItem(WORK_SETTINGS_STORAGE_KEY),
+        DEFAULT_WORK_SETTINGS
+      )
+    );
+
+    const storedLanguage =
+      localStorage.getItem(LANGUAGE_STORAGE_KEY);
+
+    if (
+      storedLanguage === "ru" ||
+      storedLanguage === "uk"
+    ) {
+      setLanguage(storedLanguage);
+    }
+  }
 
   useEffect(() => {
     const current = new Date();
@@ -723,20 +841,57 @@ export default function Home() {
     setSelectedDate(current);
 
     setVisibleMonth(
-      new Date(current.getFullYear(), current.getMonth(), 1)
+      new Date(
+        current.getFullYear(),
+        current.getMonth(),
+        1
+      )
     );
-  }, []);
+
+    const online = navigator.onLine;
+
+    setIsOnline(online);
+
+    const queue = safeArray<PendingOperation>(
+      localStorage.getItem(OFFLINE_QUEUE_STORAGE_KEY)
+    );
+
+    setPendingCount(queue.length);
+
+    function handleOnline() {
+      setIsOnline(true);
+      void syncOfflineQueue();
+    }
+
+    function handleOffline() {
+      setIsOnline(false);
+      setDatabaseStatus("offline");
+    }
+
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, [syncOfflineQueue]);
 
   useEffect(() => {
-    const localLanguage =
+    const storedLanguage =
       localStorage.getItem(LANGUAGE_STORAGE_KEY);
 
     if (
-      localLanguage === "ru" ||
-      localLanguage === "uk"
+      storedLanguage === "ru" ||
+      storedLanguage === "uk"
     ) {
-      setLanguage(localLanguage);
+      setLanguage(storedLanguage);
     }
+
+    supabase.auth.getSession().then(({ data }) => {
+      setSession(data.session);
+      setAuthChecked(true);
+    });
 
     const {
       data: { subscription },
@@ -744,14 +899,6 @@ export default function Home() {
       (_event, nextSession) => {
         setSession(nextSession);
         setAuthChecked(true);
-
-        if (!nextSession) {
-          setIsLoaded(false);
-          setClients([]);
-          setServices([]);
-          setAppointments([]);
-          setDatabaseStatus("connecting");
-        }
       }
     );
 
@@ -765,9 +912,22 @@ export default function Home() {
 
     async function loadData() {
       setIsLoaded(false);
+
+      if (!navigator.onLine) {
+        loadLocalData();
+
+        setDatabaseStatus("offline");
+        settingsReadyRef.current = true;
+        setIsLoaded(true);
+
+        return;
+      }
+
       setDatabaseStatus("connecting");
 
       try {
+        await syncOfflineQueue();
+
         const [
           clientsResult,
           servicesResult,
@@ -797,13 +957,23 @@ export default function Home() {
             .maybeSingle(),
         ]);
 
-        if (clientsResult.error) throw clientsResult.error;
-        if (servicesResult.error) throw servicesResult.error;
-        if (appointmentsResult.error)
-          throw appointmentsResult.error;
-        if (settingsResult.error) throw settingsResult.error;
+        if (clientsResult.error) {
+          throw clientsResult.error;
+        }
 
-        const databaseClients: Client[] =
+        if (servicesResult.error) {
+          throw servicesResult.error;
+        }
+
+        if (appointmentsResult.error) {
+          throw appointmentsResult.error;
+        }
+
+        if (settingsResult.error) {
+          throw settingsResult.error;
+        }
+
+        const nextClients: Client[] =
           (clientsResult.data ?? []).map((row) => ({
             id: Number(row.id),
             name: row.name ?? "",
@@ -812,7 +982,7 @@ export default function Home() {
             note: row.note ?? "",
           }));
 
-        const databaseServices: Service[] =
+        const nextServices: Service[] =
           (servicesResult.data ?? []).map((row) => ({
             id: Number(row.id),
             name: row.name ?? "",
@@ -820,7 +990,7 @@ export default function Home() {
             price: Number(row.price ?? 0),
           }));
 
-        const databaseAppointments: Appointment[] =
+        const nextAppointments: Appointment[] =
           (appointmentsResult.data ?? []).map((row) => ({
             id: Number(row.id),
             date: row.date ?? "",
@@ -848,204 +1018,44 @@ export default function Home() {
               "scheduled") as AppointmentStatus,
           }));
 
-        const databaseIsEmpty =
-          databaseClients.length === 0 &&
-          databaseServices.length === 0 &&
-          databaseAppointments.length === 0;
-
-        const migrationDone =
-          localStorage.getItem(
-            MIGRATION_STORAGE_KEY
-          ) === "true";
-
-        if (databaseIsEmpty && !migrationDone) {
-          const localClients = safeParseArray<Client>(
-            localStorage.getItem(
-              CLIENTS_STORAGE_KEY
-            )
-          );
-
-          const localServices = safeParseArray<Service>(
-            localStorage.getItem(
-              SERVICES_STORAGE_KEY
-            )
-          );
-
-          const localAppointments =
-            safeParseArray<Appointment>(
-              localStorage.getItem(
-                APPOINTMENTS_STORAGE_KEY
-              )
-            );
-
-          if (localClients.length > 0) {
-            const { error } =
-              await supabase
-                .from("clients")
-                .upsert(
-                  localClients.map((client) => ({
-                    id: client.id,
-                    name: client.name,
-                    phone: client.phone ?? "",
-                    social: client.social ?? "",
-                    note: client.note ?? "",
-                  })),
-                  { onConflict: "id" }
-                );
-
-            if (error) throw error;
-          }
-
-          if (localServices.length > 0) {
-            const { error } =
-              await supabase
-                .from("services")
-                .upsert(
-                  localServices.map((service) => ({
-                    id: service.id,
-                    name: service.name,
-                    duration:
-                      Number(service.duration) || 90,
-                    price:
-                      Number(service.price) || 0,
-                  })),
-                  { onConflict: "id" }
-                );
-
-            if (error) throw error;
-          }
-
-          const validClientIds =
-            new Set(
-              localClients.map(
-                (client) => client.id
-              )
-            );
-
-          const validServiceIds =
-            new Set(
-              localServices.map(
-                (service) => service.id
-              )
-            );
-
-          if (localAppointments.length > 0) {
-            const { error } =
-              await supabase
-                .from("appointments")
-                .upsert(
-                  localAppointments.map(
-                    (appointment) => ({
-                      id: appointment.id,
-                      date: appointment.date,
-                      time: appointment.time,
-
-                      client_id:
-                        appointment.clientId &&
-                        validClientIds.has(
-                          appointment.clientId
-                        )
-                          ? appointment.clientId
-                          : null,
-
-                      name: appointment.name,
-
-                      service_id:
-                        appointment.serviceId &&
-                        validServiceIds.has(
-                          appointment.serviceId
-                        )
-                          ? appointment.serviceId
-                          : null,
-
-                      service:
-                        appointment.service ?? "",
-                      duration:
-                        Number(
-                          appointment.duration
-                        ) || 90,
-                      price:
-                        Number(
-                          appointment.price
-                        ) || 0,
-                      status:
-                        appointment.status ??
-                        "scheduled",
-                    })
-                  ),
-                  { onConflict: "id" }
-                );
-
-            if (error) throw error;
-          }
-
-          localStorage.setItem(
-            MIGRATION_STORAGE_KEY,
-            "true"
-          );
-
-          setClients(localClients);
-          setServices(localServices);
-
-          setAppointments(
-            localAppointments.map(
-              (appointment) => ({
-                ...appointment,
-                price: Number(
-                  appointment.price ?? 0
-                ),
-                status:
-                  appointment.status ??
-                  "scheduled",
-              })
-            )
-          );
-        } else {
-          setClients(databaseClients);
-          setServices(databaseServices);
-          setAppointments(databaseAppointments);
-        }
+        setClients(nextClients);
+        setServices(nextServices);
+        setAppointments(nextAppointments);
 
         if (settingsResult.data) {
           const row = settingsResult.data;
 
-          const nextLanguage: Language =
-            row.language === "ru"
-              ? "ru"
-              : "uk";
-
-          setLanguage(nextLanguage);
+          setLanguage(
+            row.language === "ru" ? "ru" : "uk"
+          );
 
           setWorkSettings({
-            startHour: Number(
-              row.start_hour ?? 9
-            ),
-            endHour: Number(
-              row.end_hour ?? 21
-            ),
+            startHour: Number(row.start_hour ?? 8),
+            endHour: Number(row.end_hour ?? 21),
 
-            workDays:
-              Array.isArray(row.work_days)
-                ? row.work_days.map(Number)
-                : DEFAULT_WORK_SETTINGS.workDays,
+            workDays: Array.isArray(row.work_days)
+              ? row.work_days.map(Number)
+              : DEFAULT_WORK_SETTINGS.workDays,
           });
         }
 
         setDatabaseStatus("connected");
       } catch (error) {
-        console.error(
-          "Supabase load error:",
-          error
-        );
+        console.error("Load failed, using local data:", error);
 
-        setDatabaseStatus("error");
+        loadLocalData();
+
+        setDatabaseStatus(
+          navigator.onLine ? "error" : "offline"
+        );
       } finally {
+        settingsReadyRef.current = true;
         setIsLoaded(true);
       }
     }
 
-    loadData();
-  }, [session, supabase]);
+    void loadData();
+  }, [session, supabase, syncOfflineQueue]);
 
   useEffect(() => {
     if (!isLoaded) return;
@@ -1086,66 +1096,49 @@ export default function Home() {
       WORK_SETTINGS_STORAGE_KEY,
       JSON.stringify(workSettings)
     );
-  }, [language, workSettings, isLoaded]);
 
-  useEffect(() => {
-    if (
-      !session ||
-      !isLoaded ||
-      databaseStatus !== "connected"
-    ) {
+    if (!settingsReadyRef.current) {
       return;
     }
 
-    const timer =
-      window.setTimeout(async () => {
-        const { error } =
-          await supabase
-            .from("settings")
-            .upsert(
-              {
-                id: "main",
-                language,
-                start_hour:
-                  workSettings.startHour,
-                end_hour:
-                  workSettings.endHour,
-                work_days:
-                  workSettings.workDays,
-                updated_at:
-                  new Date().toISOString(),
-              },
-              { onConflict: "id" }
-            );
+    const timer = window.setTimeout(() => {
+      void saveOrQueue({
+        queueId: createQueueId(),
+        type: "upsert",
+        table: "settings",
+        recordId: "main",
 
-        if (error) {
-          console.error(
-            "Settings save error:",
-            error
-          );
+        payload: {
+          id: "main",
+          language,
+          start_hour: workSettings.startHour,
+          end_hour: workSettings.endHour,
+          work_days: workSettings.workDays,
+          updated_at: new Date().toISOString(),
+        },
+      });
+    }, 500);
 
-          setDatabaseStatus("error");
-        }
-      }, 300);
-
-    return () =>
+    return () => {
       window.clearTimeout(timer);
-  }, [
-    session,
-    language,
-    workSettings,
-    isLoaded,
-    databaseStatus,
-    supabase,
-  ]);
+    };
+  }, [language, workSettings, isLoaded]);
 
-  async function handleLogin(
-    event: React.FormEvent
-  ) {
+  async function handleLogin(event: FormEvent) {
     event.preventDefault();
 
-    setLoginError("");
+    if (!navigator.onLine) {
+      setLoginError(
+        language === "uk"
+          ? "Для входу потрібен інтернет."
+          : "Для входа нужен интернет."
+      );
+
+      return;
+    }
+
     setLoginLoading(true);
+    setLoginError("");
 
     const { error } =
       await supabase.auth.signInWithPassword({
@@ -1159,53 +1152,33 @@ export default function Home() {
           ? "Невірний email або пароль."
           : "Неверный email или пароль."
       );
-
-      setLoginLoading(false);
-      return;
     }
 
-    setLoginPassword("");
     setLoginLoading(false);
   }
 
   async function handleLogout() {
-    await supabase.auth.signOut();
+    if (navigator.onLine) {
+      await supabase.auth.signOut();
+    }
 
-    setActiveTab("calendar");
-    setIsClientDetailsOpen(false);
-    setIsAppointmentModalOpen(false);
-    setIsClientModalOpen(false);
-    setIsServiceModalOpen(false);
-    setIsReminderModalOpen(false);
+    setSession(null);
   }
 
-  const selectedDateKey =
-    formatDateKey(selectedDate);
+  const todayKey = formatDateKey(today);
+  const selectedDateKey = formatDateKey(selectedDate);
 
-  const selectedDayAppointments =
-    appointments
-      .filter(
-        (appointment) =>
-          appointment.date ===
-          selectedDateKey
-      )
-      .sort((a, b) =>
-        a.time.localeCompare(b.time)
-      );
+  const selectedDayAppointments = appointments
+    .filter(
+      (appointment) =>
+        appointment.date === selectedDateKey
+    )
+    .sort((a, b) =>
+      a.time.localeCompare(b.time)
+    );
 
   const selectedDateIsToday =
-    isSameDay(selectedDate, today);
-
-  const visibleMonthIsCurrent =
-    visibleMonth.getFullYear() ===
-      today.getFullYear() &&
-    visibleMonth.getMonth() ===
-      today.getMonth();
-
-  const selectedDateIsWorkDay =
-    workSettings.workDays.includes(
-      selectedDate.getDay()
-    );
+    selectedDateKey === todayKey;
 
   const hours = Array.from(
     {
@@ -1224,130 +1197,83 @@ export default function Home() {
     HOUR_HEIGHT;
 
   const monthDays =
-    getMonthCalendarDays(
-      visibleMonth
+    getMonthCalendarDays(visibleMonth);
+
+  const filteredClients = [...clients]
+    .filter((client) => {
+      const search =
+        clientSearch.trim().toLowerCase();
+
+      if (!search) return true;
+
+      return (
+        client.name.toLowerCase().includes(search) ||
+        client.phone.toLowerCase().includes(search) ||
+        client.social.toLowerCase().includes(search)
+      );
+    })
+    .sort((a, b) =>
+      a.name.localeCompare(
+        b.name,
+        getLocale(language)
+      )
     );
 
-  const selectedClientDetails =
+  const selectedClient =
     selectedClientDetailsId !== null
       ? clients.find(
           (client) =>
-            client.id ===
-            selectedClientDetailsId
+            client.id === selectedClientDetailsId
         )
       : undefined;
 
-  const selectedClientAppointments =
+  const clientAppointments =
     selectedClientDetailsId !== null
-      ? appointments
-          .filter(
-            (appointment) =>
-              appointment.clientId ===
-              selectedClientDetailsId
-          )
-          .sort((a, b) => {
-            if (a.date !== b.date) {
-              return a.date.localeCompare(
-                b.date
-              );
-            }
-
-            return a.time.localeCompare(
-              b.time
-            );
-          })
+      ? appointments.filter(
+          (appointment) =>
+            appointment.clientId ===
+            selectedClientDetailsId
+        )
       : [];
 
   const futureClientAppointments =
-    selectedClientAppointments.filter(
-      (appointment) =>
-        appointment.date >= todayKey &&
-        appointment.status ===
-          "scheduled"
-    );
-
-  const pastClientAppointments =
-    selectedClientAppointments
+    clientAppointments
       .filter(
         (appointment) =>
-          appointment.date < todayKey ||
-          appointment.status !==
-            "scheduled"
+          appointment.date >= todayKey &&
+          appointment.status === "scheduled"
       )
       .sort((a, b) => {
         if (a.date !== b.date) {
-          return b.date.localeCompare(
-            a.date
-          );
+          return a.date.localeCompare(b.date);
         }
 
-        return b.time.localeCompare(
-          a.time
-        );
+        return a.time.localeCompare(b.time);
       });
 
-  const filteredClients =
-    [...clients]
-      .filter((client) => {
-        const search =
-          clientSearch
-            .trim()
-            .toLowerCase();
+  const pastClientAppointments =
+    clientAppointments
+      .filter(
+        (appointment) =>
+          appointment.date < todayKey ||
+          appointment.status !== "scheduled"
+      )
+      .sort((a, b) => {
+        if (a.date !== b.date) {
+          return b.date.localeCompare(a.date);
+        }
 
-        if (!search) return true;
-
-        return (
-          client.name
-            .toLowerCase()
-            .includes(search) ||
-          client.phone
-            .toLowerCase()
-            .includes(search) ||
-          client.social
-            .toLowerCase()
-            .includes(search)
-        );
-      })
-      .sort((a, b) =>
-        a.name.localeCompare(
-          b.name,
-          getLocale(language)
-        )
-      );
-
-  const completedAppointments =
-    appointments.filter(
-      (appointment) =>
-        appointment.status ===
-        "completed"
-    );
-
-  const todayCompletedAppointments =
-    completedAppointments.filter(
-      (appointment) =>
-        appointment.date === todayKey
-    );
+        return b.time.localeCompare(a.time);
+      });
 
   const sevenDaysAgo = useMemo(() => {
     const date = new Date(today);
-
-    date.setDate(
-      date.getDate() - 6
-    );
-
+    date.setDate(date.getDate() - 6);
     return date;
   }, [today]);
 
   const sevenDaysAgoKey =
     formatDateKey(sevenDaysAgo);
-
-  const weekCompletedAppointments =
-    completedAppointments.filter(
-      (appointment) =>
-        appointment.date >=
-          sevenDaysAgoKey &&
-        appointment.date <= todayKey
-    );
 
   const monthStartKey =
     formatDateKey(
@@ -1367,150 +1293,161 @@ export default function Home() {
       )
     );
 
+  const completedAppointments =
+    appointments.filter(
+      (appointment) =>
+        appointment.status === "completed"
+    );
+
+  const todayIncome = sumPrices(
+    completedAppointments.filter(
+      (appointment) =>
+        appointment.date === todayKey
+    )
+  );
+
+  const weekIncome = sumPrices(
+    completedAppointments.filter(
+      (appointment) =>
+        appointment.date >= sevenDaysAgoKey &&
+        appointment.date <= todayKey
+    )
+  );
+
   const currentMonthAppointments =
     appointments.filter(
       (appointment) =>
-        appointment.date >=
-          monthStartKey &&
-        appointment.date <=
-          monthEndKey
+        appointment.date >= monthStartKey &&
+        appointment.date <= monthEndKey
     );
 
-  const currentMonthCompletedAppointments =
+  const currentMonthCompleted =
     currentMonthAppointments.filter(
       (appointment) =>
-        appointment.status ===
-        "completed"
-    );
-
-  const todayIncome =
-    sumPrices(
-      todayCompletedAppointments
-    );
-
-  const weekIncome =
-    sumPrices(
-      weekCompletedAppointments
+        appointment.status === "completed"
     );
 
   const monthIncome =
-    sumPrices(
-      currentMonthCompletedAppointments
-    );
+    sumPrices(currentMonthCompleted);
 
   const averageCheck =
-    currentMonthCompletedAppointments.length >
-    0
+    currentMonthCompleted.length > 0
       ? Math.round(
           monthIncome /
-            currentMonthCompletedAppointments.length
+            currentMonthCompleted.length
         )
       : 0;
 
   const monthScheduledCount =
     currentMonthAppointments.filter(
       (appointment) =>
-        appointment.status ===
-        "scheduled"
+        appointment.status === "scheduled"
+    ).length;
+
+  const monthCompletedCount =
+    currentMonthAppointments.filter(
+      (appointment) =>
+        appointment.status === "completed"
     ).length;
 
   const monthCancelledCount =
     currentMonthAppointments.filter(
       (appointment) =>
-        appointment.status ===
-        "cancelled"
+        appointment.status === "cancelled"
     ).length;
 
   const monthNoShowCount =
     currentMonthAppointments.filter(
       (appointment) =>
-        appointment.status ===
-        "no-show"
+        appointment.status === "no-show"
     ).length;
 
-  const serviceStats =
-    Object.values(
-      currentMonthCompletedAppointments.reduce(
-        (
-          accumulator: Record<
-            string,
-            {
-              name: string;
-              count: number;
-              income: number;
-            }
-          >,
-          appointment
-        ) => {
-          const key =
-            appointment.service ||
-            "Без услуги";
-
-          if (!accumulator[key]) {
-            accumulator[key] = {
-              name: key,
-              count: 0,
-              income: 0,
-            };
+  const serviceStats = Object.values(
+    currentMonthCompleted.reduce(
+      (
+        result: Record<
+          string,
+          {
+            name: string;
+            count: number;
+            income: number;
           }
+        >,
+        appointment
+      ) => {
+        const key =
+          appointment.service || "Без услуги";
 
-          accumulator[key].count += 1;
+        if (!result[key]) {
+          result[key] = {
+            name: key,
+            count: 0,
+            income: 0,
+          };
+        }
 
-          accumulator[key].income +=
-            Number(
-              appointment.price || 0
-            );
+        result[key].count += 1;
+        result[key].income += Number(
+          appointment.price || 0
+        );
 
-          return accumulator;
-        },
-        {}
-      )
-    ).sort((a, b) => {
-      if (b.count !== a.count) {
-        return b.count - a.count;
-      }
+        return result;
+      },
+      {}
+    )
+  ).sort((a, b) => b.count - a.count);
 
-      return b.income - a.income;
-    });
+  function connectionLabel() {
+    if (!isOnline) {
+      return t.offline;
+    }
 
-  const reminderClient =
-    reminderClientId !== null
-      ? clients.find(
-          (client) =>
-            client.id ===
-            reminderClientId
-        )
-      : undefined;
+    if (isSyncing || pendingCount > 0) {
+      return `${t.syncing}: ${pendingCount}`;
+    }
 
-  function getStatusLabel(
-    status: AppointmentStatus
-  ) {
-    if (status === "completed")
+    return t.online;
+  }
+
+  function connectionClass() {
+    if (!isOnline) {
+      return "border-orange-300 bg-orange-50 text-orange-700";
+    }
+
+    if (isSyncing || pendingCount > 0) {
+      return "border-amber-300 bg-amber-50 text-amber-700";
+    }
+
+    return "border-green-300 bg-green-50 text-green-700";
+  }
+
+  function statusLabel(status: AppointmentStatus) {
+    if (status === "completed") {
       return t.completedStatus;
+    }
 
-    if (status === "cancelled")
+    if (status === "cancelled") {
       return t.cancelledStatus;
+    }
 
-    if (status === "no-show")
+    if (status === "no-show") {
       return t.noShowStatus;
+    }
 
     return t.scheduledStatus;
   }
 
   function changeDay(amount: number) {
-    const newDate =
-      new Date(selectedDate);
+    const next = new Date(selectedDate);
 
-    newDate.setDate(
-      newDate.getDate() + amount
-    );
+    next.setDate(next.getDate() + amount);
 
-    setSelectedDate(newDate);
+    setSelectedDate(next);
 
     setVisibleMonth(
       new Date(
-        newDate.getFullYear(),
-        newDate.getMonth(),
+        next.getFullYear(),
+        next.getMonth(),
         1
       )
     );
@@ -1520,14 +1457,13 @@ export default function Home() {
     setVisibleMonth(
       new Date(
         visibleMonth.getFullYear(),
-        visibleMonth.getMonth() +
-          amount,
+        visibleMonth.getMonth() + amount,
         1
       )
     );
   }
 
-  function goToToday() {
+  function goToday() {
     const current = new Date();
 
     setSelectedDate(current);
@@ -1541,433 +1477,250 @@ export default function Home() {
     );
   }
 
-  function selectMonthDate(
-    date: Date
-  ) {
-    setSelectedDate(date);
-
-    setVisibleMonth(
-      new Date(
-        date.getFullYear(),
-        date.getMonth(),
-        1
-      )
-    );
-
-    setCalendarView("day");
-  }
-
-  function getAppointmentsForDate(
-    date: Date
-  ) {
-    const dateKey =
-      formatDateKey(date);
-
-    return appointments.filter(
-      (appointment) =>
-        appointment.date === dateKey
-    );
-  }
-
   function resetAppointmentForm() {
     setEditingAppointmentId(null);
     setSelectedClientId("");
     setSelectedServiceId("");
     setAppointmentName("");
-    setAppointmentDate(
-      selectedDateKey
-    );
+    setAppointmentDate(selectedDateKey);
     setAppointmentTime("");
     setAppointmentService("");
     setAppointmentDuration("90");
     setAppointmentPrice("");
-    setAppointmentStatus(
-      "scheduled"
-    );
+    setAppointmentStatus("scheduled");
     setAppointmentError("");
     setHasConflict(false);
   }
 
-  function openNewAppointment(
-    prefilledTime = ""
-  ) {
+  function openNewAppointment(time = "") {
     resetAppointmentForm();
 
-    setAppointmentDate(
-      selectedDateKey
-    );
+    setAppointmentDate(selectedDateKey);
+    setAppointmentTime(time);
 
-    setAppointmentTime(
-      prefilledTime
-    );
-
-    setIsAppointmentModalOpen(
-      true
-    );
-  }
-
-  function openNewAppointmentForClient(
-    client: Client
-  ) {
-    resetAppointmentForm();
-
-    setSelectedClientId(
-      String(client.id)
-    );
-
-    setAppointmentDate(
-      selectedDateKey
-    );
-
-    setIsClientDetailsOpen(false);
-    setActiveTab("calendar");
-    setCalendarView("day");
-
-    setIsAppointmentModalOpen(
-      true
-    );
+    setIsAppointmentModalOpen(true);
   }
 
   function openEditAppointment(
     appointment: Appointment
   ) {
-    setEditingAppointmentId(
-      appointment.id
-    );
+    setEditingAppointmentId(appointment.id);
 
-    setAppointmentDate(
-      appointment.date
-    );
-
-    setAppointmentTime(
-      appointment.time
-    );
-
-    setAppointmentService(
-      appointment.service
-    );
-
+    setAppointmentDate(appointment.date);
+    setAppointmentTime(appointment.time);
+    setAppointmentService(appointment.service);
     setAppointmentDuration(
-      String(
-        appointment.duration
-      )
+      String(appointment.duration)
     );
-
     setAppointmentPrice(
-      String(
-        appointment.price ?? 0
-      )
+      String(appointment.price)
     );
 
-    setAppointmentStatus(
-      appointment.status ??
-        "scheduled"
+    setAppointmentStatus(appointment.status);
+
+    setSelectedClientId(
+      appointment.clientId
+        ? String(appointment.clientId)
+        : ""
     );
 
-    if (appointment.serviceId) {
-      setSelectedServiceId(
-        String(
-          appointment.serviceId
-        )
-      );
-    } else {
-      setSelectedServiceId("");
-    }
+    setSelectedServiceId(
+      appointment.serviceId
+        ? String(appointment.serviceId)
+        : ""
+    );
 
-    if (appointment.clientId) {
-      setSelectedClientId(
-        String(
-          appointment.clientId
-        )
-      );
-
-      setAppointmentName("");
-    } else {
-      setSelectedClientId("");
-
-      setAppointmentName(
-        appointment.name
-      );
-    }
+    setAppointmentName(
+      appointment.clientId
+        ? ""
+        : appointment.name
+    );
 
     setAppointmentError("");
     setHasConflict(false);
 
-    setIsAppointmentModalOpen(
-      true
-    );
+    setIsAppointmentModalOpen(true);
   }
 
-  function findConflictingAppointment(
+  function findConflict(
     date: string,
     time: string,
     duration: number,
     ignoreId: number | null
   ) {
-    const newStart =
-      timeToMinutes(time);
+    const start = timeToMinutes(time);
+    const end = start + duration;
 
-    const newEnd =
-      newStart + duration;
-
-    return appointments.find(
-      (appointment) => {
-        if (
-          appointment.date !== date
-        ) {
-          return false;
-        }
-
-        if (
-          appointment.status ===
-            "cancelled" ||
-          appointment.status ===
-            "no-show"
-        ) {
-          return false;
-        }
-
-        if (
-          ignoreId !== null &&
-          appointment.id === ignoreId
-        ) {
-          return false;
-        }
-
-        const existingStart =
-          timeToMinutes(
-            appointment.time
-          );
-
-        const existingEnd =
-          existingStart +
-          appointment.duration;
-
-        return (
-          newStart < existingEnd &&
-          newEnd > existingStart
-        );
+    return appointments.find((appointment) => {
+      if (appointment.date !== date) {
+        return false;
       }
-    );
+
+      if (
+        appointment.status === "cancelled" ||
+        appointment.status === "no-show"
+      ) {
+        return false;
+      }
+
+      if (
+        ignoreId !== null &&
+        appointment.id === ignoreId
+      ) {
+        return false;
+      }
+
+      const appointmentStart =
+        timeToMinutes(appointment.time);
+
+      const appointmentEnd =
+        appointmentStart +
+        appointment.duration;
+
+      return (
+        start < appointmentEnd &&
+        end > appointmentStart
+      );
+    });
   }
 
   async function actuallySaveAppointment() {
-    const selectedClient =
-      clients.find(
-        (client) =>
-          client.id ===
-          Number(selectedClientId)
-      );
-
-    const selectedService =
-      services.find(
-        (service) =>
-          service.id ===
-          Number(selectedServiceId)
-      );
-
-    const finalName =
-      selectedClient?.name ||
-      appointmentName.trim();
-
-    const duration =
-      Number(
-        appointmentDuration
-      );
-
-    const price =
-      Number(
-        appointmentPrice || 0
-      );
-
-    const appointmentId =
-      editingAppointmentId ??
-      Date.now();
-
-    const newAppointment: Appointment =
-      {
-        id: appointmentId,
-        date: appointmentDate,
-        time: appointmentTime,
-        clientId:
-          selectedClient?.id,
-        name: finalName,
-        serviceId:
-          selectedService?.id,
-        service:
-          selectedService?.name ||
-          appointmentService.trim() ||
-          (language === "uk"
-            ? "Манікюр"
-            : "Маникюр"),
-        duration,
-        price,
-        status:
-          appointmentStatus,
-      };
-
-    const { error } =
-      await supabase
-        .from("appointments")
-        .upsert(
-          {
-            id: newAppointment.id,
-            date:
-              newAppointment.date,
-            time:
-              newAppointment.time,
-            client_id:
-              newAppointment.clientId ??
-              null,
-            name:
-              newAppointment.name,
-            service_id:
-              newAppointment.serviceId ??
-              null,
-            service:
-              newAppointment.service,
-            duration:
-              newAppointment.duration,
-            price:
-              newAppointment.price,
-            status:
-              newAppointment.status,
-          },
-          {
-            onConflict: "id",
-          }
-        );
-
-    if (error) {
-      console.error(error);
-
-      window.alert(
-        t.databaseSaveError
-      );
-
-      setDatabaseStatus("error");
-
-      return;
-    }
-
-    if (
-      editingAppointmentId !== null
-    ) {
-      setAppointments(
-        appointments.map(
-          (appointment) =>
-            appointment.id ===
-            editingAppointmentId
-              ? newAppointment
-              : appointment
-        )
-      );
-    } else {
-      setAppointments([
-        ...appointments,
-        newAppointment,
-      ]);
-    }
-
-    setDatabaseStatus("connected");
-
-    setIsAppointmentModalOpen(
-      false
+    const client = clients.find(
+      (item) =>
+        item.id === Number(selectedClientId)
     );
 
+    const service = services.find(
+      (item) =>
+        item.id === Number(selectedServiceId)
+    );
+
+    const appointment: Appointment = {
+      id:
+        editingAppointmentId ??
+        Date.now(),
+
+      date: appointmentDate,
+      time: appointmentTime,
+
+      clientId: client?.id,
+
+      name:
+        client?.name ||
+        appointmentName.trim(),
+
+      serviceId: service?.id,
+
+      service:
+        service?.name ||
+        appointmentService.trim() ||
+        (language === "uk"
+          ? "Манікюр"
+          : "Маникюр"),
+
+      duration:
+        Number(appointmentDuration),
+
+      price:
+        Number(appointmentPrice || 0),
+
+      status: appointmentStatus,
+    };
+
+    setAppointments((current) => {
+      if (editingAppointmentId !== null) {
+        return current.map((item) =>
+          item.id === editingAppointmentId
+            ? appointment
+            : item
+        );
+      }
+
+      return [
+        ...current,
+        appointment,
+      ];
+    });
+
+    await saveOrQueue({
+      queueId: createQueueId(),
+      type: "upsert",
+      table: "appointments",
+      recordId: appointment.id,
+
+      payload: {
+        id: appointment.id,
+        date: appointment.date,
+        time: appointment.time,
+        client_id: appointment.clientId ?? null,
+        name: appointment.name,
+        service_id: appointment.serviceId ?? null,
+        service: appointment.service,
+        duration: appointment.duration,
+        price: appointment.price,
+        status: appointment.status,
+      },
+    });
+
+    setIsAppointmentModalOpen(false);
     resetAppointmentForm();
   }
 
   async function saveAppointment() {
-    setAppointmentError("");
-    setHasConflict(false);
-
-    const selectedClient =
-      clients.find(
-        (client) =>
-          client.id ===
-          Number(selectedClientId)
-      );
+    const client = clients.find(
+      (item) =>
+        item.id === Number(selectedClientId)
+    );
 
     const finalName =
-      selectedClient?.name ||
+      client?.name ||
       appointmentName.trim();
 
     if (!finalName) {
-      setAppointmentError(
-        t.clientRequired
-      );
-
+      setAppointmentError(t.clientRequired);
       return;
     }
 
     if (!appointmentDate) {
-      setAppointmentError(
-        t.dateRequired
-      );
-
+      setAppointmentError(t.dateRequired);
       return;
     }
 
     if (!appointmentTime) {
-      setAppointmentError(
-        t.timeRequired
-      );
-
+      setAppointmentError(t.timeRequired);
       return;
     }
 
-    const duration =
-      Number(
-        appointmentDuration
-      );
+    const conflict = findConflict(
+      appointmentDate,
+      appointmentTime,
+      Number(appointmentDuration),
+      editingAppointmentId
+    );
 
     if (
-      appointmentStatus !==
-        "cancelled" &&
-      appointmentStatus !==
-        "no-show"
+      conflict &&
+      appointmentStatus !== "cancelled" &&
+      appointmentStatus !== "no-show"
     ) {
-      const conflict =
-        findConflictingAppointment(
-          appointmentDate,
-          appointmentTime,
-          duration,
-          editingAppointmentId
-        );
+      setAppointmentError(
+        `${t.conflict}: ${conflict.name}, ${
+          conflict.time
+        }–${minutesToTime(
+          timeToMinutes(conflict.time) +
+            conflict.duration
+        )}`
+      );
 
-      if (conflict) {
-        const conflictStart =
-          timeToMinutes(
-            conflict.time
-          );
+      setHasConflict(true);
 
-        const conflictEnd =
-          conflictStart +
-          conflict.duration;
-
-        setAppointmentError(
-          `${t.conflict}: ${
-            conflict.name
-          }, ${
-            conflict.time
-          }–${minutesToTime(
-            conflictEnd
-          )}.`
-        );
-
-        setHasConflict(true);
-
-        return;
-      }
+      return;
     }
 
     await actuallySaveAppointment();
   }
 
-  async function deleteAppointment(
-    id: number
-  ) {
+  async function deleteAppointment(id: number) {
     if (
       !window.confirm(
         t.deleteAppointmentConfirm
@@ -1976,197 +1729,141 @@ export default function Home() {
       return;
     }
 
-    const { error } =
-      await supabase
-        .from("appointments")
-        .delete()
-        .eq("id", id);
-
-    if (error) {
-      console.error(error);
-
-      window.alert(
-        t.databaseDeleteError
-      );
-
-      setDatabaseStatus("error");
-
-      return;
-    }
-
-    setAppointments(
-      appointments.filter(
-        (appointment) =>
-          appointment.id !== id
+    setAppointments((current) =>
+      current.filter(
+        (item) => item.id !== id
       )
     );
 
-    setIsAppointmentModalOpen(
-      false
-    );
+    await saveOrQueue({
+      queueId: createQueueId(),
+      type: "delete",
+      table: "appointments",
+      recordId: id,
+      column: "id",
+      value: id,
+    });
 
-    setDatabaseStatus(
-      "connected"
-    );
+    setIsAppointmentModalOpen(false);
   }
 
-  function resetClientForm() {
+  function openNewClient() {
     setEditingClientId(null);
     setClientName("");
     setClientPhone("");
     setClientSocial("");
     setClientNote("");
+
+    setIsClientModalOpen(true);
   }
 
-  function openNewClient() {
-    resetClientForm();
-
-    setIsClientModalOpen(
-      true
-    );
-  }
-
-  function openClientDetails(
-    clientId: number
-  ) {
-    setSelectedClientDetailsId(
-      clientId
-    );
-
-    setIsClientDetailsOpen(
-      true
-    );
-  }
-
-  function openEditClient(
-    client: Client
-  ) {
-    setEditingClientId(
-      client.id
-    );
-
+  function openEditClient(client: Client) {
+    setEditingClientId(client.id);
     setClientName(client.name);
     setClientPhone(client.phone);
     setClientSocial(client.social);
     setClientNote(client.note);
 
-    setIsClientDetailsOpen(
-      false
-    );
-
-    setIsClientModalOpen(
-      true
-    );
+    setIsClientDetailsOpen(false);
+    setIsClientModalOpen(true);
   }
 
   async function saveClient() {
-    if (!clientName.trim()) {
-      return;
-    }
+    if (!clientName.trim()) return;
 
-    const clientId =
-      editingClientId ??
-      Date.now();
+    const client: Client = {
+      id:
+        editingClientId ??
+        Date.now(),
 
-    const newClient: Client =
-      {
-        id: clientId,
-        name:
-          clientName.trim(),
-        phone:
-          clientPhone.trim(),
-        social:
-          clientSocial.trim(),
-        note:
-          clientNote.trim(),
-      };
+      name: clientName.trim(),
+      phone: clientPhone.trim(),
+      social: clientSocial.trim(),
+      note: clientNote.trim(),
+    };
 
-    const { error } =
-      await supabase
-        .from("clients")
-        .upsert(
-          {
-            id: newClient.id,
-            name:
-              newClient.name,
-            phone:
-              newClient.phone,
-            social:
-              newClient.social,
-            note:
-              newClient.note,
-          },
-          {
-            onConflict: "id",
-          }
+    setClients((current) => {
+      if (editingClientId !== null) {
+        return current.map((item) =>
+          item.id === editingClientId
+            ? client
+            : item
         );
+      }
 
-    if (error) {
-      console.error(error);
+      return [
+        ...current,
+        client,
+      ];
+    });
 
-      window.alert(
-        t.databaseSaveError
-      );
+    if (editingClientId !== null) {
+      const changedAppointments =
+        appointments
+          .filter(
+            (appointment) =>
+              appointment.clientId ===
+              editingClientId
+          )
+          .map((appointment) => ({
+            ...appointment,
+            name: client.name,
+          }));
 
-      return;
-    }
+      setAppointments((current) =>
+        current.map((appointment) => {
+          const changed =
+            changedAppointments.find(
+              (item) =>
+                item.id === appointment.id
+            );
 
-    if (
-      editingClientId !== null
-    ) {
-      await supabase
-        .from("appointments")
-        .update({
-          name: newClient.name,
+          return changed ?? appointment;
         })
-        .eq(
-          "client_id",
-          editingClientId
-        );
-
-      setClients(
-        clients.map((client) =>
-          client.id ===
-          editingClientId
-            ? newClient
-            : client
-        )
       );
 
-      setAppointments(
-        appointments.map(
-          (appointment) =>
-            appointment.clientId ===
-            editingClientId
-              ? {
-                  ...appointment,
-                  name:
-                    newClient.name,
-                }
-              : appointment
-        )
-      );
-    } else {
-      setClients([
-        ...clients,
-        newClient,
-      ]);
+      for (const appointment of changedAppointments) {
+        await saveOrQueue({
+          queueId: createQueueId(),
+          type: "upsert",
+          table: "appointments",
+          recordId: appointment.id,
+
+          payload: {
+            id: appointment.id,
+            date: appointment.date,
+            time: appointment.time,
+            client_id: appointment.clientId ?? null,
+            name: appointment.name,
+            service_id: appointment.serviceId ?? null,
+            service: appointment.service,
+            duration: appointment.duration,
+            price: appointment.price,
+            status: appointment.status,
+          },
+        });
+      }
     }
 
-    setDatabaseStatus(
-      "connected"
-    );
+    await saveOrQueue({
+      queueId: createQueueId(),
+      type: "upsert",
+      table: "clients",
+      recordId: client.id,
 
-    setIsClientModalOpen(
-      false
-    );
+      payload: {
+        id: client.id,
+        name: client.name,
+        phone: client.phone,
+        social: client.social,
+        note: client.note,
+      },
+    });
 
-    resetClientForm();
+    setIsClientModalOpen(false);
   }
 
-  async function deleteClient(
-    id: number
-  ) {
+  async function deleteClient(id: number) {
     if (
       !window.confirm(
         t.deleteClientConfirm
@@ -2175,184 +1872,104 @@ export default function Home() {
       return;
     }
 
-    const { error } =
-      await supabase
-        .from("clients")
-        .delete()
-        .eq("id", id);
-
-    if (error) {
-      console.error(error);
-
-      window.alert(
-        t.databaseDeleteError
-      );
-
-      return;
-    }
-
-    setClients(
-      clients.filter(
+    setClients((current) =>
+      current.filter(
         (client) =>
           client.id !== id
       )
     );
 
-    setAppointments(
-      appointments.map(
-        (appointment) =>
-          appointment.clientId ===
-          id
-            ? {
-                ...appointment,
-                clientId:
-                  undefined,
-              }
-            : appointment
+    setAppointments((current) =>
+      current.map((appointment) =>
+        appointment.clientId === id
+          ? {
+              ...appointment,
+              clientId: undefined,
+            }
+          : appointment
       )
     );
 
-    setIsClientDetailsOpen(
-      false
-    );
+    await saveOrQueue({
+      queueId: createQueueId(),
+      type: "delete",
+      table: "clients",
+      recordId: id,
+      column: "id",
+      value: id,
+    });
 
-    setSelectedClientDetailsId(
-      null
-    );
-
-    setDatabaseStatus(
-      "connected"
-    );
+    setIsClientDetailsOpen(false);
   }
 
-  function resetServiceForm() {
+  function openNewService() {
     setEditingServiceId(null);
     setServiceName("");
     setServiceDuration("90");
     setServicePrice("");
+
+    setIsServiceModalOpen(true);
   }
 
-  function openNewService() {
-    resetServiceForm();
-
-    setIsServiceModalOpen(
-      true
-    );
-  }
-
-  function openEditService(
-    service: Service
-  ) {
-    setEditingServiceId(
-      service.id
-    );
-
-    setServiceName(
-      service.name
-    );
-
+  function openEditService(service: Service) {
+    setEditingServiceId(service.id);
+    setServiceName(service.name);
     setServiceDuration(
-      String(
-        service.duration
-      )
+      String(service.duration)
     );
-
     setServicePrice(
-      String(
-        service.price
-      )
+      String(service.price)
     );
 
-    setIsServiceModalOpen(
-      true
-    );
+    setIsServiceModalOpen(true);
   }
 
   async function saveService() {
-    if (!serviceName.trim()) {
-      return;
-    }
+    if (!serviceName.trim()) return;
 
-    const serviceId =
-      editingServiceId ??
-      Date.now();
+    const service: Service = {
+      id:
+        editingServiceId ??
+        Date.now(),
 
-    const newService: Service =
-      {
-        id: serviceId,
-        name:
-          serviceName.trim(),
-        duration:
-          Number(
-            serviceDuration
-          ),
-        price:
-          Number(
-            servicePrice || 0
-          ),
-      };
+      name: serviceName.trim(),
+      duration: Number(serviceDuration),
+      price: Number(servicePrice || 0),
+    };
 
-    const { error } =
-      await supabase
-        .from("services")
-        .upsert(
-          {
-            id: newService.id,
-            name:
-              newService.name,
-            duration:
-              newService.duration,
-            price:
-              newService.price,
-          },
-          {
-            onConflict: "id",
-          }
+    setServices((current) => {
+      if (editingServiceId !== null) {
+        return current.map((item) =>
+          item.id === editingServiceId
+            ? service
+            : item
         );
+      }
 
-    if (error) {
-      console.error(error);
+      return [
+        ...current,
+        service,
+      ];
+    });
 
-      window.alert(
-        t.databaseSaveError
-      );
+    await saveOrQueue({
+      queueId: createQueueId(),
+      type: "upsert",
+      table: "services",
+      recordId: service.id,
 
-      return;
-    }
+      payload: {
+        id: service.id,
+        name: service.name,
+        duration: service.duration,
+        price: service.price,
+      },
+    });
 
-    if (
-      editingServiceId !== null
-    ) {
-      setServices(
-        services.map(
-          (service) =>
-            service.id ===
-            editingServiceId
-              ? newService
-              : service
-        )
-      );
-    } else {
-      setServices([
-        ...services,
-        newService,
-      ]);
-    }
-
-    setDatabaseStatus(
-      "connected"
-    );
-
-    setIsServiceModalOpen(
-      false
-    );
-
-    resetServiceForm();
+    setIsServiceModalOpen(false);
   }
 
-  async function deleteService(
-    id: number
-  ) {
+  async function deleteService(id: number) {
     if (
       !window.confirm(
         t.deleteServiceConfirm
@@ -2361,87 +1978,25 @@ export default function Home() {
       return;
     }
 
-    const { error } =
-      await supabase
-        .from("services")
-        .delete()
-        .eq("id", id);
-
-    if (error) {
-      console.error(error);
-
-      window.alert(
-        t.databaseDeleteError
-      );
-
-      return;
-    }
-
-    setServices(
-      services.filter(
+    setServices((current) =>
+      current.filter(
         (service) =>
           service.id !== id
       )
     );
 
-    setAppointments(
-      appointments.map(
-        (appointment) =>
-          appointment.serviceId ===
-          id
-            ? {
-                ...appointment,
-                serviceId:
-                  undefined,
-              }
-            : appointment
-      )
-    );
-
-    setDatabaseStatus(
-      "connected"
-    );
-  }
-
-  function getClientAppointmentsCount(
-    clientId: number
-  ) {
-    return appointments.filter(
-      (appointment) =>
-        appointment.clientId ===
-        clientId
-    ).length;
-  }
-
-  function getClientForAppointment(
-    appointment: Appointment
-  ) {
-    if (appointment.clientId) {
-      const client =
-        clients.find(
-          (item) =>
-            item.id ===
-            appointment.clientId
-        );
-
-      if (client) {
-        return client;
-      }
-    }
-
-    return clients.find(
-      (client) =>
-        client.name
-          .trim()
-          .toLowerCase() ===
-        appointment.name
-          .trim()
-          .toLowerCase()
-    );
+    await saveOrQueue({
+      queueId: createQueueId(),
+      type: "delete",
+      table: "services",
+      recordId: id,
+      column: "id",
+      value: id,
+    });
   }
 
   function handleCalendarClick(
-    event: React.MouseEvent<HTMLDivElement>
+    event: MouseEvent<HTMLDivElement>
   ) {
     const rect =
       event.currentTarget.getBoundingClientRect();
@@ -2450,126 +2005,64 @@ export default function Home() {
       event.clientY -
       rect.top;
 
-    const clickedHour =
+    const hour =
       workSettings.startHour +
-      Math.floor(
-        y / HOUR_HEIGHT
-      );
+      Math.floor(y / HOUR_HEIGHT);
 
     if (
-      clickedHour <
-        workSettings.startHour ||
-      clickedHour >=
-        workSettings.endHour
+      hour < workSettings.startHour ||
+      hour >= workSettings.endHour
     ) {
       return;
     }
 
-    const time =
-      `${String(
-        clickedHour
-      ).padStart(
-        2,
-        "0"
-      )}:00`;
-
-    openNewAppointment(time);
+    openNewAppointment(
+      `${String(hour).padStart(2, "0")}:00`
+    );
   }
 
-  function clearAppointmentWarning() {
-    setAppointmentError("");
-    setHasConflict(false);
-  }
+  function handleServiceSelection(value: string) {
+    setSelectedServiceId(value);
 
-  function handleServiceSelection(
-    serviceId: string
-  ) {
-    setSelectedServiceId(
-      serviceId
+    if (!value) return;
+
+    const service = services.find(
+      (item) =>
+        item.id === Number(value)
     );
 
-    clearAppointmentWarning();
+    if (!service) return;
 
-    if (!serviceId) {
-      return;
-    }
-
-    const service =
-      services.find(
-        (item) =>
-          item.id ===
-          Number(serviceId)
-      );
-
-    if (!service) {
-      return;
-    }
-
-    setAppointmentService(
-      service.name
-    );
-
+    setAppointmentService(service.name);
     setAppointmentDuration(
-      String(
-        service.duration
-      )
+      String(service.duration)
     );
-
     setAppointmentPrice(
-      String(
-        service.price
-      )
+      String(service.price)
     );
   }
 
-  function toggleWorkDay(
-    day: number
-  ) {
-    if (
-      workSettings.workDays.includes(
-        day
-      )
-    ) {
-      setWorkSettings({
-        ...workSettings,
+  function toggleWorkDay(day: number) {
+    setWorkSettings((current) => ({
+      ...current,
 
-        workDays:
-          workSettings.workDays.filter(
-            (item) =>
-              item !== day
-          ),
-      });
-    } else {
-      setWorkSettings({
-        ...workSettings,
-
-        workDays: [
-          ...workSettings.workDays,
-          day,
-        ],
-      });
-    }
+      workDays:
+        current.workDays.includes(day)
+          ? current.workDays.filter(
+              (item) => item !== day
+            )
+          : [
+              ...current.workDays,
+              day,
+            ],
+    }));
   }
 
   function openReminder(
     appointment: Appointment
   ) {
-    const client =
-      appointment.clientId !==
-      undefined
-        ? clients.find(
-            (item) =>
-              item.id ===
-              appointment.clientId
-          )
-        : undefined;
-
-    const name =
-      client?.name ||
-      appointment.name;
-
     const text =
-      `Привіт, ${name}! ` +
+      `Привіт, ${appointment.name}! ` +
       `Нагадую про ваш запис ${formatUkrainianReminderDate(
         appointment.date
       )} о ${appointment.time}. ` +
@@ -2577,42 +2070,8 @@ export default function Home() {
       `Чекаю на вас ❤️`;
 
     setReminderText(text);
-
-    setReminderClientId(
-      client?.id ?? null
-    );
-
     setReminderCopied(false);
-
-    setIsReminderModalOpen(
-      true
-    );
-  }
-
-  function openReminderForEditingAppointment() {
-    if (
-      editingAppointmentId ===
-      null
-    ) {
-      return;
-    }
-
-    const appointment =
-      appointments.find(
-        (item) =>
-          item.id ===
-          editingAppointmentId
-      );
-
-    if (!appointment) {
-      return;
-    }
-
-    setIsAppointmentModalOpen(
-      false
-    );
-
-    openReminder(appointment);
+    setIsReminderModalOpen(true);
   }
 
   async function copyReminder() {
@@ -2623,44 +2082,18 @@ export default function Home() {
 
       setReminderCopied(true);
     } catch {
-      window.alert(
-        reminderText
-      );
+      window.alert(reminderText);
     }
-  }
-
-  function openExternal(
-    url: string
-  ) {
-    if (!url) {
-      return;
-    }
-
-    window.open(
-      url,
-      "_blank",
-      "noopener,noreferrer"
-    );
   }
 
   if (!authChecked) {
     return (
       <main
         className="flex h-dvh items-center justify-center"
-        style={
-          APP_BACKGROUND_STYLE
-        }
+        style={APP_BACKGROUND_STYLE}
       >
-        <div className="rounded-3xl bg-rose-50/80 px-8 py-7 text-center shadow-2xl backdrop-blur-md">
-          <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-rose-200 border-t-black" />
-
-          <p className="mt-4 font-semibold">
-            Nails Calendar
-          </p>
-
-          <p className="mt-1 text-sm text-neutral-500">
-            Проверка входа...
-          </p>
+        <div className="rounded-3xl bg-rose-50/80 px-8 py-7 shadow-xl">
+          Nails
         </div>
       </main>
     );
@@ -2670,106 +2103,55 @@ export default function Home() {
     return (
       <main
         className="flex h-dvh items-center justify-center px-5"
-        style={
-          APP_BACKGROUND_STYLE
-        }
+        style={APP_BACKGROUND_STYLE}
       >
-        <div className="w-full max-w-sm rounded-3xl bg-rose-50/75 p-6 shadow-2xl backdrop-blur-md">
-          <div className="text-center">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-black text-2xl text-white">
-              ✦
-            </div>
+        <form
+          onSubmit={handleLogin}
+          className="w-full max-w-sm rounded-3xl bg-rose-50/80 p-6 shadow-2xl backdrop-blur-md"
+        >
+          <h1 className="text-center text-2xl font-semibold">
+            Nails
+          </h1>
 
-            <h1 className="mt-4 text-2xl font-semibold">
-              Nails Calendar
-            </h1>
-
-            <p className="mt-2 text-sm text-neutral-500">
-              Вхід до календаря / Вход в календарь
-            </p>
-          </div>
-
-          <form
-            onSubmit={
-              handleLogin
+          <input
+            type="email"
+            value={loginEmail}
+            onChange={(event) =>
+              setLoginEmail(
+                event.target.value
+              )
             }
-            className="mt-7 space-y-4"
+            placeholder="Email"
+            className="mt-6 w-full rounded-xl border border-rose-200 bg-white p-3 text-black"
+          />
+
+          <input
+            type="password"
+            value={loginPassword}
+            onChange={(event) =>
+              setLoginPassword(
+                event.target.value
+              )
+            }
+            placeholder="Пароль"
+            className="mt-3 w-full rounded-xl border border-rose-200 bg-white p-3 text-black"
+          />
+
+          {loginError && (
+            <div className="mt-3 rounded-xl bg-red-50 p-3 text-sm text-red-700">
+              {loginError}
+            </div>
+          )}
+
+          <button
+            disabled={loginLoading}
+            className="mt-4 w-full rounded-xl bg-black p-4 font-medium text-white"
           >
-            <div>
-              <label className="mb-1 block text-sm text-neutral-500">
-                Email
-              </label>
-
-              <input
-                type="email"
-                autoComplete="email"
-                required
-                value={
-                  loginEmail
-                }
-                onChange={(
-                  event
-                ) => {
-                  setLoginEmail(
-                    event.target.value
-                  );
-
-                  setLoginError(
-                    ""
-                  );
-                }}
-                placeholder="name@example.com"
-                className="w-full rounded-xl border border-rose-200 bg-white/90 px-4 py-3 text-black caret-black outline-none placeholder:text-neutral-400 focus:border-rose-400"
-              />
-            </div>
-
-            <div>
-              <label className="mb-1 block text-sm text-neutral-500">
-                Пароль
-              </label>
-
-              <input
-                type="password"
-                autoComplete="current-password"
-                required
-                value={
-                  loginPassword
-                }
-                onChange={(
-                  event
-                ) => {
-                  setLoginPassword(
-                    event.target.value
-                  );
-
-                  setLoginError(
-                    ""
-                  );
-                }}
-                placeholder="••••••••"
-                className="w-full rounded-xl border border-rose-200 bg-white/90 px-4 py-3 text-black caret-black outline-none placeholder:text-neutral-400 focus:border-rose-400"
-              />
-            </div>
-
-            {loginError && (
-              <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-                {loginError}
-              </div>
-            )}
-
-            <button
-              type="submit"
-              disabled={
-                loginLoading
-              }
-              className="w-full rounded-xl bg-black px-4 py-4 font-medium text-white disabled:opacity-50"
-            >
-              {loginLoading
-                ? "Вхід..."
-                : "Увійти / Войти"}
-            </button>
-          </form>
-        </div>
+            {loginLoading
+              ? "..."
+              : "Увійти / Войти"}
+          </button>
+        </form>
       </main>
     );
   }
@@ -2778,23 +2160,10 @@ export default function Home() {
     return (
       <main
         className="flex h-dvh items-center justify-center"
-        style={
-          APP_BACKGROUND_STYLE
-        }
+        style={APP_BACKGROUND_STYLE}
       >
-        <div className="rounded-2xl bg-rose-50/80 px-6 py-5 text-center shadow-xl backdrop-blur-md">
-          <div className="mx-auto h-7 w-7 animate-spin rounded-full border-2 border-rose-200 border-t-black" />
-
-          <p className="mt-3 text-sm font-medium">
-            Supabase
-          </p>
-
-          <p className="mt-1 text-xs text-neutral-500">
-            {language ===
-            "uk"
-              ? "Завантаження даних..."
-              : "Загрузка данных..."}
-          </p>
+        <div className="rounded-3xl bg-rose-50/80 px-8 py-7 shadow-xl">
+          Загрузка...
         </div>
       </main>
     );
@@ -2803,485 +2172,224 @@ export default function Home() {
   return (
     <main
       className="h-dvh overflow-hidden text-neutral-900"
-      style={
-        APP_BACKGROUND_STYLE
-      }
+      style={APP_BACKGROUND_STYLE}
     >
       <div className="mx-auto flex h-dvh max-w-md flex-col overflow-hidden bg-rose-50/45 shadow-2xl backdrop-blur-[1px]">
-
-        {activeTab ===
-          "calendar" && (
+        {activeTab === "calendar" && (
           <div className="flex min-h-0 flex-1 flex-col">
-            <header className="z-20 shrink-0 border-b border-rose-200 bg-rose-50/70 backdrop-blur-md">
-              <div className="px-5 pb-3 pt-4">
-                <div className="flex items-start justify-between gap-3">
-                  <div>
+            <header className="shrink-0 border-b border-neutral-600/60 bg-rose-50/70 px-5 pb-3 pt-4 backdrop-blur-md">
+              <div className="flex items-start justify-between">
+                <div>
+                  <div className="flex items-center gap-2">
                     <p className="text-sm capitalize text-neutral-500">
-                      {calendarView ===
-                      "day"
-                        ? selectedDateIsToday
-                          ? t.today
-                          : formatWeekday(
-                              selectedDate,
-                              language
-                            )
-                        : t.calendar}
-                    </p>
-
-                    <h1 className="text-2xl font-semibold capitalize">
-                      {calendarView ===
-                      "day"
-                        ? formatDateTitle(
+                      {selectedDateIsToday
+                        ? t.today
+                        : formatWeekday(
                             selectedDate,
                             language
-                          )
-                        : formatMonthTitle(
-                            visibleMonth,
-                            language
                           )}
-                    </h1>
-
-                    <p className="mt-1 text-xs text-neutral-400">
-                      {calendarView ===
-                      "day"
-                        ? `${t.records}: ${selectedDayAppointments.length}`
-                        : `${t.totalRecords}: ${
-                            appointments.filter(
-                              (
-                                appointment
-                              ) => {
-                                const [
-                                  year,
-                                  month,
-                                ] =
-                                  appointment.date
-                                    .split(
-                                      "-"
-                                    )
-                                    .map(
-                                      Number
-                                    );
-
-                                return (
-                                  year ===
-                                    visibleMonth.getFullYear() &&
-                                  month -
-                                    1 ===
-                                    visibleMonth.getMonth()
-                                );
-                              }
-                            )
-                              .length
-                          }`}
                     </p>
+
+                    <span
+                      className={`rounded-full border px-2 py-0.5 text-[10px] font-medium ${connectionClass()}`}
+                    >
+                      {connectionLabel()}
+                    </span>
                   </div>
 
-                  <button
-                    onClick={() =>
-                      openNewAppointment()
-                    }
-                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-black text-2xl text-white shadow-sm"
-                  >
-                    +
-                  </button>
-                </div>
-
-                <div className="mt-4 grid grid-cols-2 rounded-xl bg-rose-100/70 p-1">
-                  <button
-                    onClick={() =>
-                      setCalendarView(
-                        "day"
-                      )
-                    }
-                    className={`rounded-lg px-3 py-2 text-sm ${
-                      calendarView ===
-                      "day"
-                        ? "bg-white/85 font-medium shadow-sm"
-                        : "text-neutral-500"
-                    }`}
-                  >
-                    {t.day}
-                  </button>
-
-                  <button
-                    onClick={() => {
-                      setVisibleMonth(
-                        new Date(
-                          selectedDate.getFullYear(),
-                          selectedDate.getMonth(),
-                          1
+                  <h1 className="text-2xl font-semibold capitalize">
+                    {calendarView === "day"
+                      ? formatDateTitle(
+                          selectedDate,
+                          language
                         )
-                      );
+                      : formatMonthTitle(
+                          visibleMonth,
+                          language
+                        )}
+                  </h1>
 
-                      setCalendarView(
-                        "month"
-                      );
-                    }}
-                    className={`rounded-lg px-3 py-2 text-sm ${
-                      calendarView ===
-                      "month"
-                        ? "bg-white/85 font-medium shadow-sm"
-                        : "text-neutral-500"
-                    }`}
-                  >
-                    {t.month}
-                  </button>
+                  <p className="mt-1 text-xs text-neutral-500">
+                    {t.records}:{" "}
+                    {selectedDayAppointments.length}
+                  </p>
                 </div>
-              </div>
 
-              <div className="grid grid-cols-[48px_1fr_48px] items-center border-t border-rose-100 px-3 py-2">
                 <button
                   onClick={() =>
-                    calendarView ===
-                    "day"
-                      ? changeDay(
-                          -1
-                        )
-                      : changeMonth(
-                          -1
-                        )
+                    openNewAppointment()
                   }
-                  className="flex h-10 items-center justify-center rounded-xl text-2xl hover:bg-rose-100"
+                  className="flex h-11 w-11 items-center justify-center rounded-full bg-black text-2xl text-white"
+                >
+                  +
+                </button>
+              </div>
+
+              <div className="mt-4 grid grid-cols-2 rounded-xl bg-rose-100/70 p-1">
+                <button
+                  onClick={() =>
+                    setCalendarView("day")
+                  }
+                  className={`rounded-lg py-2 text-sm ${
+                    calendarView === "day"
+                      ? "bg-white shadow-sm"
+                      : "text-neutral-500"
+                  }`}
+                >
+                  {t.day}
+                </button>
+
+                <button
+                  onClick={() =>
+                    setCalendarView("month")
+                  }
+                  className={`rounded-lg py-2 text-sm ${
+                    calendarView === "month"
+                      ? "bg-white shadow-sm"
+                      : "text-neutral-500"
+                  }`}
+                >
+                  {t.month}
+                </button>
+              </div>
+
+              <div className="mt-3 grid grid-cols-[48px_1fr_48px] items-center">
+                <button
+                  onClick={() =>
+                    calendarView === "day"
+                      ? changeDay(-1)
+                      : changeMonth(-1)
+                  }
+                  className="text-2xl"
                 >
                   ‹
                 </button>
 
                 <button
-                  onClick={
-                    goToToday
-                  }
-                  className="mx-auto rounded-xl bg-rose-100/70 px-4 py-2 text-sm font-medium"
+                  onClick={goToday}
+                  className="mx-auto rounded-xl bg-rose-100/70 px-4 py-2 text-sm"
                 >
-                  {calendarView ===
-                  "day"
-                    ? selectedDateIsToday
-                      ? t.today
-                      : t.returnToday
-                    : visibleMonthIsCurrent
-                    ? t.currentMonth
-                    : t.returnCurrentMonth}
+                  {calendarView === "day"
+                    ? t.today
+                    : t.currentMonth}
                 </button>
 
                 <button
                   onClick={() =>
-                    calendarView ===
-                    "day"
-                      ? changeDay(
-                          1
-                        )
-                      : changeMonth(
-                          1
-                        )
+                    calendarView === "day"
+                      ? changeDay(1)
+                      : changeMonth(1)
                   }
-                  className="flex h-10 items-center justify-center rounded-xl text-2xl hover:bg-rose-100"
+                  className="text-2xl"
                 >
                   ›
                 </button>
               </div>
             </header>
 
-            {calendarView ===
-              "day" && (
-              <>
-                {!selectedDateIsWorkDay && (
-                  <div className="shrink-0 border-b border-orange-200 bg-orange-50/85 px-4 py-3">
-                    <p className="text-sm font-medium text-orange-800">
-                      {t.dayOff}
-                    </p>
-
-                    <p className="mt-1 text-xs text-orange-600">
-                      {
-                        t.dayOffHint
-                      }
-                    </p>
+            {calendarView === "day" && (
+              <section className="min-h-0 flex-1 overflow-y-auto">
+                <div
+                  className="grid grid-cols-[70px_1fr]"
+                  style={{
+                    height: `${calendarHeight}px`,
+                  }}
+                >
+                  <div className="relative border-r border-neutral-600/65">
+                    {hours.map((hour) => (
+                      <div
+                        key={hour}
+                        className="absolute left-0 w-full px-3 text-sm text-neutral-600"
+                        style={{
+                          top: `${
+                            (hour -
+                              workSettings.startHour) *
+                            HOUR_HEIGHT
+                          }px`,
+                        }}
+                      >
+                        {String(hour).padStart(
+                          2,
+                          "0"
+                        )}
+                        :00
+                      </div>
+                    ))}
                   </div>
-                )}
 
-                <section className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
                   <div
-                    className="grid grid-cols-[70px_1fr]"
-                    style={{
-                      height: `${calendarHeight}px`,
-                    }}
+                    className="relative"
+                    onClick={handleCalendarClick}
                   >
-                    <div className="relative border-r border-neutral-500/60">
-                      {hours.map(
-                        (hour) => (
-                          <div
-                            key={
-                              hour
-                            }
-                            className="absolute left-0 w-full px-3 text-sm text-neutral-500"
-                            style={{
-                              top: `${
-                                (hour -
-                                  workSettings.startHour) *
-                                HOUR_HEIGHT
-                              }px`,
-                            }}
-                          >
-                            {String(
-                              hour
-                            ).padStart(
-                              2,
-                              "0"
-                            )}
-                            :00
-                          </div>
-                        )
-                      )}
-                    </div>
+                    {hours.map((hour) => (
+                      <div
+                        key={hour}
+                        className="absolute left-0 right-0 border-t border-neutral-600/65"
+                        style={{
+                          top: `${
+                            (hour -
+                              workSettings.startHour) *
+                            HOUR_HEIGHT
+                          }px`,
+                        }}
+                      />
+                    ))}
 
-                    <div
-                      className="relative cursor-pointer"
-                      onClick={
-                        handleCalendarClick
-                      }
-                    >
-                      {hours.map(
-                        (hour) => (
-                          <div
-                            key={
-                              hour
-                            }
-                            className="absolute left-0 right-0 border-t border-neutral-500/60"
-                            style={{
-                              top: `${
-                                (hour -
-                                  workSettings.startHour) *
-                                HOUR_HEIGHT
-                              }px`,
-                            }}
-                          />
-                        )
-                      )}
-
-                      {selectedDayAppointments.map(
-                        (
-                          appointment
-                        ) => {
-                          const client =
-                            getClientForAppointment(
-                              appointment
-                            );
-
-                          const top =
-                            getAppointmentTop(
-                              appointment.time,
-                              workSettings.startHour
-                            );
-
-                          const height =
-                            getAppointmentHeight(
-                              appointment.duration
-                            );
-
-                          if (
-                            top <
-                              0 ||
-                            top >
-                              calendarHeight
-                          ) {
-                            return null;
-                          }
-
-                          return (
-                            <button
-                              key={
-                                appointment.id
-                              }
-                              onClick={(
-                                event
-                              ) => {
-                                event.stopPropagation();
-
-                                openEditAppointment(
-                                  appointment
-                                );
-                              }}
-                              className={`absolute left-2 right-2 z-10 overflow-hidden rounded-2xl border p-3 text-left shadow-md backdrop-blur-sm ${getAppointmentCardClass(
-                                appointment.status
-                              )}`}
-                              style={{
-                                top: `${top}px`,
-                                height: `${height}px`,
-                              }}
-                            >
-                              <div className="flex items-center justify-between gap-2">
-                                <p className="text-sm font-medium">
-                                  {
-                                    appointment.time
-                                  }
-                                </p>
-
-                                <span
-                                  className={`rounded-full border px-2 py-0.5 text-[10px] font-medium ${getStatusBadgeClass(
-                                    appointment.status
-                                  )}`}
-                                >
-                                  {getStatusLabel(
-                                    appointment.status
-                                  )}
-                                </span>
-                              </div>
-
-                              <div className="mt-1 flex items-center justify-between gap-2">
-                                <p className="truncate font-semibold">
-                                  {
-                                    appointment.name
-                                  }
-                                </p>
-
-                                {client?.phone && (
-                                  <span className="shrink-0 text-xs text-neutral-700">
-                                    {
-                                      client.phone
-                                    }
-                                  </span>
-                                )}
-                              </div>
-
-                              {height >=
-                                70 && (
-                                <p className="mt-1 truncate text-sm text-neutral-600">
-                                  {
-                                    appointment.service
-                                  }
-                                </p>
-                              )}
-
-                              {height >=
-                                90 && (
-                                <div className="mt-1 flex justify-between text-xs text-neutral-500">
-                                  <span>
-                                    {
-                                      appointment.duration
-                                    }{" "}
-                                    {
-                                      t.minutes
-                                    }
-                                  </span>
-
-                                  <span>
-                                    {
-                                      appointment.price
-                                    }{" "}
-                                    грн
-                                  </span>
-                                </div>
-                              )}
-                            </button>
-                          );
-                        }
-                      )}
-                    </div>
-                  </div>
-                </section>
-              </>
-            )}
-
-            {calendarView ===
-              "month" && (
-              <section className="min-h-0 flex-1 overflow-y-auto p-4">
-                <div className="rounded-2xl border border-rose-200 bg-white/65 p-3 shadow-sm backdrop-blur-sm">
-                  <div className="grid grid-cols-7 gap-1 pb-2">
-                    {WEEKDAYS.map(
-                      (
-                        weekday
-                      ) => (
-                        <div
-                          key={
-                            weekday.value
-                          }
-                          className="py-2 text-center text-xs text-neutral-400"
-                        >
-                          {
-                            weekday[
-                              language
-                            ]
-                          }
-                        </div>
-                      )
-                    )}
-                  </div>
-
-                  <div className="grid grid-cols-7 gap-1">
-                    {monthDays.map(
-                      (item) => {
-                        const dateKey =
-                          formatDateKey(
-                            item.date
+                    {selectedDayAppointments.map(
+                      (appointment) => {
+                        const top =
+                          getAppointmentTop(
+                            appointment.time,
+                            workSettings.startHour
                           );
 
-                        const dayAppointments =
-                          getAppointmentsForDate(
-                            item.date
-                          );
-
-                        const isToday =
-                          dateKey ===
-                          todayKey;
-
-                        const isSelected =
-                          dateKey ===
-                          selectedDateKey;
-
-                        const isWorkDay =
-                          workSettings.workDays.includes(
-                            item.date.getDay()
+                        const height =
+                          getAppointmentHeight(
+                            appointment.duration
                           );
 
                         return (
                           <button
-                            key={
-                              dateKey
-                            }
-                            onClick={() =>
-                              selectMonthDate(
-                                item.date
-                              )
-                            }
-                            className={`relative flex min-h-[64px] flex-col items-center rounded-xl px-1 py-2 ${
-                              isSelected
-                                ? "bg-black text-white"
-                                : isToday
-                                ? "border border-rose-400 bg-rose-100"
-                                : !isWorkDay &&
-                                  item.isCurrentMonth
-                                ? "bg-rose-50/80 text-neutral-400"
-                                : item.isCurrentMonth
-                                ? "hover:bg-rose-50"
-                                : "text-neutral-300"
-                            }`}
+                            key={appointment.id}
+                            onClick={(event) => {
+                              event.stopPropagation();
+
+                              openEditAppointment(
+                                appointment
+                              );
+                            }}
+                            className={`absolute left-2 right-2 z-10 overflow-hidden rounded-2xl border p-3 text-left shadow-md ${getAppointmentCardClass(
+                              appointment.status
+                            )}`}
+                            style={{
+                              top: `${top}px`,
+                              height: `${height}px`,
+                            }}
                           >
-                            <span className="text-sm">
-                              {
-                                item.date.getDate()
-                              }
-                            </span>
-
-                            {!isWorkDay &&
-                              item.isCurrentMonth && (
-                                <span className="mt-1 text-[9px] opacity-60">
-                                  {
-                                    t.dayOffShort
-                                  }
-                                </span>
-                              )}
-
-                            {dayAppointments.length >
-                              0 && (
-                              <span
-                                className={`mt-1 rounded-full px-1.5 text-[10px] ${
-                                  isSelected
-                                    ? "bg-white text-black"
-                                    : "bg-black text-white"
-                                }`}
-                              >
-                                {
-                                  dayAppointments.length
-                                }
+                            <div className="flex justify-between gap-2">
+                              <span className="font-medium">
+                                {appointment.time}
                               </span>
+
+                              <span
+                                className={`rounded-full border px-2 py-0.5 text-[10px] ${getStatusBadgeClass(
+                                  appointment.status
+                                )}`}
+                              >
+                                {statusLabel(
+                                  appointment.status
+                                )}
+                              </span>
+                            </div>
+
+                            <p className="mt-1 truncate font-semibold">
+                              {appointment.name}
+                            </p>
+
+                            {height >= 70 && (
+                              <p className="mt-1 truncate text-sm text-neutral-600">
+                                {appointment.service}
+                              </p>
                             )}
                           </button>
                         );
@@ -3291,37 +2399,98 @@ export default function Home() {
                 </div>
               </section>
             )}
+
+            {calendarView === "month" && (
+              <section className="min-h-0 flex-1 overflow-y-auto p-4">
+                <div className="rounded-2xl bg-white/65 p-3 backdrop-blur-sm">
+                  <div className="grid grid-cols-7 gap-1">
+                    {WEEKDAYS.map((day) => (
+                      <div
+                        key={day.value}
+                        className="py-2 text-center text-xs text-neutral-500"
+                      >
+                        {day[language]}
+                      </div>
+                    ))}
+
+                    {monthDays.map((item) => {
+                      const dateKey =
+                        formatDateKey(item.date);
+
+                      const count =
+                        appointments.filter(
+                          (appointment) =>
+                            appointment.date ===
+                            dateKey
+                        ).length;
+
+                      const selected =
+                        dateKey ===
+                        selectedDateKey;
+
+                      return (
+                        <button
+                          key={dateKey}
+                          onClick={() => {
+                            setSelectedDate(
+                              item.date
+                            );
+
+                            setVisibleMonth(
+                              new Date(
+                                item.date.getFullYear(),
+                                item.date.getMonth(),
+                                1
+                              )
+                            );
+
+                            setCalendarView(
+                              "day"
+                            );
+                          }}
+                          className={`min-h-[62px] rounded-xl p-2 ${
+                            selected
+                              ? "bg-black text-white"
+                              : item.isCurrentMonth
+                              ? "bg-white/50"
+                              : "text-neutral-300"
+                          }`}
+                        >
+                          <div>
+                            {item.date.getDate()}
+                          </div>
+
+                          {count > 0 && (
+                            <div className="mt-1 text-xs">
+                              {count}
+                            </div>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </section>
+            )}
           </div>
         )}
 
-        {activeTab ===
-          "clients" && (
+        {activeTab === "clients" && (
           <div className="flex min-h-0 flex-1 flex-col">
-            <header className="shrink-0 border-b border-rose-200 bg-rose-50/70 px-5 py-4 backdrop-blur-md">
+            <header className="shrink-0 bg-rose-50/70 px-5 py-4 backdrop-blur-md">
               <div className="flex justify-between">
                 <div>
                   <p className="text-sm text-neutral-500">
-                    {
-                      t.clientBase
-                    }
+                    {t.clientBase}
                   </p>
 
                   <h1 className="text-2xl font-semibold">
                     {t.clients}
                   </h1>
-
-                  <p className="mt-1 text-xs text-neutral-400">
-                    {t.total}:{" "}
-                    {
-                      clients.length
-                    }
-                  </p>
                 </div>
 
                 <button
-                  onClick={
-                    openNewClient
-                  }
+                  onClick={openNewClient}
                   className="flex h-11 w-11 items-center justify-center rounded-full bg-black text-2xl text-white"
                 >
                   +
@@ -3329,1981 +2498,1265 @@ export default function Home() {
               </div>
 
               <input
-                value={
-                  clientSearch
-                }
-                onChange={(
-                  event
-                ) =>
+                value={clientSearch}
+                onChange={(event) =>
                   setClientSearch(
                     event.target.value
                   )
                 }
-                placeholder={
-                  t.searchClient
-                }
-                className="mt-4 w-full rounded-xl border border-rose-200 bg-white/85 px-4 py-3 outline-none focus:border-rose-400"
+                placeholder={t.searchClient}
+                className="mt-4 w-full rounded-xl border border-rose-200 bg-white/90 p-3"
               />
             </header>
 
             <section className="min-h-0 flex-1 space-y-3 overflow-y-auto p-4">
-              {clients.length ===
-                0 && (
-                <div className="rounded-2xl border border-dashed border-rose-300 bg-white/55 p-8 text-center backdrop-blur-sm">
-                  <p className="font-medium">
-                    {
-                      t.noClients
-                    }
-                  </p>
-
-                  <p className="mt-2 text-sm text-neutral-500">
-                    {
-                      t.addFirstClient
-                    }
-                  </p>
+              {filteredClients.length === 0 && (
+                <div className="rounded-2xl bg-white/60 p-6 text-center text-neutral-500">
+                  {t.noClients}
                 </div>
               )}
 
-              {clients.length >
-                0 &&
-                filteredClients.length ===
-                  0 && (
-                  <div className="rounded-2xl border border-dashed border-rose-300 bg-white/55 p-8 text-center">
-                    {
-                      t.nothingFound
-                    }
-                  </div>
-                )}
-
-              {filteredClients.map(
-                (client) => (
-                  <button
-                    key={
+              {filteredClients.map((client) => (
+                <button
+                  key={client.id}
+                  onClick={() => {
+                    setSelectedClientDetailsId(
                       client.id
-                    }
-                    onClick={() =>
-                      openClientDetails(
-                        client.id
-                      )
-                    }
-                    className="w-full rounded-2xl border border-rose-300 bg-white/65 p-4 text-left shadow-md backdrop-blur-sm"
-                  >
-                    <div className="flex justify-between gap-4">
-                      <div>
-                        <h2 className="text-lg font-semibold">
-                          {
-                            client.name
-                          }
-                        </h2>
+                    );
 
-                        {client.phone && (
-                          <p className="mt-2 text-sm">
-                            {
-                              client.phone
-                            }
-                          </p>
-                        )}
+                    setIsClientDetailsOpen(true);
+                  }}
+                  className="w-full rounded-2xl border border-rose-200 bg-white/70 p-4 text-left shadow-sm"
+                >
+                  <div className="flex justify-between">
+                    <div>
+                      <p className="font-semibold">
+                        {client.name}
+                      </p>
 
-                        {client.social && (
-                          <p className="mt-1 text-sm text-neutral-500">
-                            {
-                              client.social
-                            }
-                          </p>
-                        )}
-                      </div>
-
-                      <span className="h-fit rounded-full bg-rose-100 px-3 py-1 text-xs">
-                        {getClientAppointmentsCount(
-                          client.id
-                        )}
-                      </span>
+                      {client.phone && (
+                        <p className="mt-1 text-sm text-neutral-500">
+                          {client.phone}
+                        </p>
+                      )}
                     </div>
-                  </button>
-                )
-              )}
+
+                    <span className="rounded-full bg-rose-100 px-3 py-1 text-xs">
+                      {
+                        appointments.filter(
+                          (appointment) =>
+                            appointment.clientId ===
+                            client.id
+                        ).length
+                      }
+                    </span>
+                  </div>
+                </button>
+              ))}
             </section>
           </div>
         )}
 
-        {activeTab ===
-          "analytics" && (
+        {activeTab === "analytics" && (
           <div className="flex min-h-0 flex-1 flex-col">
-            <header className="shrink-0 border-b border-rose-200 bg-rose-50/70 px-5 py-4 backdrop-blur-md">
+            <header className="shrink-0 bg-rose-50/70 px-5 py-4">
               <p className="text-sm text-neutral-500">
-                {
-                  t.financeRecords
-                }
+                {t.financeRecords}
               </p>
 
               <h1 className="text-2xl font-semibold">
                 {t.analytics}
               </h1>
-
-              <p className="mt-1 text-xs text-neutral-400">
-                {
-                  t.completedOnlyIncome
-                }
-              </p>
             </header>
 
             <section className="min-h-0 flex-1 overflow-y-auto p-4">
               <div className="grid grid-cols-2 gap-3">
-                <div className="rounded-2xl border border-rose-200 bg-white/65 p-4 backdrop-blur-sm">
-                  <p className="text-xs text-neutral-500">
-                    {
-                      t.todayIncome
-                    }
-                  </p>
+                <StatCard
+                  label={t.todayIncome}
+                  value={`${todayIncome} грн`}
+                />
 
-                  <p className="mt-2 text-2xl font-semibold">
-                    {
-                      todayIncome
-                    }{" "}
-                    грн
-                  </p>
-                </div>
+                <StatCard
+                  label={t.sevenDays}
+                  value={`${weekIncome} грн`}
+                />
 
-                <div className="rounded-2xl border border-rose-200 bg-white/65 p-4 backdrop-blur-sm">
-                  <p className="text-xs text-neutral-500">
-                    {
-                      t.sevenDays
-                    }
-                  </p>
+                <StatCard
+                  label={t.currentMonthIncome}
+                  value={`${monthIncome} грн`}
+                />
 
-                  <p className="mt-2 text-2xl font-semibold">
-                    {
-                      weekIncome
-                    }{" "}
-                    грн
-                  </p>
-                </div>
-              </div>
+                <StatCard
+                  label={t.averageCheck}
+                  value={`${averageCheck} грн`}
+                />
 
-              <div className="mt-3 rounded-2xl border border-rose-300 bg-rose-100/65 p-5 backdrop-blur-sm">
-                <p className="text-sm text-neutral-500">
-                  {
-                    t.currentMonthIncome
-                  }
-                </p>
-
-                <p className="mt-2 text-3xl font-semibold">
-                  {
-                    monthIncome
-                  }{" "}
-                  грн
-                </p>
-              </div>
-
-              <div className="mt-3 grid grid-cols-2 gap-3">
-                <div className="rounded-2xl bg-white/65 p-4 backdrop-blur-sm">
-                  <p className="text-xs text-neutral-500">
-                    {
-                      t.averageCheck
-                    }
-                  </p>
-
-                  <p className="mt-2 text-xl font-semibold">
-                    {
-                      averageCheck
-                    }{" "}
-                    грн
-                  </p>
-                </div>
-
-                <div className="rounded-2xl bg-sky-50/85 p-4">
-                  <p className="text-xs text-sky-700">
-                    {
-                      t.scheduled
-                    }
-                  </p>
-
-                  <p className="mt-2 text-xl font-semibold">
-                    {
-                      monthScheduledCount
-                    }
-                  </p>
-                </div>
-
-                <div className="rounded-2xl bg-red-50/85 p-4">
-                  <p className="text-xs text-red-600">
-                    {
-                      t.cancelled
-                    }
-                  </p>
-
-                  <p className="mt-2 text-xl font-semibold">
-                    {
-                      monthCancelledCount
-                    }
-                  </p>
-                </div>
-
-                <div className="rounded-2xl bg-orange-50/85 p-4">
-                  <p className="text-xs text-orange-600">
-                    {t.noShow}
-                  </p>
-
-                  <p className="mt-2 text-xl font-semibold">
-                    {
-                      monthNoShowCount
-                    }
-                  </p>
-                </div>
-              </div>
-
-              <div className="mt-6">
-                <h2 className="text-lg font-semibold">
-                  {
-                    t.topServices
-                  }
-                </h2>
-
-                <div className="mt-3 space-y-2">
-                  {serviceStats.length ===
-                    0 && (
-                    <div className="rounded-2xl border border-dashed border-rose-300 bg-white/55 p-6 text-center text-sm text-neutral-500">
-                      {
-                        t.noCompleted
-                      }
-                    </div>
+                <StatCard
+                  label={t.scheduled}
+                  value={String(
+                    monthScheduledCount
                   )}
+                  tone="blue"
+                />
 
-                  {serviceStats.map(
-                    (
-                      service,
-                      index
-                    ) => (
-                      <div
-                        key={
-                          service.name
-                        }
-                        className="rounded-2xl border border-rose-200 bg-white/65 p-4 backdrop-blur-sm"
-                      >
-                        <div className="flex justify-between">
-                          <div>
-                            <p className="text-xs text-neutral-400">
-                              #
-                              {index +
-                                1}
-                            </p>
+                <StatCard
+                  label={t.completed}
+                  value={String(
+                    monthCompletedCount
+                  )}
+                  tone="green"
+                />
 
-                            <p className="font-semibold">
-                              {
-                                service.name
-                              }
-                            </p>
+                <StatCard
+                  label={t.cancelled}
+                  value={String(
+                    monthCancelledCount
+                  )}
+                  tone="red"
+                />
 
-                            <p className="mt-1 text-sm text-neutral-500">
-                              {
-                                service.count
-                              }
-                            </p>
-                          </div>
+                <StatCard
+                  label={t.noShow}
+                  value={String(
+                    monthNoShowCount
+                  )}
+                  tone="orange"
+                />
+              </div>
 
-                          <p className="font-semibold">
-                            {
-                              service.income
-                            }{" "}
-                            грн
-                          </p>
-                        </div>
+              <h2 className="mt-6 text-lg font-semibold">
+                {t.topServices}
+              </h2>
+
+              <div className="mt-3 space-y-2">
+                {serviceStats.map((service) => (
+                  <div
+                    key={service.name}
+                    className="rounded-2xl bg-white/70 p-4"
+                  >
+                    <div className="flex justify-between">
+                      <div>
+                        <p className="font-semibold">
+                          {service.name}
+                        </p>
+
+                        <p className="text-sm text-neutral-500">
+                          {service.count}
+                        </p>
                       </div>
-                    )
-                  )}
-                </div>
+
+                      <p className="font-semibold">
+                        {service.income} грн
+                      </p>
+                    </div>
+                  </div>
+                ))}
               </div>
             </section>
           </div>
         )}
 
-        {activeTab ===
-          "settings" && (
+        {activeTab === "settings" && (
           <div className="flex min-h-0 flex-1 flex-col">
-            <header className="shrink-0 border-b border-rose-200 bg-rose-50/70 px-5 py-4 backdrop-blur-md">
-              <p className="text-sm text-neutral-500">
-                {t.app}
-              </p>
-
+            <header className="shrink-0 bg-rose-50/70 px-5 py-4">
               <h1 className="text-2xl font-semibold">
                 {t.settings}
               </h1>
             </header>
 
             <section className="min-h-0 flex-1 overflow-y-auto p-5">
-              <div>
-                <h2 className="text-lg font-semibold">
-                  {t.account}
-                </h2>
+              <h2 className="font-semibold">
+                {t.sync}
+              </h2>
 
-                <div className="mt-3 rounded-2xl border border-rose-200 bg-white/65 p-4 backdrop-blur-sm">
-                  <p className="text-xs text-neutral-500">
-                    {
-                      t.signedInAs
-                    }
+              <div
+                className={`mt-3 rounded-2xl border p-4 ${connectionClass()}`}
+              >
+                <p className="font-medium">
+                  {connectionLabel()}
+                </p>
+
+                {pendingCount > 0 && (
+                  <p className="mt-1 text-xs">
+                    В очереди: {pendingCount}
                   </p>
-
-                  <p className="mt-1 break-all text-sm font-medium">
-                    {
-                      session.user
-                        .email
-                    }
-                  </p>
-
-                  <button
-                    onClick={
-                      handleLogout
-                    }
-                    className="mt-4 w-full rounded-xl bg-red-50 px-4 py-3 text-sm font-medium text-red-600"
-                  >
-                    {t.logout}
-                  </button>
-                </div>
+                )}
               </div>
 
-              <div className="mt-7">
-                <h2 className="text-lg font-semibold">
-                  {t.database}
-                </h2>
+              <h2 className="mt-7 font-semibold">
+                {t.language}
+              </h2>
 
-                <div
-                  className={`mt-3 flex items-center gap-3 rounded-2xl border p-4 ${
-                    databaseStatus ===
-                    "connected"
-                      ? "border-green-200 bg-green-50/85"
-                      : databaseStatus ===
-                        "error"
-                      ? "border-red-200 bg-red-50/85"
-                      : "border-rose-200 bg-white/65"
+              <div className="mt-3 grid grid-cols-2 gap-2">
+                <button
+                  onClick={() =>
+                    setLanguage("ru")
+                  }
+                  className={`rounded-xl p-3 ${
+                    language === "ru"
+                      ? "bg-black text-white"
+                      : "bg-white/70"
                   }`}
                 >
-                  <span
-                    className={`h-3 w-3 rounded-full ${
-                      databaseStatus ===
-                      "connected"
-                        ? "bg-green-500"
-                        : databaseStatus ===
-                          "error"
-                        ? "bg-red-500"
-                        : "bg-neutral-400"
-                    }`}
-                  />
+                  Русский
+                </button>
 
-                  <p className="text-sm font-medium">
-                    {databaseStatus ===
-                    "connected"
-                      ? t.databaseConnected
-                      : databaseStatus ===
-                        "error"
-                      ? t.databaseError
-                      : t.databaseConnecting}
+                <button
+                  onClick={() =>
+                    setLanguage("uk")
+                  }
+                  className={`rounded-xl p-3 ${
+                    language === "uk"
+                      ? "bg-black text-white"
+                      : "bg-white/70"
+                  }`}
+                >
+                  Українська
+                </button>
+              </div>
+
+              <h2 className="mt-7 font-semibold">
+                {t.workSchedule}
+              </h2>
+
+              <div className="mt-3 grid grid-cols-2 gap-3">
+                <div>
+                  <p className="mb-1 text-xs text-neutral-500">
+                    {t.startDay}
                   </p>
-                </div>
-              </div>
 
-              <div className="mt-7">
-                <h2 className="text-lg font-semibold">
-                  {
-                    t.language
-                  }
-                </h2>
-
-                <p className="mt-1 text-sm text-neutral-500">
-                  {
-                    t.languageHint
-                  }
-                </p>
-
-                <div className="mt-4 grid grid-cols-2 gap-2 rounded-2xl border border-rose-200 bg-white/65 p-2">
-                  <button
-                    onClick={() =>
-                      setLanguage(
-                        "ru"
-                      )
+                  <select
+                    value={
+                      workSettings.startHour
                     }
-                    className={`rounded-xl px-4 py-3 text-sm font-medium ${
-                      language ===
-                      "ru"
-                        ? "bg-black text-white"
-                        : "bg-rose-50 text-neutral-500"
-                    }`}
-                  >
-                    Русский
-                  </button>
+                    onChange={(event) =>
+                      setWorkSettings({
+                        ...workSettings,
 
-                  <button
-                    onClick={() =>
-                      setLanguage(
-                        "uk"
-                      )
+                        startHour: Number(
+                          event.target.value
+                        ),
+                      })
                     }
-                    className={`rounded-xl px-4 py-3 text-sm font-medium ${
-                      language ===
-                      "uk"
-                        ? "bg-black text-white"
-                        : "bg-rose-50 text-neutral-500"
-                    }`}
+                    className="w-full rounded-xl bg-white p-3"
                   >
-                    Українська
-                  </button>
-                </div>
-              </div>
-
-              <div className="mt-7">
-                <h2 className="text-lg font-semibold">
-                  {
-                    t.workSchedule
-                  }
-                </h2>
-
-                <p className="mt-1 text-sm text-neutral-500">
-                  {
-                    t.workScheduleHint
-                  }
-                </p>
-
-                <div className="mt-4 rounded-2xl border border-rose-200 bg-white/65 p-4 backdrop-blur-sm">
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="mb-1 block text-xs text-neutral-500">
-                        {
-                          t.startDay
-                        }
-                      </label>
-
-                      <select
-                        value={
-                          workSettings.startHour
-                        }
-                        onChange={(
-                          event
-                        ) => {
-                          const hour =
-                            Number(
-                              event
-                                .target
-                                .value
-                            );
-
-                          setWorkSettings(
-                            {
-                              ...workSettings,
-                              startHour:
-                                hour,
-
-                              endHour:
-                                Math.max(
-                                  hour +
-                                    1,
-                                  workSettings.endHour
-                                ),
-                            }
-                          );
-                        }}
-                        className="w-full rounded-xl border border-rose-200 bg-white px-3 py-3"
+                    {Array.from(
+                      { length: 18 },
+                      (_, index) =>
+                        index + 6
+                    ).map((hour) => (
+                      <option
+                        key={hour}
+                        value={hour}
                       >
-                        {Array.from(
-                          {
-                            length: 18,
-                          },
-                          (
-                            _,
-                            index
-                          ) =>
-                            index +
-                            6
-                        ).map(
-                          (
-                            hour
-                          ) => (
-                            <option
-                              key={
-                                hour
-                              }
-                              value={
-                                hour
-                              }
-                            >
-                              {String(
-                                hour
-                              ).padStart(
-                                2,
-                                "0"
-                              )}
-                              :00
-                            </option>
-                          )
+                        {String(hour).padStart(
+                          2,
+                          "0"
                         )}
-                      </select>
-                    </div>
+                        :00
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-                    <div>
-                      <label className="mb-1 block text-xs text-neutral-500">
-                        {
-                          t.endDay
-                        }
-                      </label>
+                <div>
+                  <p className="mb-1 text-xs text-neutral-500">
+                    {t.endDay}
+                  </p>
 
-                      <select
-                        value={
-                          workSettings.endHour
-                        }
-                        onChange={(
-                          event
-                        ) =>
-                          setWorkSettings(
-                            {
-                              ...workSettings,
+                  <select
+                    value={
+                      workSettings.endHour
+                    }
+                    onChange={(event) =>
+                      setWorkSettings({
+                        ...workSettings,
 
-                              endHour:
-                                Number(
-                                  event
-                                    .target
-                                    .value
-                                ),
-                            }
-                          )
-                        }
-                        className="w-full rounded-xl border border-rose-200 bg-white px-3 py-3"
+                        endHour: Number(
+                          event.target.value
+                        ),
+                      })
+                    }
+                    className="w-full rounded-xl bg-white p-3"
+                  >
+                    {Array.from(
+                      { length: 18 },
+                      (_, index) =>
+                        index + 7
+                    ).map((hour) => (
+                      <option
+                        key={hour}
+                        value={hour}
                       >
-                        {Array.from(
-                          {
-                            length: 18,
-                          },
-                          (
-                            _,
-                            index
-                          ) =>
-                            index +
-                            7
-                        )
-                          .filter(
-                            (
+                        {hour === 24
+                          ? "24:00"
+                          : `${String(
                               hour
-                            ) =>
-                              hour >
-                              workSettings.startHour
-                          )
-                          .map(
-                            (
-                              hour
-                            ) => (
-                              <option
-                                key={
-                                  hour
-                                }
-                                value={
-                                  hour
-                                }
-                              >
-                                {hour ===
-                                24
-                                  ? "24:00"
-                                  : `${String(
-                                      hour
-                                    ).padStart(
-                                      2,
-                                      "0"
-                                    )}:00`}
-                              </option>
-                            )
-                          )}
-                      </select>
-                    </div>
-                  </div>
-
-                  <div className="mt-5">
-                    <p className="text-xs text-neutral-500">
-                      {
-                        t.workDays
-                      }
-                    </p>
-
-                    <div className="mt-2 grid grid-cols-7 gap-1">
-                      {WEEKDAYS.map(
-                        (day) => {
-                          const active =
-                            workSettings.workDays.includes(
-                              day.value
-                            );
-
-                          return (
-                            <button
-                              key={
-                                day.value
-                              }
-                              onClick={() =>
-                                toggleWorkDay(
-                                  day.value
-                                )
-                              }
-                              className={`rounded-xl py-3 text-xs font-medium ${
-                                active
-                                  ? "bg-black text-white"
-                                  : "bg-rose-100 text-neutral-400"
-                              }`}
-                            >
-                              {
-                                day[
-                                  language
-                                ]
-                              }
-                            </button>
-                          );
-                        }
-                      )}
-                    </div>
-                  </div>
+                            ).padStart(
+                              2,
+                              "0"
+                            )}:00`}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
 
-              <div className="mt-7">
-                <div className="flex justify-between">
-                  <div>
-                    <h2 className="text-lg font-semibold">
-                      {
-                        t.services
-                      }
-                    </h2>
+              <p className="mt-4 text-xs text-neutral-500">
+                {t.workDays}
+              </p>
+
+              <div className="mt-2 grid grid-cols-7 gap-1">
+                {WEEKDAYS.map((day) => (
+                  <button
+                    key={day.value}
+                    onClick={() =>
+                      toggleWorkDay(
+                        day.value
+                      )
+                    }
+                    className={`rounded-xl py-3 text-xs ${
+                      workSettings.workDays.includes(
+                        day.value
+                      )
+                        ? "bg-black text-white"
+                        : "bg-white/60"
+                    }`}
+                  >
+                    {day[language]}
+                  </button>
+                ))}
+              </div>
+
+              <div className="mt-7 flex items-center justify-between">
+                <h2 className="font-semibold">
+                  {t.services}
+                </h2>
+
+                <button
+                  onClick={openNewService}
+                  className="flex h-10 w-10 items-center justify-center rounded-full bg-black text-xl text-white"
+                >
+                  +
+                </button>
+              </div>
+
+              <div className="mt-3 space-y-2">
+                {services.map((service) => (
+                  <div
+                    key={service.id}
+                    className="rounded-2xl bg-white/70 p-4"
+                  >
+                    <p className="font-semibold">
+                      {service.name}
+                    </p>
 
                     <p className="mt-1 text-sm text-neutral-500">
-                      {
-                        t.servicePriceDuration
-                      }
+                      {service.duration}{" "}
+                      {t.minutes} ·{" "}
+                      {service.price} грн
                     </p>
-                  </div>
 
-                  <button
-                    onClick={
-                      openNewService
-                    }
-                    className="flex h-10 w-10 items-center justify-center rounded-full bg-black text-xl text-white"
-                  >
-                    +
-                  </button>
-                </div>
-
-                <div className="mt-4 space-y-3">
-                  {services.length ===
-                    0 && (
-                    <div className="rounded-2xl border border-dashed border-rose-300 bg-white/55 p-6 text-center text-sm text-neutral-500">
-                      {
-                        t.addFirstService
-                      }
-                    </div>
-                  )}
-
-                  {services.map(
-                    (
-                      service
-                    ) => (
-                      <div
-                        key={
-                          service.id
+                    <div className="mt-3 flex gap-2">
+                      <button
+                        onClick={() =>
+                          openEditService(
+                            service
+                          )
                         }
-                        className="rounded-2xl border border-rose-200 bg-white/65 p-4 backdrop-blur-sm"
+                        className="rounded-lg bg-white px-3 py-2 text-xs"
                       >
-                        <p className="font-semibold">
-                          {
-                            service.name
-                          }
-                        </p>
+                        {t.edit}
+                      </button>
 
-                        <p className="mt-1 text-sm text-neutral-500">
-                          {
-                            service.duration
-                          }{" "}
-                          {
-                            t.minutes
-                          }{" "}
-                          ·{" "}
-                          {
-                            service.price
-                          }{" "}
-                          грн
-                        </p>
-
-                        <div className="mt-3 flex gap-2">
-                          <button
-                            onClick={() =>
-                              openEditService(
-                                service
-                              )
-                            }
-                            className="rounded-lg border border-rose-200 bg-white px-3 py-2 text-xs"
-                          >
-                            {
-                              t.edit
-                            }
-                          </button>
-
-                          <button
-                            onClick={() =>
-                              deleteService(
-                                service.id
-                              )
-                            }
-                            className="rounded-lg bg-red-50 px-3 py-2 text-xs text-red-600"
-                          >
-                            {
-                              t.delete
-                            }
-                          </button>
-                        </div>
-                      </div>
-                    )
-                  )}
-                </div>
+                      <button
+                        onClick={() =>
+                          deleteService(
+                            service.id
+                          )
+                        }
+                        className="rounded-lg bg-red-50 px-3 py-2 text-xs text-red-600"
+                      >
+                        {t.delete}
+                      </button>
+                    </div>
+                  </div>
+                ))}
               </div>
+
+              <button
+                onClick={handleLogout}
+                className="mt-7 w-full rounded-xl bg-red-50 p-3 text-red-600"
+              >
+                {t.logout}
+              </button>
             </section>
           </div>
         )}
 
-        <nav className="z-40 grid shrink-0 grid-cols-4 border-t border-rose-200 bg-rose-50/72 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] backdrop-blur-md">
-          <button
-            onClick={() =>
-              setActiveTab(
-                "calendar"
-              )
+        <nav className="grid shrink-0 grid-cols-4 border-t border-neutral-600/50 bg-rose-50/80 backdrop-blur-md">
+          <NavButton
+            active={
+              activeTab === "calendar"
             }
-            className={`px-1 py-4 text-xs ${
-              activeTab ===
-              "calendar"
-                ? "font-semibold text-neutral-900"
-                : "text-neutral-400"
-            }`}
+            onClick={() =>
+              setActiveTab("calendar")
+            }
           >
             {t.calendar}
-          </button>
+          </NavButton>
 
-          <button
-            onClick={() =>
-              setActiveTab(
-                "clients"
-              )
+          <NavButton
+            active={
+              activeTab === "clients"
             }
-            className={`px-1 py-4 text-xs ${
-              activeTab ===
-              "clients"
-                ? "font-semibold text-neutral-900"
-                : "text-neutral-400"
-            }`}
+            onClick={() =>
+              setActiveTab("clients")
+            }
           >
             {t.clients}
-          </button>
+          </NavButton>
 
-          <button
-            onClick={() =>
-              setActiveTab(
-                "analytics"
-              )
+          <NavButton
+            active={
+              activeTab === "analytics"
             }
-            className={`px-1 py-4 text-xs ${
-              activeTab ===
-              "analytics"
-                ? "font-semibold text-neutral-900"
-                : "text-neutral-400"
-            }`}
+            onClick={() =>
+              setActiveTab("analytics")
+            }
           >
             {t.analytics}
-          </button>
+          </NavButton>
 
-          <button
-            onClick={() =>
-              setActiveTab(
-                "settings"
-              )
+          <NavButton
+            active={
+              activeTab === "settings"
             }
-            className={`px-1 py-4 text-xs ${
-              activeTab ===
-              "settings"
-                ? "font-semibold text-neutral-900"
-                : "text-neutral-400"
-            }`}
+            onClick={() =>
+              setActiveTab("settings")
+            }
           >
             {t.settings}
-          </button>
+          </NavButton>
         </nav>
 
         {isAppointmentModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40">
-            <div className="max-h-[90dvh] w-full max-w-md overflow-y-auto rounded-t-3xl bg-rose-50/92 p-5 backdrop-blur-md">
-              <div className="mb-5 flex justify-between gap-4">
-                <div>
-                  <h2 className="text-xl font-semibold">
-                    {editingAppointmentId !==
-                    null
-                      ? t.appointmentEdit
-                      : t.appointmentNew}
-                  </h2>
+          <Modal
+            onClose={() =>
+              setIsAppointmentModalOpen(
+                false
+              )
+            }
+          >
+            <h2 className="text-xl font-semibold">
+              {editingAppointmentId !==
+              null
+                ? t.appointmentEdit
+                : t.appointmentNew}
+            </h2>
 
-                  <p className="mt-1 text-sm text-neutral-500">
-                    {
-                      t.appointmentSubtitle
-                    }
-                  </p>
-                </div>
-
-                <button
-                  onClick={() =>
-                    setIsAppointmentModalOpen(
-                      false
-                    )
-                  }
-                  className="text-sm text-neutral-500"
-                >
-                  {t.close}
-                </button>
-              </div>
-
-              <div className="space-y-4">
-                {clients.length >
-                  0 && (
-                  <div>
-                    <label className="mb-1 block text-sm text-neutral-500">
-                      {
-                        t.client
-                      }
-                    </label>
-
-                    <select
-                      value={
-                        selectedClientId
-                      }
-                      onChange={(
-                        event
-                      ) => {
-                        setSelectedClientId(
-                          event
-                            .target
-                            .value
-                        );
-
-                        clearAppointmentWarning();
-
-                        if (
-                          event
-                            .target
-                            .value
-                        ) {
-                          setAppointmentName(
-                            ""
-                          );
-                        }
-                      }}
-                      className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
-                    >
-                      <option value="">
-                        {
-                          t.manualName
-                        }
-                      </option>
-
-                      {[...clients]
-                        .sort(
-                          (
-                            a,
-                            b
-                          ) =>
-                            a.name.localeCompare(
-                              b.name,
-                              getLocale(
-                                language
-                              )
-                            )
-                        )
-                        .map(
-                          (
-                            client
-                          ) => (
-                            <option
-                              key={
-                                client.id
-                              }
-                              value={
-                                client.id
-                              }
-                            >
-                              {
-                                client.name
-                              }
-                              {client.phone
-                                ? ` — ${client.phone}`
-                                : ""}
-                            </option>
-                          )
-                        )}
-                    </select>
-                  </div>
-                )}
-
-                {!selectedClientId && (
-                  <div>
-                    <label className="mb-1 block text-sm text-neutral-500">
-                      {
-                        t.clientName
-                      }
-                    </label>
-
-                    <input
-                      value={
-                        appointmentName
-                      }
-                      onChange={(
-                        event
-                      ) => {
-                        setAppointmentName(
-                          event
-                            .target
-                            .value
-                        );
-
-                        clearAppointmentWarning();
-                      }}
-                      className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
-                    />
-                  </div>
-                )}
-
-                {services.length >
-                  0 && (
-                  <div>
-                    <label className="mb-1 block text-sm text-neutral-500">
-                      {
-                        t.service
-                      }
-                    </label>
-
-                    <select
-                      value={
-                        selectedServiceId
-                      }
-                      onChange={(
-                        event
-                      ) =>
-                        handleServiceSelection(
-                          event
-                            .target
-                            .value
-                        )
-                      }
-                      className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
-                    >
-                      <option value="">
-                        {
-                          t.manualService
-                        }
-                      </option>
-
-                      {services.map(
-                        (
-                          service
-                        ) => (
-                          <option
-                            key={
-                              service.id
-                            }
-                            value={
-                              service.id
-                            }
-                          >
-                            {
-                              service.name
-                            }{" "}
-                            —{" "}
-                            {
-                              service.price
-                            }{" "}
-                            грн
-                          </option>
-                        )
-                      )}
-                    </select>
-                  </div>
-                )}
-
-                {!selectedServiceId && (
-                  <div>
-                    <label className="mb-1 block text-sm text-neutral-500">
-                      {
-                        t.serviceName
-                      }
-                    </label>
-
-                    <input
-                      value={
-                        appointmentService
-                      }
-                      onChange={(
-                        event
-                      ) => {
-                        setAppointmentService(
-                          event
-                            .target
-                            .value
-                        );
-
-                        clearAppointmentWarning();
-                      }}
-                      className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
-                    />
-                  </div>
-                )}
-
-                <div className="flex min-w-0 items-start gap-5">
-                  <div className="w-[40%] min-w-0">
-                    <label className="mb-1 block text-sm text-neutral-500">
-                      {
-                        t.date
-                      }
-                    </label>
-
-                    <input
-                      type="date"
-                      value={
-                        appointmentDate
-                      }
-                      onChange={(
-                        event
-                      ) => {
-                        setAppointmentDate(
-                          event
-                            .target
-                            .value
-                        );
-
-                        clearAppointmentWarning();
-                      }}
-                      className="block w-full min-w-0 rounded-xl border border-rose-200 bg-white px-2 py-3 text-base text-black outline-none focus:border-rose-400"
-                    />
-                  </div>
-
-                  <div className="w-[40%] min-w-0">
-                    <label className="mb-1 block text-sm text-neutral-500">
-                      {
-                        t.time
-                      }
-                    </label>
-
-                    <input
-                      type="time"
-                      value={
-                        appointmentTime
-                      }
-                      onChange={(
-                        event
-                      ) => {
-                        setAppointmentTime(
-                          event
-                            .target
-                            .value
-                        );
-
-                        clearAppointmentWarning();
-                      }}
-                      className="block w-full min-w-0 rounded-xl border border-rose-200 bg-white px-2 py-3 text-base text-black outline-none focus:border-rose-400"
-                    />
-                  </div>
-                </div>
-
+            <div className="mt-5 space-y-4">
+              {clients.length > 0 && (
                 <div>
                   <label className="mb-1 block text-sm text-neutral-500">
-                    {
-                      t.duration
-                    }
+                    {t.client}
                   </label>
 
                   <select
                     value={
-                      appointmentDuration
+                      selectedClientId
                     }
-                    onChange={(
-                      event
-                    ) => {
-                      setAppointmentDuration(
-                        event
-                          .target
-                          .value
+                    onChange={(event) => {
+                      setSelectedClientId(
+                        event.target.value
                       );
 
-                      clearAppointmentWarning();
+                      if (
+                        event.target.value
+                      ) {
+                        setAppointmentName(
+                          ""
+                        );
+                      }
                     }}
-                    className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
+                    className="w-full rounded-xl border border-rose-200 bg-white p-3"
                   >
-                    {[
-                      30,
-                      60,
-                      90,
-                      120,
-                      150,
-                      180,
-                    ].map(
-                      (
-                        minutes
-                      ) => (
+                    <option value="">
+                      {t.manualName}
+                    </option>
+
+                    {clients.map(
+                      (client) => (
                         <option
                           key={
-                            minutes
+                            client.id
                           }
                           value={
-                            minutes
+                            client.id
                           }
                         >
                           {
-                            minutes
-                          }{" "}
-                          {
-                            t.minutes
+                            client.name
                           }
                         </option>
                       )
                     )}
                   </select>
                 </div>
+              )}
 
+              {!selectedClientId && (
+                <input
+                  value={
+                    appointmentName
+                  }
+                  onChange={(event) =>
+                    setAppointmentName(
+                      event.target.value
+                    )
+                  }
+                  placeholder={
+                    t.clientName
+                  }
+                  className="w-full rounded-xl border border-rose-200 bg-white p-3"
+                />
+              )}
+
+              {services.length > 0 && (
                 <div>
                   <label className="mb-1 block text-sm text-neutral-500">
-                    {
-                      t.price
-                    }
-                  </label>
-
-                  <input
-                    type="number"
-                    min="0"
-                    value={
-                      appointmentPrice
-                    }
-                    onChange={(
-                      event
-                    ) =>
-                      setAppointmentPrice(
-                        event
-                          .target
-                          .value
-                      )
-                    }
-                    className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
-                  />
-                </div>
-
-                <div>
-                  <label className="mb-1 block text-sm text-neutral-500">
-                    {
-                      t.status
-                    }
+                    {t.service}
                   </label>
 
                   <select
                     value={
-                      appointmentStatus
+                      selectedServiceId
                     }
-                    onChange={(
-                      event
-                    ) =>
-                      setAppointmentStatus(
-                        event
-                          .target
-                          .value as AppointmentStatus
+                    onChange={(event) =>
+                      handleServiceSelection(
+                        event.target.value
                       )
                     }
-                    className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
+                    className="w-full rounded-xl border border-rose-200 bg-white p-3"
                   >
-                    <option value="scheduled">
-                      {
-                        t.scheduledStatus
-                      }
+                    <option value="">
+                      {t.manualService}
                     </option>
 
-                    <option value="completed">
-                      {
-                        t.completedStatus
-                      }
-                    </option>
-
-                    <option value="cancelled">
-                      {
-                        t.cancelledStatus
-                      }
-                    </option>
-
-                    <option value="no-show">
-                      {
-                        t.noShowStatus
-                      }
-                    </option>
+                    {services.map(
+                      (service) => (
+                        <option
+                          key={
+                            service.id
+                          }
+                          value={
+                            service.id
+                          }
+                        >
+                          {
+                            service.name
+                          }{" "}
+                          —{" "}
+                          {
+                            service.price
+                          }{" "}
+                          грн
+                        </option>
+                      )
+                    )}
                   </select>
                 </div>
+              )}
 
-                {editingAppointmentId !==
-                  null &&
-                  appointmentStatus ===
-                    "scheduled" && (
-                    <button
-                      onClick={
-                        openReminderForEditingAppointment
-                      }
-                      className="w-full rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 font-medium text-sky-700"
-                    >
-                      {
-                        t.remindClient
-                      }
-                    </button>
-                  )}
-
-                {appointmentError && (
-                  <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-                    {
-                      appointmentError
-                    }
-
-                    {hasConflict && (
-                      <button
-                        onClick={
-                          actuallySaveAppointment
-                        }
-                        className="mt-3 w-full rounded-xl bg-white px-4 py-3"
-                      >
-                        {
-                          t.forceSave
-                        }
-                      </button>
-                    )}
-                  </div>
-                )}
-
-                <button
-                  onClick={
-                    saveAppointment
-                  }
-                  className="w-full rounded-xl bg-black px-4 py-4 font-medium text-white"
-                >
-                  {editingAppointmentId !==
-                  null
-                    ? t.saveChanges
-                    : t.createAppointment}
-                </button>
-
-                {editingAppointmentId !==
-                  null && (
-                  <button
-                    onClick={() =>
-                      deleteAppointment(
-                        editingAppointmentId
-                      )
-                    }
-                    className="w-full rounded-xl bg-red-50 px-4 py-4 font-medium text-red-600"
-                  >
-                    {
-                      t.deleteAppointment
-                    }
-                  </button>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {isClientModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40">
-            <div className="max-h-[90dvh] w-full max-w-md overflow-y-auto rounded-t-3xl bg-rose-50/92 p-5 backdrop-blur-md">
-              <div className="flex justify-between">
-                <h2 className="text-xl font-semibold">
-                  {editingClientId !==
-                  null
-                    ? t.editClient
-                    : t.newClient}
-                </h2>
-
-                <button
-                  onClick={() =>
-                    setIsClientModalOpen(
-                      false
-                    )
-                  }
-                  className="text-sm text-neutral-500"
-                >
-                  {t.close}
-                </button>
-              </div>
-
-              <div className="mt-5 space-y-4">
+              {!selectedServiceId && (
                 <input
                   value={
-                    clientName
+                    appointmentService
                   }
-                  onChange={(
-                    event
-                  ) =>
-                    setClientName(
-                      event
-                        .target
-                        .value
-                    )
-                  }
-                  placeholder={
-                    t.name
-                  }
-                  className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
-                />
-
-                <input
-                  value={
-                    clientPhone
-                  }
-                  onChange={(
-                    event
-                  ) =>
-                    setClientPhone(
-                      event
-                        .target
-                        .value
-                    )
-                  }
-                  placeholder={
-                    t.phone
-                  }
-                  className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
-                />
-
-                <input
-                  value={
-                    clientSocial
-                  }
-                  onChange={(
-                    event
-                  ) =>
-                    setClientSocial(
-                      event
-                        .target
-                        .value
-                    )
-                  }
-                  placeholder="@username"
-                  className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
-                />
-
-                <textarea
-                  value={
-                    clientNote
-                  }
-                  onChange={(
-                    event
-                  ) =>
-                    setClientNote(
-                      event
-                        .target
-                        .value
-                    )
-                  }
-                  placeholder={
-                    t.note
-                  }
-                  rows={3}
-                  className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
-                />
-
-                <button
-                  onClick={
-                    saveClient
-                  }
-                  className="w-full rounded-xl bg-black px-4 py-4 text-white"
-                >
-                  {t.save}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {isClientDetailsOpen &&
-          selectedClientDetails && (
-            <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40">
-              <div className="max-h-[92dvh] w-full max-w-md overflow-y-auto rounded-t-3xl bg-rose-50/92 p-5 backdrop-blur-md">
-                <div className="flex justify-between gap-4">
-                  <div>
-                    <p className="text-sm text-neutral-500">
-                      {
-                        t.clientCard
-                      }
-                    </p>
-
-                    <h2 className="mt-1 text-2xl font-semibold">
-                      {
-                        selectedClientDetails.name
-                      }
-                    </h2>
-                  </div>
-
-                  <button
-                    onClick={() =>
-                      setIsClientDetailsOpen(
-                        false
-                      )
-                    }
-                    className="text-sm text-neutral-500"
-                  >
-                    {
-                      t.close
-                    }
-                  </button>
-                </div>
-
-                <div className="mt-5 rounded-2xl border border-rose-200 bg-white/65 p-4">
-                  <p className="font-medium">
-                    {selectedClientDetails.phone ||
-                      t.phoneMissing}
-                  </p>
-
-                  {selectedClientDetails.social && (
-                    <p className="mt-2 text-sm text-neutral-500">
-                      {
-                        selectedClientDetails.social
-                      }
-                    </p>
-                  )}
-
-                  {selectedClientDetails.note && (
-                    <p className="mt-3 rounded-xl bg-rose-50 p-3 text-sm">
-                      {
-                        selectedClientDetails.note
-                      }
-                    </p>
-                  )}
-
-                  <div className="mt-4 grid grid-cols-2 gap-2">
-                    {selectedClientDetails.phone && (
-                      <a
-                        href={getPhoneUrl(
-                          selectedClientDetails.phone
-                        )}
-                        className="rounded-xl bg-black px-3 py-3 text-center text-sm font-medium text-white"
-                      >
-                        {
-                          t.call
-                        }
-                      </a>
-                    )}
-
-                    {selectedClientDetails.social &&
-                      (getSocialType(
-                        selectedClientDetails.social
-                      ) ===
-                        "telegram" ||
-                        getSocialType(
-                          selectedClientDetails.social
-                        ) ===
-                          "unknown") && (
-                        <button
-                          onClick={() =>
-                            openExternal(
-                              getTelegramUrl(
-                                selectedClientDetails.social
-                              )
-                            )
-                          }
-                          className="rounded-xl border border-rose-200 bg-white px-3 py-3 text-sm font-medium"
-                        >
-                          {
-                            t.telegram
-                          }
-                        </button>
-                      )}
-
-                    {selectedClientDetails.social &&
-                      (getSocialType(
-                        selectedClientDetails.social
-                      ) ===
-                        "instagram" ||
-                        getSocialType(
-                          selectedClientDetails.social
-                        ) ===
-                          "unknown") && (
-                        <button
-                          onClick={() =>
-                            openExternal(
-                              getInstagramUrl(
-                                selectedClientDetails.social
-                              )
-                            )
-                          }
-                          className="rounded-xl border border-rose-200 bg-white px-3 py-3 text-sm font-medium"
-                        >
-                          {
-                            t.instagram
-                          }
-                        </button>
-                      )}
-                  </div>
-                </div>
-
-                <div className="mt-4 grid grid-cols-2 gap-3">
-                  <div className="rounded-2xl bg-white/65 p-4">
-                    <p className="text-xs text-neutral-500">
-                      {
-                        t.totalAppointments
-                      }
-                    </p>
-
-                    <p className="mt-1 text-2xl font-semibold">
-                      {
-                        selectedClientAppointments.length
-                      }
-                    </p>
-                  </div>
-
-                  <div className="rounded-2xl bg-white/65 p-4">
-                    <p className="text-xs text-neutral-500">
-                      {
-                        t.futureAppointmentsCount
-                      }
-                    </p>
-
-                    <p className="mt-1 text-2xl font-semibold">
-                      {
-                        futureClientAppointments.length
-                      }
-                    </p>
-                  </div>
-                </div>
-
-                <button
-                  onClick={() =>
-                    openNewAppointmentForClient(
-                      selectedClientDetails
-                    )
-                  }
-                  className="mt-4 w-full rounded-xl bg-black px-4 py-4 text-white"
-                >
-                  {
-                    t.bookClient
-                  }
-                </button>
-
-                <button
-                  onClick={() =>
-                    openEditClient(
-                      selectedClientDetails
-                    )
-                  }
-                  className="mt-3 w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
-                >
-                  {
-                    t.editClientButton
-                  }
-                </button>
-
-                <div className="mt-6">
-                  <h3 className="text-lg font-semibold">
-                    {
-                      t.futureAppointments
-                    }
-                  </h3>
-
-                  <div className="mt-3 space-y-2">
-                    {futureClientAppointments.length ===
-                      0 && (
-                      <p className="rounded-xl bg-white/65 p-4 text-sm text-neutral-500">
-                        {
-                          t.noFutureAppointments
-                        }
-                      </p>
-                    )}
-
-                    {futureClientAppointments.map(
-                      (
-                        appointment
-                      ) => (
-                        <div
-                          key={
-                            appointment.id
-                          }
-                          className="rounded-xl border border-rose-200 bg-white/65 p-3"
-                        >
-                          <div className="flex justify-between gap-3">
-                            <div>
-                              <p className="font-medium">
-                                {formatFullDate(
-                                  appointment.date,
-                                  language
-                                )}
-                              </p>
-
-                              <p className="mt-1 text-sm text-neutral-500">
-                                {
-                                  appointment.time
-                                }{" "}
-                                ·{" "}
-                                {
-                                  appointment.service
-                                }
-                              </p>
-
-                              <p className="mt-1 text-sm font-medium">
-                                {
-                                  appointment.price
-                                }{" "}
-                                грн
-                              </p>
-                            </div>
-
-                            <span
-                              className={`h-fit rounded-full border px-2 py-1 text-[10px] ${getStatusBadgeClass(
-                                appointment.status
-                              )}`}
-                            >
-                              {getStatusLabel(
-                                appointment.status
-                              )}
-                            </span>
-                          </div>
-
-                          {appointment.status ===
-                            "scheduled" && (
-                            <button
-                              onClick={() =>
-                                openReminder(
-                                  appointment
-                                )
-                              }
-                              className="mt-3 w-full rounded-xl bg-sky-50 px-3 py-2 text-sm font-medium text-sky-700"
-                            >
-                              {
-                                t.remind
-                              }
-                            </button>
-                          )}
-                        </div>
-                      )
-                    )}
-                  </div>
-                </div>
-
-                <div className="mt-6">
-                  <h3 className="text-lg font-semibold">
-                    {
-                      t.history
-                    }
-                  </h3>
-
-                  <div className="mt-3 space-y-2">
-                    {pastClientAppointments.length ===
-                      0 && (
-                      <p className="rounded-xl bg-white/65 p-4 text-sm text-neutral-500">
-                        {
-                          t.noHistory
-                        }
-                      </p>
-                    )}
-
-                    {pastClientAppointments.map(
-                      (
-                        appointment
-                      ) => (
-                        <div
-                          key={
-                            appointment.id
-                          }
-                          className="rounded-xl border border-rose-200 bg-white/65 p-3"
-                        >
-                          <div className="flex justify-between gap-3">
-                            <div>
-                              <p className="font-medium">
-                                {formatFullDate(
-                                  appointment.date,
-                                  language
-                                )}
-                              </p>
-
-                              <p className="mt-1 text-sm text-neutral-500">
-                                {
-                                  appointment.service
-                                }{" "}
-                                ·{" "}
-                                {
-                                  appointment.price
-                                }{" "}
-                                грн
-                              </p>
-                            </div>
-
-                            <span
-                              className={`h-fit rounded-full border px-2 py-1 text-[10px] ${getStatusBadgeClass(
-                                appointment.status
-                              )}`}
-                            >
-                              {getStatusLabel(
-                                appointment.status
-                              )}
-                            </span>
-                          </div>
-                        </div>
-                      )
-                    )}
-                  </div>
-                </div>
-
-                <button
-                  onClick={() =>
-                    deleteClient(
-                      selectedClientDetails.id
-                    )
-                  }
-                  className="mt-6 w-full rounded-xl bg-red-50 px-4 py-3 text-red-600"
-                >
-                  {
-                    t.deleteClient
-                  }
-                </button>
-              </div>
-            </div>
-          )}
-
-        {isServiceModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40">
-            <div className="w-full max-w-md rounded-t-3xl bg-rose-50/92 p-5 backdrop-blur-md">
-              <div className="flex justify-between">
-                <h2 className="text-xl font-semibold">
-                  {editingServiceId !==
-                  null
-                    ? t.editService
-                    : t.newService}
-                </h2>
-
-                <button
-                  onClick={() =>
-                    setIsServiceModalOpen(
-                      false
-                    )
-                  }
-                  className="text-sm text-neutral-500"
-                >
-                  {
-                    t.close
-                  }
-                </button>
-              </div>
-
-              <div className="mt-5 space-y-4">
-                <input
-                  value={
-                    serviceName
-                  }
-                  onChange={(
-                    event
-                  ) =>
-                    setServiceName(
-                      event
-                        .target
-                        .value
+                  onChange={(event) =>
+                    setAppointmentService(
+                      event.target.value
                     )
                   }
                   placeholder={
                     t.serviceName
                   }
-                  className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
+                  className="w-full rounded-xl border border-rose-200 bg-white p-3"
                 />
+              )}
 
-                <select
-                  value={
-                    serviceDuration
-                  }
-                  onChange={(
-                    event
-                  ) =>
-                    setServiceDuration(
-                      event
-                        .target
-                        .value
-                    )
-                  }
-                  className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
-                >
-                  {[
-                    30,
-                    60,
-                    90,
-                    120,
-                    150,
-                    180,
-                  ].map(
-                    (
-                      minutes
-                    ) => (
-                      <option
-                        key={
-                          minutes
-                        }
-                        value={
-                          minutes
-                        }
-                      >
-                        {
-                          minutes
-                        }{" "}
-                        {
-                          t.minutes
-                        }
-                      </option>
-                    )
-                  )}
-                </select>
+              <div className="flex min-w-0 items-start gap-5">
+                <div className="w-[40%] min-w-0">
+                  <label className="mb-1 block text-sm text-neutral-500">
+                    {t.date}
+                  </label>
 
-                <input
-                  type="number"
-                  min="0"
-                  value={
-                    servicePrice
-                  }
-                  onChange={(
-                    event
-                  ) =>
-                    setServicePrice(
-                      event
-                        .target
-                        .value
-                    )
-                  }
-                  placeholder={
-                    t.servicePrice
-                  }
-                  className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
-                />
-
-                <button
-                  onClick={
-                    saveService
-                  }
-                  className="w-full rounded-xl bg-black px-4 py-4 text-white"
-                >
-                  {
-                    t.save
-                  }
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {isReminderModalOpen && (
-          <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/50">
-            <div className="w-full max-w-md rounded-t-3xl bg-rose-50/92 p-5 backdrop-blur-md">
-              <div className="flex justify-between gap-4">
-                <div>
-                  <h2 className="text-xl font-semibold">
-                    {
-                      t.reminder
+                  <input
+                    type="date"
+                    value={
+                      appointmentDate
                     }
-                  </h2>
-
-                  <p className="mt-1 text-sm text-neutral-500">
-                    {
-                      t.reminderHint
+                    onChange={(event) =>
+                      setAppointmentDate(
+                        event.target.value
+                      )
                     }
-                  </p>
+                    className="block w-full min-w-0 rounded-xl border border-rose-200 bg-white px-2 py-3 text-base text-black"
+                  />
                 </div>
 
-                <button
-                  onClick={() =>
-                    setIsReminderModalOpen(
-                      false
-                    )
-                  }
-                  className="text-sm text-neutral-500"
-                >
-                  {
-                    t.close
-                  }
-                </button>
+                <div className="w-[40%] min-w-0">
+                  <label className="mb-1 block text-sm text-neutral-500">
+                    {t.time}
+                  </label>
+
+                  <input
+                    type="time"
+                    value={
+                      appointmentTime
+                    }
+                    onChange={(event) =>
+                      setAppointmentTime(
+                        event.target.value
+                      )
+                    }
+                    className="block w-full min-w-0 rounded-xl border border-rose-200 bg-white px-2 py-3 text-base text-black"
+                  />
+                </div>
               </div>
 
-              <textarea
+              <select
                 value={
-                  reminderText
+                  appointmentDuration
                 }
-                onChange={(
-                  event
-                ) => {
-                  setReminderText(
-                    event
-                      .target
-                      .value
-                  );
+                onChange={(event) =>
+                  setAppointmentDuration(
+                    event.target.value
+                  )
+                }
+                className="w-full rounded-xl border border-rose-200 bg-white p-3"
+              >
+                {[
+                  30,
+                  60,
+                  90,
+                  120,
+                  150,
+                  180,
+                ].map((minutes) => (
+                  <option
+                    key={minutes}
+                    value={minutes}
+                  >
+                    {minutes}{" "}
+                    {t.minutes}
+                  </option>
+                ))}
+              </select>
 
-                  setReminderCopied(
-                    false
-                  );
-                }}
-                rows={7}
-                className="mt-5 w-full resize-none rounded-2xl border border-rose-200 bg-white p-4 outline-none focus:border-rose-400"
+              <input
+                type="number"
+                min="0"
+                value={
+                  appointmentPrice
+                }
+                onChange={(event) =>
+                  setAppointmentPrice(
+                    event.target.value
+                  )
+                }
+                placeholder={t.price}
+                className="w-full rounded-xl border border-rose-200 bg-white p-3"
               />
 
-              <button
-                onClick={
-                  copyReminder
+              <select
+                value={
+                  appointmentStatus
                 }
-                className="mt-3 w-full rounded-xl bg-black px-4 py-4 font-medium text-white"
+                onChange={(event) =>
+                  setAppointmentStatus(
+                    event.target
+                      .value as AppointmentStatus
+                  )
+                }
+                className="w-full rounded-xl border border-rose-200 bg-white p-3"
               >
-                {reminderCopied
-                  ? t.copied
-                  : t.copyText}
-              </button>
+                <option value="scheduled">
+                  {t.scheduledStatus}
+                </option>
 
-              {reminderClient?.social && (
-                <div className="mt-3 grid grid-cols-2 gap-2">
-                  {(getSocialType(
-                    reminderClient.social
-                  ) ===
-                    "telegram" ||
-                    getSocialType(
-                      reminderClient.social
-                    ) ===
-                      "unknown") && (
-                    <button
-                      onClick={() =>
-                        openExternal(
-                          getTelegramUrl(
-                            reminderClient.social
-                          )
-                        )
-                      }
-                      className="rounded-xl border border-rose-200 bg-white px-3 py-3 text-sm font-medium"
-                    >
-                      {
-                        t.openTelegram
-                      }
-                    </button>
-                  )}
+                <option value="completed">
+                  {t.completedStatus}
+                </option>
 
-                  {(getSocialType(
-                    reminderClient.social
-                  ) ===
-                    "instagram" ||
-                    getSocialType(
-                      reminderClient.social
-                    ) ===
-                      "unknown") && (
+                <option value="no-show">
+                  {t.noShowStatus}
+                </option>
+
+                <option value="cancelled">
+                  {t.cancelledStatus}
+                </option>
+              </select>
+
+              {editingAppointmentId !==
+                null &&
+                appointmentStatus ===
+                  "scheduled" && (
+                  <button
+                    onClick={() => {
+                      const appointment =
+                        appointments.find(
+                          (item) =>
+                            item.id ===
+                            editingAppointmentId
+                        );
+
+                      if (
+                        appointment
+                      ) {
+                        setIsAppointmentModalOpen(
+                          false
+                        );
+
+                        openReminder(
+                          appointment
+                        );
+                      }
+                    }}
+                    className="w-full rounded-xl bg-sky-50 p-3 font-medium text-sky-700"
+                  >
+                    {t.remindClient}
+                  </button>
+                )}
+
+              {appointmentError && (
+                <div className="rounded-xl bg-red-50 p-3 text-sm text-red-700">
+                  {appointmentError}
+
+                  {hasConflict && (
                     <button
-                      onClick={() =>
-                        openExternal(
-                          getInstagramUrl(
-                            reminderClient.social
-                          )
-                        )
+                      onClick={
+                        actuallySaveAppointment
                       }
-                      className="rounded-xl border border-rose-200 bg-white px-3 py-3 text-sm font-medium"
+                      className="mt-3 w-full rounded-xl bg-white p-3"
                     >
-                      {
-                        t.openInstagram
-                      }
+                      {t.forceSave}
                     </button>
                   )}
                 </div>
               )}
+
+              <button
+                onClick={
+                  saveAppointment
+                }
+                className="w-full rounded-xl bg-black p-4 font-medium text-white"
+              >
+                {editingAppointmentId !==
+                null
+                  ? t.saveChanges
+                  : t.createAppointment}
+              </button>
+
+              {editingAppointmentId !==
+                null && (
+                <button
+                  onClick={() =>
+                    deleteAppointment(
+                      editingAppointmentId
+                    )
+                  }
+                  className="w-full rounded-xl bg-red-50 p-4 text-red-600"
+                >
+                  {t.deleteAppointment}
+                </button>
+              )}
             </div>
-          </div>
+          </Modal>
+        )}
+
+        {isClientModalOpen && (
+          <Modal
+            onClose={() =>
+              setIsClientModalOpen(
+                false
+              )
+            }
+          >
+            <h2 className="text-xl font-semibold">
+              {editingClientId !== null
+                ? t.editClient
+                : t.newClient}
+            </h2>
+
+            <div className="mt-5 space-y-4">
+              <input
+                value={clientName}
+                onChange={(event) =>
+                  setClientName(
+                    event.target.value
+                  )
+                }
+                placeholder={t.name}
+                className="w-full rounded-xl border border-rose-200 bg-white p-3"
+              />
+
+              <input
+                value={clientPhone}
+                onChange={(event) =>
+                  setClientPhone(
+                    event.target.value
+                  )
+                }
+                placeholder={t.phone}
+                className="w-full rounded-xl border border-rose-200 bg-white p-3"
+              />
+
+              <input
+                value={clientSocial}
+                onChange={(event) =>
+                  setClientSocial(
+                    event.target.value
+                  )
+                }
+                placeholder={t.social}
+                className="w-full rounded-xl border border-rose-200 bg-white p-3"
+              />
+
+              <textarea
+                value={clientNote}
+                onChange={(event) =>
+                  setClientNote(
+                    event.target.value
+                  )
+                }
+                placeholder={t.note}
+                rows={3}
+                className="w-full rounded-xl border border-rose-200 bg-white p-3"
+              />
+
+              <button
+                onClick={saveClient}
+                className="w-full rounded-xl bg-black p-4 text-white"
+              >
+                {t.save}
+              </button>
+            </div>
+          </Modal>
+        )}
+
+        {isClientDetailsOpen &&
+          selectedClient && (
+            <Modal
+              onClose={() =>
+                setIsClientDetailsOpen(
+                  false
+                )
+              }
+            >
+              <h2 className="text-2xl font-semibold">
+                {selectedClient.name}
+              </h2>
+
+              <p className="mt-2 text-sm text-neutral-500">
+                {selectedClient.phone ||
+                  t.phoneMissing}
+              </p>
+
+              {selectedClient.social && (
+                <p className="mt-1 text-sm text-neutral-500">
+                  {selectedClient.social}
+                </p>
+              )}
+
+              {selectedClient.note && (
+                <p className="mt-3 rounded-xl bg-white/70 p-3 text-sm">
+                  {selectedClient.note}
+                </p>
+              )}
+
+              <div className="mt-4 grid grid-cols-2 gap-2">
+                {selectedClient.phone && (
+                  <a
+                    href={`tel:${selectedClient.phone.replace(
+                      /[^+\d]/g,
+                      ""
+                    )}`}
+                    className="rounded-xl bg-black p-3 text-center text-sm text-white"
+                  >
+                    {t.call}
+                  </a>
+                )}
+
+                {selectedClient.social && (
+                  <>
+                    <button
+                      onClick={() =>
+                        window.open(
+                          getTelegramUrl(
+                            selectedClient.social
+                          ),
+                          "_blank"
+                        )
+                      }
+                      className="rounded-xl bg-white p-3 text-sm"
+                    >
+                      {t.telegram}
+                    </button>
+
+                    <button
+                      onClick={() =>
+                        window.open(
+                          getInstagramUrl(
+                            selectedClient.social
+                          ),
+                          "_blank"
+                        )
+                      }
+                      className="rounded-xl bg-white p-3 text-sm"
+                    >
+                      {t.instagram}
+                    </button>
+                  </>
+                )}
+              </div>
+
+              <button
+                onClick={() => {
+                  setSelectedClientId(
+                    String(
+                      selectedClient.id
+                    )
+                  );
+
+                  setAppointmentDate(
+                    selectedDateKey
+                  );
+
+                  setAppointmentName("");
+                  setEditingAppointmentId(
+                    null
+                  );
+
+                  setIsClientDetailsOpen(
+                    false
+                  );
+
+                  setActiveTab("calendar");
+
+                  setIsAppointmentModalOpen(
+                    true
+                  );
+                }}
+                className="mt-4 w-full rounded-xl bg-black p-4 text-white"
+              >
+                {t.bookClient}
+              </button>
+
+              <button
+                onClick={() =>
+                  openEditClient(
+                    selectedClient
+                  )
+                }
+                className="mt-2 w-full rounded-xl bg-white p-3"
+              >
+                {t.editClientButton}
+              </button>
+
+              <h3 className="mt-6 font-semibold">
+                {t.futureAppointments}
+              </h3>
+
+              <div className="mt-2 space-y-2">
+                {futureClientAppointments.map(
+                  (appointment) => (
+                    <div
+                      key={
+                        appointment.id
+                      }
+                      className="rounded-xl bg-white/70 p-3"
+                    >
+                      <p className="font-medium">
+                        {formatFullDate(
+                          appointment.date,
+                          language
+                        )}{" "}
+                        ·{" "}
+                        {
+                          appointment.time
+                        }
+                      </p>
+
+                      <p className="mt-1 text-sm text-neutral-500">
+                        {
+                          appointment.service
+                        }
+                      </p>
+
+                      <button
+                        onClick={() =>
+                          openReminder(
+                            appointment
+                          )
+                        }
+                        className="mt-2 rounded-lg bg-sky-50 px-3 py-2 text-sm text-sky-700"
+                      >
+                        {t.remind}
+                      </button>
+                    </div>
+                  )
+                )}
+              </div>
+
+              <h3 className="mt-6 font-semibold">
+                {t.history}
+              </h3>
+
+              <div className="mt-2 space-y-2">
+                {pastClientAppointments.map(
+                  (appointment) => (
+                    <div
+                      key={
+                        appointment.id
+                      }
+                      className="rounded-xl bg-white/70 p-3 text-sm"
+                    >
+                      {formatFullDate(
+                        appointment.date,
+                        language
+                      )}{" "}
+                      ·{" "}
+                      {
+                        appointment.service
+                      }
+                    </div>
+                  )
+                )}
+              </div>
+
+              <button
+                onClick={() =>
+                  deleteClient(
+                    selectedClient.id
+                  )
+                }
+                className="mt-6 w-full rounded-xl bg-red-50 p-3 text-red-600"
+              >
+                {t.deleteClient}
+              </button>
+            </Modal>
+          )}
+
+        {isServiceModalOpen && (
+          <Modal
+            onClose={() =>
+              setIsServiceModalOpen(
+                false
+              )
+            }
+          >
+            <h2 className="text-xl font-semibold">
+              {editingServiceId !==
+              null
+                ? t.editService
+                : t.newService}
+            </h2>
+
+            <div className="mt-5 space-y-4">
+              <input
+                value={serviceName}
+                onChange={(event) =>
+                  setServiceName(
+                    event.target.value
+                  )
+                }
+                placeholder={
+                  t.serviceName
+                }
+                className="w-full rounded-xl border border-rose-200 bg-white p-3"
+              />
+
+              <select
+                value={
+                  serviceDuration
+                }
+                onChange={(event) =>
+                  setServiceDuration(
+                    event.target.value
+                  )
+                }
+                className="w-full rounded-xl border border-rose-200 bg-white p-3"
+              >
+                {[
+                  30,
+                  60,
+                  90,
+                  120,
+                  150,
+                  180,
+                ].map((minutes) => (
+                  <option
+                    key={minutes}
+                    value={minutes}
+                  >
+                    {minutes}{" "}
+                    {t.minutes}
+                  </option>
+                ))}
+              </select>
+
+              <input
+                type="number"
+                min="0"
+                value={
+                  servicePrice
+                }
+                onChange={(event) =>
+                  setServicePrice(
+                    event.target.value
+                  )
+                }
+                placeholder={
+                  t.servicePrice
+                }
+                className="w-full rounded-xl border border-rose-200 bg-white p-3"
+              />
+
+              <button
+                onClick={
+                  saveService
+                }
+                className="w-full rounded-xl bg-black p-4 text-white"
+              >
+                {t.save}
+              </button>
+            </div>
+          </Modal>
+        )}
+
+        {isReminderModalOpen && (
+          <Modal
+            onClose={() =>
+              setIsReminderModalOpen(
+                false
+              )
+            }
+          >
+            <h2 className="text-xl font-semibold">
+              {t.reminder}
+            </h2>
+
+            <textarea
+              value={
+                reminderText
+              }
+              onChange={(event) => {
+                setReminderText(
+                  event.target.value
+                );
+
+                setReminderCopied(
+                  false
+                );
+              }}
+              rows={7}
+              className="mt-5 w-full rounded-xl border border-rose-200 bg-white p-3"
+            />
+
+            <button
+              onClick={
+                copyReminder
+              }
+              className="mt-3 w-full rounded-xl bg-black p-4 text-white"
+            >
+              {reminderCopied
+                ? t.copied
+                : t.copyText}
+            </button>
+          </Modal>
         )}
       </div>
     </main>
+  );
+}
+
+function NavButton({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: ReactNode;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`px-1 py-4 text-xs ${
+        active
+          ? "font-semibold text-neutral-900"
+          : "text-neutral-400"
+      }`}
+    >
+      {children}
+    </button>
+  );
+}
+
+function StatCard({
+  label,
+  value,
+  tone = "white",
+}: {
+  label: string;
+  value: string;
+  tone?: "white" | "blue" | "green" | "red" | "orange";
+}) {
+  const tones = {
+    white: "bg-white/65",
+    blue: "bg-sky-50/90",
+    green: "bg-green-50/90",
+    red: "bg-red-50/90",
+    orange: "bg-orange-50/90",
+  };
+
+  return (
+    <div
+      className={`rounded-2xl p-4 ${tones[tone]}`}
+    >
+      <p className="text-xs text-neutral-500">
+        {label}
+      </p>
+
+      <p className="mt-2 text-xl font-semibold">
+        {value}
+      </p>
+    </div>
+  );
+}
+
+function Modal({
+  children,
+  onClose,
+}: {
+  children: ReactNode;
+  onClose: () => void;
+}) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40">
+      <div className="max-h-[92dvh] w-full max-w-md overflow-y-auto rounded-t-3xl bg-rose-50/95 p-5 backdrop-blur-md">
+        <div className="flex justify-end">
+          <button
+            onClick={onClose}
+            className="text-sm text-neutral-500"
+          >
+            ✕
+          </button>
+        </div>
+
+        {children}
+      </div>
+    </div>
   );
 }
