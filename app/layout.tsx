@@ -1,15 +1,20 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
+import PwaRegister from "./pwa-register";
+
 export const metadata: Metadata = {
-  title: "Nails Calendar",
-  description: "Календар записів для майстра манікюру",
-  applicationName: "Nails Calendar",
+  title: "Nails",
+  description: "Календар записів на манікюр",
+
+  applicationName: "Nails",
+
+  manifest: "/manifest.webmanifest",
 
   appleWebApp: {
     capable: true,
+    title: "Nails",
     statusBarStyle: "default",
-    title: "Nails Calendar",
   },
 
   icons: {
@@ -34,13 +39,18 @@ export const metadata: Metadata = {
       },
     ],
   },
+
+  formatDetection: {
+    telephone: false,
+  },
 };
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  viewportFit: "cover",
-  themeColor: "#ffffff",
+  maximumScale: 1,
+  userScalable: false,
+  themeColor: "#fcecef",
 };
 
 export default function RootLayout({
@@ -50,7 +60,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="uk">
-      <body>{children}</body>
+      <body className="m-0 bg-[#fcecef]">
+        <PwaRegister />
+
+        {children}
+      </body>
     </html>
   );
 }
