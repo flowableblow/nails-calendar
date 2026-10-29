@@ -3024,40 +3024,40 @@ export default function Home() {
                 )}
 
                 <div className="space-y-4">
-                  <div className="w-full min-w-0">
-                    <label className="mb-1 block text-sm text-neutral-500">
-                      {t.date}
-                    </label>
+  <div className="w-full">
+    <label className="mb-1 block text-sm text-neutral-500">
+      {t.date}
+    </label>
 
-                    <div className="w-full max-w-full overflow-hidden rounded-xl border border-rose-200 bg-white">
-                      <input
-                        type="date"
-                        value={appointmentDate}
-                        onChange={(event) =>
-                          setAppointmentDate(event.target.value)
-                        }
-                        className="block h-14 w-full min-w-0 max-w-full appearance-none bg-transparent px-4 text-base text-black outline-none"
-                      />
-                    </div>
-                  </div>
+    <div className="h-[50px] w-full overflow-hidden rounded-xl border border-rose-200 bg-white">
+      <input
+        type="date"
+        value={appointmentDate}
+        onChange={(event) =>
+          setAppointmentDate(event.target.value)
+        }
+        className="block h-full w-full min-w-0 appearance-none border-0 bg-transparent px-4 py-0 text-base text-black outline-none"
+      />
+    </div>
+  </div>
 
-                  <div className="w-full min-w-0">
-                    <label className="mb-1 block text-sm text-neutral-500">
-                      {t.time}
-                    </label>
+  <div className="w-full">
+    <label className="mb-1 block text-sm text-neutral-500">
+      {t.time}
+    </label>
 
-                    <div className="w-full max-w-full overflow-hidden rounded-xl border border-rose-200 bg-white">
-                      <input
-                        type="time"
-                        value={appointmentTime}
-                        onChange={(event) =>
-                          setAppointmentTime(event.target.value)
-                        }
-                        className="block h-14 w-full min-w-0 max-w-full appearance-none bg-transparent px-4 text-base text-black outline-none"
-                      />
-                    </div>
-                  </div>
-                </div>
+    <div className="h-[50px] w-full overflow-hidden rounded-xl border border-rose-200 bg-white">
+      <input
+        type="time"
+        value={appointmentTime}
+        onChange={(event) =>
+          setAppointmentTime(event.target.value)
+        }
+        className="block h-full w-full min-w-0 appearance-none border-0 bg-transparent px-4 py-0 text-base text-black outline-none"
+      />
+    </div>
+  </div>
+</div>
 
                 <div>
                   <label className="mb-1 block text-sm text-neutral-500">
