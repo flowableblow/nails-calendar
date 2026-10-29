@@ -4088,34 +4088,47 @@ export default function Home() {
                     }}
                   >
                     <div className="relative bg-white/10">
-                      {hours.map(
-                        (
-                          hour
-                        ) => (
-                          <div
-                            key={
-                              hour
-                            }
-                            className="absolute left-0 right-0 pr-3 text-right text-[11px] font-medium text-neutral-500"
-                            style={{
-                              top: `${
-                                (hour -
-                                  workSettings.startHour) *
-                                  HOUR_HEIGHT -
-                                7
-                              }px`,
-                            }}
-                          >
-                            {String(
-                              hour
-                            ).padStart(
-                              2,
-                              "0"
-                            )}
-                            :00
-                          </div>
-                        )
-                      )}
+                      {hours.map((hour) => {
+  const isFirst =
+    hour ===
+    workSettings.startHour;
+
+  const isLast =
+    hour ===
+    workSettings.endHour;
+
+  let top =
+    (hour -
+      workSettings.startHour) *
+      HOUR_HEIGHT -
+    7;
+
+  if (isFirst) {
+    top = 8;
+  }
+
+  if (isLast) {
+    top =
+      calendarHeight -
+      22;
+  }
+
+  return (
+    <div
+      key={hour}
+      className="absolute left-0 right-0 pr-3 text-right text-[11px] font-medium text-neutral-500"
+      style={{
+        top: `${top}px`,
+      }}
+    >
+      {String(hour).padStart(
+        2,
+        "0"
+      )}
+      :00
+    </div>
+  );
+})}
                     </div>
 
                     <div
