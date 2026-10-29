@@ -527,11 +527,13 @@ function cleanUsername(value: string) {
 
 function getTelegramUrl(social: string) {
   const username = cleanUsername(social);
+
   return username ? `https://t.me/${username}` : "";
 }
 
 function getInstagramUrl(social: string) {
   const username = cleanUsername(social);
+
   return username ? `https://instagram.com/${username}` : "";
 }
 
@@ -561,6 +563,7 @@ function safeParseArray<T>(value: string | null): T[] {
 
   try {
     const parsed = JSON.parse(value);
+
     return Array.isArray(parsed) ? parsed : [];
   } catch {
     return [];
@@ -617,12 +620,14 @@ export default function Home() {
   const [loginLoading, setLoginLoading] = useState(false);
 
   const [language, setLanguage] = useState<Language>("uk");
+
   const t = translations[language];
 
   const [databaseStatus, setDatabaseStatus] =
     useState<DatabaseStatus>("connecting");
 
   const [activeTab, setActiveTab] = useState<Tab>("calendar");
+
   const [calendarView, setCalendarView] =
     useState<CalendarView>("day");
 
@@ -694,9 +699,11 @@ export default function Home() {
   const [clientSearch, setClientSearch] = useState("");
 
   const [reminderText, setReminderText] = useState("");
+
   const [reminderClientId, setReminderClientId] = useState<number | null>(
     null
   );
+
   const [reminderCopied, setReminderCopied] = useState(false);
 
   useEffect(() => {
@@ -1154,7 +1161,9 @@ export default function Home() {
 
   const sevenDaysAgo = useMemo(() => {
     const date = new Date(today);
+
     date.setDate(date.getDate() - 6);
+
     return date;
   }, [today]);
 
@@ -1261,6 +1270,7 @@ export default function Home() {
 
   function changeDay(amount: number) {
     const newDate = new Date(selectedDate);
+
     newDate.setDate(newDate.getDate() + amount);
 
     setSelectedDate(newDate);
@@ -1488,16 +1498,19 @@ export default function Home() {
 
     if (!finalName) {
       setAppointmentError(t.clientRequired);
+
       return;
     }
 
     if (!appointmentDate) {
       setAppointmentError(t.dateRequired);
+
       return;
     }
 
     if (!appointmentTime) {
       setAppointmentError(t.timeRequired);
+
       return;
     }
 
@@ -1534,7 +1547,9 @@ export default function Home() {
   }
 
   async function deleteAppointment(id: number) {
-    if (!window.confirm(t.deleteAppointmentConfirm)) return;
+    if (!window.confirm(t.deleteAppointmentConfirm)) {
+      return;
+    }
 
     const { error } = await supabase
       .from("appointments")
@@ -1566,16 +1581,19 @@ export default function Home() {
 
   function openNewClient() {
     resetClientForm();
+
     setIsClientModalOpen(true);
   }
 
   function openClientDetails(clientId: number) {
     setSelectedClientDetailsId(clientId);
+
     setIsClientDetailsOpen(true);
   }
 
   function openEditClient(client: Client) {
     setEditingClientId(client.id);
+
     setClientName(client.name);
     setClientPhone(client.phone);
     setClientSocial(client.social);
@@ -1586,7 +1604,9 @@ export default function Home() {
   }
 
   async function saveClient() {
-    if (!clientName.trim()) return;
+    if (!clientName.trim()) {
+      return;
+    }
 
     const clientId = editingClientId ?? Date.now();
 
@@ -1612,13 +1632,16 @@ export default function Home() {
     if (error) {
       console.error(error);
       window.alert(t.databaseSaveError);
+
       return;
     }
 
     if (editingClientId !== null) {
       await supabase
         .from("appointments")
-        .update({ name: newClient.name })
+        .update({
+          name: newClient.name,
+        })
         .eq("client_id", editingClientId);
 
       setClients(
@@ -1630,7 +1653,10 @@ export default function Home() {
       setAppointments(
         appointments.map((appointment) =>
           appointment.clientId === editingClientId
-            ? { ...appointment, name: newClient.name }
+            ? {
+                ...appointment,
+                name: newClient.name,
+              }
             : appointment
         )
       );
@@ -1644,7 +1670,9 @@ export default function Home() {
   }
 
   async function deleteClient(id: number) {
-    if (!window.confirm(t.deleteClientConfirm)) return;
+    if (!window.confirm(t.deleteClientConfirm)) {
+      return;
+    }
 
     const { error } = await supabase
       .from("clients")
@@ -1654,6 +1682,7 @@ export default function Home() {
     if (error) {
       console.error(error);
       window.alert(t.databaseDeleteError);
+
       return;
     }
 
@@ -1662,7 +1691,10 @@ export default function Home() {
     setAppointments(
       appointments.map((appointment) =>
         appointment.clientId === id
-          ? { ...appointment, clientId: undefined }
+          ? {
+              ...appointment,
+              clientId: undefined,
+            }
           : appointment
       )
     );
@@ -1681,11 +1713,13 @@ export default function Home() {
 
   function openNewService() {
     resetServiceForm();
+
     setIsServiceModalOpen(true);
   }
 
   function openEditService(service: Service) {
     setEditingServiceId(service.id);
+
     setServiceName(service.name);
     setServiceDuration(String(service.duration));
     setServicePrice(String(service.price));
@@ -1694,7 +1728,9 @@ export default function Home() {
   }
 
   async function saveService() {
-    if (!serviceName.trim()) return;
+    if (!serviceName.trim()) {
+      return;
+    }
 
     const serviceId = editingServiceId ?? Date.now();
 
@@ -1712,12 +1748,15 @@ export default function Home() {
         duration: newService.duration,
         price: newService.price,
       },
-      { onConflict: "id" }
+      {
+        onConflict: "id",
+      }
     );
 
     if (error) {
       console.error(error);
       window.alert(t.databaseSaveError);
+
       return;
     }
 
@@ -1737,7 +1776,9 @@ export default function Home() {
   }
 
   async function deleteService(id: number) {
-    if (!window.confirm(t.deleteServiceConfirm)) return;
+    if (!window.confirm(t.deleteServiceConfirm)) {
+      return;
+    }
 
     const { error } = await supabase
       .from("services")
@@ -1747,6 +1788,7 @@ export default function Home() {
     if (error) {
       console.error(error);
       window.alert(t.databaseDeleteError);
+
       return;
     }
 
@@ -1755,7 +1797,10 @@ export default function Home() {
     setAppointments(
       appointments.map((appointment) =>
         appointment.serviceId === id
-          ? { ...appointment, serviceId: undefined }
+          ? {
+              ...appointment,
+              serviceId: undefined,
+            }
           : appointment
       )
     );
@@ -1775,7 +1820,9 @@ export default function Home() {
         (item) => item.id === appointment.clientId
       );
 
-      if (client) return client;
+      if (client) {
+        return client;
+      }
     }
 
     return clients.find(
@@ -1789,6 +1836,7 @@ export default function Home() {
     event: React.MouseEvent<HTMLDivElement>
   ) {
     const rect = event.currentTarget.getBoundingClientRect();
+
     const y = event.clientY - rect.top;
 
     const clickedHour =
@@ -1815,13 +1863,17 @@ export default function Home() {
     setSelectedServiceId(serviceId);
     clearAppointmentWarning();
 
-    if (!serviceId) return;
+    if (!serviceId) {
+      return;
+    }
 
     const service = services.find(
       (item) => item.id === Number(serviceId)
     );
 
-    if (!service) return;
+    if (!service) {
+      return;
+    }
 
     setAppointmentService(service.name);
     setAppointmentDuration(String(service.duration));
@@ -1832,7 +1884,9 @@ export default function Home() {
     if (workSettings.workDays.includes(day)) {
       setWorkSettings({
         ...workSettings,
-        workDays: workSettings.workDays.filter((item) => item !== day),
+        workDays: workSettings.workDays.filter(
+          (item) => item !== day
+        ),
       });
     } else {
       setWorkSettings({
@@ -1865,21 +1919,27 @@ export default function Home() {
   }
 
   function openReminderForEditingAppointment() {
-    if (editingAppointmentId === null) return;
+    if (editingAppointmentId === null) {
+      return;
+    }
 
     const appointment = appointments.find(
       (item) => item.id === editingAppointmentId
     );
 
-    if (!appointment) return;
+    if (!appointment) {
+      return;
+    }
 
     setIsAppointmentModalOpen(false);
+
     openReminder(appointment);
   }
 
   async function copyReminder() {
     try {
       await navigator.clipboard.writeText(reminderText);
+
       setReminderCopied(true);
     } catch {
       window.alert(reminderText);
@@ -1887,7 +1947,9 @@ export default function Home() {
   }
 
   function openExternal(url: string) {
-    if (!url) return;
+    if (!url) {
+      return;
+    }
 
     window.open(url, "_blank", "noopener,noreferrer");
   }
@@ -1904,7 +1966,9 @@ export default function Home() {
         <div className="rounded-3xl bg-rose-50/95 px-8 py-7 text-center shadow-2xl backdrop-blur">
           <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-rose-200 border-t-black" />
 
-          <p className="mt-4 font-semibold">Nails Calendar</p>
+          <p className="mt-4 font-semibold">
+            Nails Calendar
+          </p>
 
           <p className="mt-1 text-sm text-neutral-500">
             Проверка входа...
@@ -1938,7 +2002,10 @@ export default function Home() {
             </p>
           </div>
 
-          <form onSubmit={handleLogin} className="mt-7 space-y-4">
+          <form
+            onSubmit={handleLogin}
+            className="mt-7 space-y-4"
+          >
             <div>
               <label className="mb-1 block text-sm text-neutral-500">
                 Email
@@ -2008,7 +2075,9 @@ export default function Home() {
         <div className="rounded-2xl bg-rose-50/95 px-6 py-5 text-center shadow-xl backdrop-blur">
           <div className="mx-auto h-7 w-7 animate-spin rounded-full border-2 border-rose-200 border-t-black" />
 
-          <p className="mt-3 text-sm font-medium">Supabase</p>
+          <p className="mt-3 text-sm font-medium">
+            Supabase
+          </p>
 
           <p className="mt-1 text-xs text-neutral-500">
             {language === "uk"
@@ -2029,6 +2098,7 @@ export default function Home() {
       }}
     >
       <div className="mx-auto flex h-dvh max-w-md flex-col overflow-hidden bg-rose-50/95 shadow-2xl backdrop-blur-[2px]">
+
         {activeTab === "calendar" && (
           <div className="flex min-h-0 flex-1 flex-col">
             <header className="z-20 shrink-0 border-b border-rose-200 bg-rose-50/95 backdrop-blur-md">
@@ -2055,7 +2125,9 @@ export default function Home() {
                         : `${t.totalRecords}: ${
                             appointments.filter((appointment) => {
                               const [year, month] =
-                                appointment.date.split("-").map(Number);
+                                appointment.date
+                                  .split("-")
+                                  .map(Number);
 
                               return (
                                 year === visibleMonth.getFullYear() &&
@@ -2224,6 +2296,7 @@ export default function Home() {
                             key={appointment.id}
                             onClick={(event) => {
                               event.stopPropagation();
+
                               openEditAppointment(appointment);
                             }}
                             className={`absolute left-2 right-2 z-10 overflow-hidden rounded-2xl border p-3 text-left shadow-md backdrop-blur-sm ${getAppointmentCardClass(
@@ -2272,7 +2345,9 @@ export default function Home() {
                                   {appointment.duration} {t.minutes}
                                 </span>
 
-                                <span>{appointment.price} грн</span>
+                                <span>
+                                  {appointment.price} грн
+                                </span>
                               </div>
                             )}
                           </button>
@@ -2308,9 +2383,10 @@ export default function Home() {
                       const isToday = dateKey === todayKey;
                       const isSelected = dateKey === selectedDateKey;
 
-                      const isWorkDay = workSettings.workDays.includes(
-                        item.date.getDay()
-                      );
+                      const isWorkDay =
+                        workSettings.workDays.includes(
+                          item.date.getDay()
+                        );
 
                       return (
                         <button
@@ -2332,11 +2408,12 @@ export default function Home() {
                             {item.date.getDate()}
                           </span>
 
-                          {!isWorkDay && item.isCurrentMonth && (
-                            <span className="mt-1 text-[9px] opacity-60">
-                              {t.dayOffShort}
-                            </span>
-                          )}
+                          {!isWorkDay &&
+                            item.isCurrentMonth && (
+                              <span className="mt-1 text-[9px] opacity-60">
+                                {t.dayOffShort}
+                              </span>
+                            )}
 
                           {dayAppointments.length > 0 && (
                             <span
@@ -2359,7 +2436,9 @@ export default function Home() {
                   {appointments
                     .filter((appointment) => {
                       const [year, month] =
-                        appointment.date.split("-").map(Number);
+                        appointment.date
+                          .split("-")
+                          .map(Number);
 
                       return (
                         year === visibleMonth.getFullYear() &&
@@ -2376,7 +2455,9 @@ export default function Home() {
                         key={appointment.id}
                         onClick={() => {
                           setSelectedDate(
-                            new Date(`${appointment.date}T12:00:00`)
+                            new Date(
+                              `${appointment.date}T12:00:00`
+                            )
                           );
 
                           setCalendarView("day");
@@ -2393,7 +2474,8 @@ export default function Home() {
                             </p>
 
                             <p className="mt-1 text-sm text-neutral-500">
-                              {appointment.time} · {appointment.name}
+                              {appointment.time} ·{" "}
+                              {appointment.name}
                             </p>
 
                             <p className="mt-1 text-xs text-neutral-400">
@@ -2406,7 +2488,9 @@ export default function Home() {
                               appointment.status
                             )}`}
                           >
-                            {getStatusLabel(appointment.status)}
+                            {getStatusLabel(
+                              appointment.status
+                            )}
                           </span>
                         </div>
                       </button>
@@ -2426,7 +2510,9 @@ export default function Home() {
                     {t.clientBase}
                   </p>
 
-                  <h1 className="text-2xl font-semibold">{t.clients}</h1>
+                  <h1 className="text-2xl font-semibold">
+                    {t.clients}
+                  </h1>
 
                   <p className="mt-1 text-xs text-neutral-400">
                     {t.total}: {clients.length}
@@ -2443,7 +2529,9 @@ export default function Home() {
 
               <input
                 value={clientSearch}
-                onChange={(event) => setClientSearch(event.target.value)}
+                onChange={(event) =>
+                  setClientSearch(event.target.value)
+                }
                 placeholder={t.searchClient}
                 className="mt-4 w-full rounded-xl border border-rose-200 bg-white px-4 py-3 outline-none focus:border-rose-400"
               />
@@ -2452,7 +2540,9 @@ export default function Home() {
             <section className="min-h-0 flex-1 space-y-3 overflow-y-auto p-4">
               {clients.length === 0 && (
                 <div className="rounded-2xl border border-dashed border-rose-300 bg-white/70 p-8 text-center">
-                  <p className="font-medium">{t.noClients}</p>
+                  <p className="font-medium">
+                    {t.noClients}
+                  </p>
 
                   <p className="mt-2 text-sm text-neutral-500">
                     {t.addFirstClient}
@@ -2460,16 +2550,19 @@ export default function Home() {
                 </div>
               )}
 
-              {clients.length > 0 && filteredClients.length === 0 && (
-                <div className="rounded-2xl border border-dashed border-rose-300 bg-white/70 p-8 text-center">
-                  {t.nothingFound}
-                </div>
-              )}
+              {clients.length > 0 &&
+                filteredClients.length === 0 && (
+                  <div className="rounded-2xl border border-dashed border-rose-300 bg-white/70 p-8 text-center">
+                    {t.nothingFound}
+                  </div>
+                )}
 
               {filteredClients.map((client) => (
                 <button
                   key={client.id}
-                  onClick={() => openClientDetails(client.id)}
+                  onClick={() =>
+                    openClientDetails(client.id)
+                  }
                   className="w-full rounded-2xl border border-rose-300 bg-white/80 p-4 text-left shadow-md"
                 >
                   <div className="flex justify-between gap-4">
@@ -2479,7 +2572,9 @@ export default function Home() {
                       </h2>
 
                       {client.phone && (
-                        <p className="mt-2 text-sm">{client.phone}</p>
+                        <p className="mt-2 text-sm">
+                          {client.phone}
+                        </p>
                       )}
 
                       {client.social && (
@@ -2490,7 +2585,9 @@ export default function Home() {
                     </div>
 
                     <span className="h-fit rounded-full bg-rose-100 px-3 py-1 text-xs">
-                      {getClientAppointmentsCount(client.id)}
+                      {getClientAppointmentsCount(
+                        client.id
+                      )}
                     </span>
                   </div>
                 </button>
@@ -2506,7 +2603,9 @@ export default function Home() {
                 {t.financeRecords}
               </p>
 
-              <h1 className="text-2xl font-semibold">{t.analytics}</h1>
+              <h1 className="text-2xl font-semibold">
+                {t.analytics}
+              </h1>
 
               <p className="mt-1 text-xs text-neutral-400">
                 {t.completedOnlyIncome}
@@ -2525,7 +2624,8 @@ export default function Home() {
                   </p>
 
                   <p className="mt-1 text-xs text-neutral-400">
-                    {todayCompletedAppointments.length} {t.completed}
+                    {todayCompletedAppointments.length}{" "}
+                    {t.completed}
                   </p>
                 </div>
 
@@ -2539,7 +2639,8 @@ export default function Home() {
                   </p>
 
                   <p className="mt-1 text-xs text-neutral-400">
-                    {weekCompletedAppointments.length} {t.completed}
+                    {weekCompletedAppointments.length}{" "}
+                    {t.completed}
                   </p>
                 </div>
               </div>
@@ -2554,7 +2655,9 @@ export default function Home() {
                 </p>
 
                 <p className="mt-2 text-sm text-neutral-500">
-                  {currentMonthCompletedAppointments.length}{" "}
+                  {
+                    currentMonthCompletedAppointments.length
+                  }{" "}
                   {t.completed}
                 </p>
               </div>
@@ -2591,7 +2694,9 @@ export default function Home() {
                 </div>
 
                 <div className="rounded-2xl bg-orange-50 p-4">
-                  <p className="text-xs text-orange-600">{t.noShow}</p>
+                  <p className="text-xs text-orange-600">
+                    {t.noShow}
+                  </p>
 
                   <p className="mt-2 text-xl font-semibold">
                     {monthNoShowCount}
@@ -2600,7 +2705,9 @@ export default function Home() {
               </div>
 
               <div className="mt-6">
-                <h2 className="text-lg font-semibold">{t.topServices}</h2>
+                <h2 className="text-lg font-semibold">
+                  {t.topServices}
+                </h2>
 
                 <div className="mt-3 space-y-2">
                   {serviceStats.length === 0 && (
@@ -2609,30 +2716,34 @@ export default function Home() {
                     </div>
                   )}
 
-                  {serviceStats.map((service, index) => (
-                    <div
-                      key={service.name}
-                      className="rounded-2xl border border-rose-200 bg-white/80 p-4"
-                    >
-                      <div className="flex justify-between">
-                        <div>
-                          <p className="text-xs text-neutral-400">
-                            #{index + 1}
-                          </p>
+                  {serviceStats.map(
+                    (service, index) => (
+                      <div
+                        key={service.name}
+                        className="rounded-2xl border border-rose-200 bg-white/80 p-4"
+                      >
+                        <div className="flex justify-between">
+                          <div>
+                            <p className="text-xs text-neutral-400">
+                              #{index + 1}
+                            </p>
 
-                          <p className="font-semibold">{service.name}</p>
+                            <p className="font-semibold">
+                              {service.name}
+                            </p>
 
-                          <p className="mt-1 text-sm text-neutral-500">
-                            {service.count}
+                            <p className="mt-1 text-sm text-neutral-500">
+                              {service.count}
+                            </p>
+                          </div>
+
+                          <p className="font-semibold">
+                            {service.income} грн
                           </p>
                         </div>
-
-                        <p className="font-semibold">
-                          {service.income} грн
-                        </p>
                       </div>
-                    </div>
-                  ))}
+                    )
+                  )}
                 </div>
               </div>
             </section>
@@ -2642,14 +2753,20 @@ export default function Home() {
         {activeTab === "settings" && (
           <div className="flex min-h-0 flex-1 flex-col">
             <header className="shrink-0 border-b border-rose-200 bg-rose-50/95 px-5 py-4">
-              <p className="text-sm text-neutral-500">{t.app}</p>
+              <p className="text-sm text-neutral-500">
+                {t.app}
+              </p>
 
-              <h1 className="text-2xl font-semibold">{t.settings}</h1>
+              <h1 className="text-2xl font-semibold">
+                {t.settings}
+              </h1>
             </header>
 
             <section className="min-h-0 flex-1 overflow-y-auto p-5">
               <div>
-                <h2 className="text-lg font-semibold">{t.account}</h2>
+                <h2 className="text-lg font-semibold">
+                  {t.account}
+                </h2>
 
                 <div className="mt-3 rounded-2xl border border-rose-200 bg-white/80 p-4">
                   <p className="text-xs text-neutral-500">
@@ -2670,7 +2787,9 @@ export default function Home() {
               </div>
 
               <div className="mt-7">
-                <h2 className="text-lg font-semibold">{t.database}</h2>
+                <h2 className="text-lg font-semibold">
+                  {t.database}
+                </h2>
 
                 <div
                   className={`mt-3 flex items-center gap-3 rounded-2xl border p-4 ${
@@ -2702,7 +2821,9 @@ export default function Home() {
               </div>
 
               <div className="mt-7">
-                <h2 className="text-lg font-semibold">{t.language}</h2>
+                <h2 className="text-lg font-semibold">
+                  {t.language}
+                </h2>
 
                 <p className="mt-1 text-sm text-neutral-500">
                   {t.languageHint}
@@ -2752,7 +2873,9 @@ export default function Home() {
                       <select
                         value={workSettings.startHour}
                         onChange={(event) => {
-                          const hour = Number(event.target.value);
+                          const hour = Number(
+                            event.target.value
+                          );
 
                           setWorkSettings({
                             ...workSettings,
@@ -2769,8 +2892,15 @@ export default function Home() {
                           { length: 18 },
                           (_, index) => index + 6
                         ).map((hour) => (
-                          <option key={hour} value={hour}>
-                            {String(hour).padStart(2, "0")}:00
+                          <option
+                            key={hour}
+                            value={hour}
+                          >
+                            {String(hour).padStart(
+                              2,
+                              "0"
+                            )}
+                            :00
                           </option>
                         ))}
                       </select>
@@ -2786,7 +2916,9 @@ export default function Home() {
                         onChange={(event) =>
                           setWorkSettings({
                             ...workSettings,
-                            endHour: Number(event.target.value),
+                            endHour: Number(
+                              event.target.value
+                            ),
                           })
                         }
                         className="w-full rounded-xl border border-rose-200 bg-white px-3 py-3"
@@ -2796,13 +2928,23 @@ export default function Home() {
                           (_, index) => index + 7
                         )
                           .filter(
-                            (hour) => hour > workSettings.startHour
+                            (hour) =>
+                              hour >
+                              workSettings.startHour
                           )
                           .map((hour) => (
-                            <option key={hour} value={hour}>
+                            <option
+                              key={hour}
+                              value={hour}
+                            >
                               {hour === 24
                                 ? "24:00"
-                                : `${String(hour).padStart(2, "0")}:00`}
+                                : `${String(
+                                    hour
+                                  ).padStart(
+                                    2,
+                                    "0"
+                                  )}:00`}
                             </option>
                           ))}
                       </select>
@@ -2816,14 +2958,19 @@ export default function Home() {
 
                     <div className="mt-2 grid grid-cols-7 gap-1">
                       {WEEKDAYS.map((day) => {
-                        const active = workSettings.workDays.includes(
-                          day.value
-                        );
+                        const active =
+                          workSettings.workDays.includes(
+                            day.value
+                          );
 
                         return (
                           <button
                             key={day.value}
-                            onClick={() => toggleWorkDay(day.value)}
+                            onClick={() =>
+                              toggleWorkDay(
+                                day.value
+                              )
+                            }
                             className={`rounded-xl py-3 text-xs font-medium ${
                               active
                                 ? "bg-black text-white"
@@ -2842,7 +2989,9 @@ export default function Home() {
               <div className="mt-7">
                 <div className="flex justify-between">
                   <div>
-                    <h2 className="text-lg font-semibold">{t.services}</h2>
+                    <h2 className="text-lg font-semibold">
+                      {t.services}
+                    </h2>
 
                     <p className="mt-1 text-sm text-neutral-500">
                       {t.servicePriceDuration}
@@ -2869,22 +3018,34 @@ export default function Home() {
                       key={service.id}
                       className="rounded-2xl border border-rose-200 bg-white/80 p-4"
                     >
-                      <p className="font-semibold">{service.name}</p>
+                      <p className="font-semibold">
+                        {service.name}
+                      </p>
 
                       <p className="mt-1 text-sm text-neutral-500">
-                        {service.duration} {t.minutes} · {service.price} грн
+                        {service.duration}{" "}
+                        {t.minutes} ·{" "}
+                        {service.price} грн
                       </p>
 
                       <div className="mt-3 flex gap-2">
                         <button
-                          onClick={() => openEditService(service)}
+                          onClick={() =>
+                            openEditService(
+                              service
+                            )
+                          }
                           className="rounded-lg border border-rose-200 bg-white px-3 py-2 text-xs"
                         >
                           {t.edit}
                         </button>
 
                         <button
-                          onClick={() => deleteService(service.id)}
+                          onClick={() =>
+                            deleteService(
+                              service.id
+                            )
+                          }
                           className="rounded-lg bg-red-50 px-3 py-2 text-xs text-red-600"
                         >
                           {t.delete}
@@ -2900,7 +3061,9 @@ export default function Home() {
 
         <nav className="z-40 grid shrink-0 grid-cols-4 border-t border-rose-200 bg-rose-50/95 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] backdrop-blur-md">
           <button
-            onClick={() => setActiveTab("calendar")}
+            onClick={() =>
+              setActiveTab("calendar")
+            }
             className={`px-1 py-4 text-xs ${
               activeTab === "calendar"
                 ? "font-semibold text-neutral-900"
@@ -2911,7 +3074,9 @@ export default function Home() {
           </button>
 
           <button
-            onClick={() => setActiveTab("clients")}
+            onClick={() =>
+              setActiveTab("clients")
+            }
             className={`px-1 py-4 text-xs ${
               activeTab === "clients"
                 ? "font-semibold text-neutral-900"
@@ -2922,7 +3087,9 @@ export default function Home() {
           </button>
 
           <button
-            onClick={() => setActiveTab("analytics")}
+            onClick={() =>
+              setActiveTab("analytics")
+            }
             className={`px-1 py-4 text-xs ${
               activeTab === "analytics"
                 ? "font-semibold text-neutral-900"
@@ -2933,7 +3100,9 @@ export default function Home() {
           </button>
 
           <button
-            onClick={() => setActiveTab("settings")}
+            onClick={() =>
+              setActiveTab("settings")
+            }
             className={`px-1 py-4 text-xs ${
               activeTab === "settings"
                 ? "font-semibold text-neutral-900"
@@ -2950,7 +3119,8 @@ export default function Home() {
               <div className="mb-5 flex justify-between gap-4">
                 <div>
                   <h2 className="text-xl font-semibold">
-                    {editingAppointmentId !== null
+                    {editingAppointmentId !==
+                    null
                       ? t.appointmentEdit
                       : t.appointmentNew}
                   </h2>
@@ -2961,7 +3131,11 @@ export default function Home() {
                 </div>
 
                 <button
-                  onClick={() => setIsAppointmentModalOpen(false)}
+                  onClick={() =>
+                    setIsAppointmentModalOpen(
+                      false
+                    )
+                  }
                   className="text-sm text-neutral-500"
                 >
                   {t.close}
@@ -2976,31 +3150,52 @@ export default function Home() {
                     </label>
 
                     <select
-                      value={selectedClientId}
+                      value={
+                        selectedClientId
+                      }
                       onChange={(event) => {
-                        setSelectedClientId(event.target.value);
+                        setSelectedClientId(
+                          event.target.value
+                        );
 
                         clearAppointmentWarning();
 
-                        if (event.target.value) {
-                          setAppointmentName("");
+                        if (
+                          event.target.value
+                        ) {
+                          setAppointmentName(
+                            ""
+                          );
                         }
                       }}
                       className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
                     >
-                      <option value="">{t.manualName}</option>
+                      <option value="">
+                        {t.manualName}
+                      </option>
 
                       {[...clients]
                         .sort((a, b) =>
                           a.name.localeCompare(
                             b.name,
-                            getLocale(language)
+                            getLocale(
+                              language
+                            )
                           )
                         )
                         .map((client) => (
-                          <option key={client.id} value={client.id}>
-                            {client.name}
-                            {client.phone ? ` — ${client.phone}` : ""}
+                          <option
+                            key={client.id}
+                            value={
+                              client.id
+                            }
+                          >
+                            {
+                              client.name
+                            }
+                            {client.phone
+                              ? ` — ${client.phone}`
+                              : ""}
                           </option>
                         ))}
                     </select>
@@ -3014,9 +3209,13 @@ export default function Home() {
                     </label>
 
                     <input
-                      value={appointmentName}
+                      value={
+                        appointmentName
+                      }
                       onChange={(event) => {
-                        setAppointmentName(event.target.value);
+                        setAppointmentName(
+                          event.target.value
+                        );
 
                         clearAppointmentWarning();
                       }}
@@ -3032,19 +3231,41 @@ export default function Home() {
                     </label>
 
                     <select
-                      value={selectedServiceId}
+                      value={
+                        selectedServiceId
+                      }
                       onChange={(event) =>
-                        handleServiceSelection(event.target.value)
+                        handleServiceSelection(
+                          event.target.value
+                        )
                       }
                       className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
                     >
-                      <option value="">{t.manualService}</option>
+                      <option value="">
+                        {t.manualService}
+                      </option>
 
-                      {services.map((service) => (
-                        <option key={service.id} value={service.id}>
-                          {service.name} — {service.price} грн
-                        </option>
-                      ))}
+                      {services.map(
+                        (service) => (
+                          <option
+                            key={
+                              service.id
+                            }
+                            value={
+                              service.id
+                            }
+                          >
+                            {
+                              service.name
+                            }{" "}
+                            —{" "}
+                            {
+                              service.price
+                            }{" "}
+                            грн
+                          </option>
+                        )
+                      )}
                     </select>
                   </div>
                 )}
@@ -3056,9 +3277,13 @@ export default function Home() {
                     </label>
 
                     <input
-                      value={appointmentService}
+                      value={
+                        appointmentService
+                      }
                       onChange={(event) => {
-                        setAppointmentService(event.target.value);
+                        setAppointmentService(
+                          event.target.value
+                        );
 
                         clearAppointmentWarning();
                       }}
@@ -3067,38 +3292,46 @@ export default function Home() {
                   </div>
                 )}
 
-                <div className="grid min-w-0 grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)] gap-3">
-                  <div className="min-w-0">
+                <div className="flex min-w-0 items-start gap-3">
+                  <div className="w-[40%] min-w-0">
                     <label className="mb-1 block text-sm text-neutral-500">
                       {t.date}
                     </label>
 
                     <input
                       type="date"
-                      value={appointmentDate}
+                      value={
+                        appointmentDate
+                      }
                       onChange={(event) => {
-                        setAppointmentDate(event.target.value);
+                        setAppointmentDate(
+                          event.target.value
+                        );
 
                         clearAppointmentWarning();
                       }}
-                      className="block w-full min-w-0 max-w-full rounded-xl border border-rose-200 bg-white px-2 py-3 text-base text-black outline-none focus:border-rose-400"
+                      className="block w-full min-w-0 rounded-xl border border-rose-200 bg-white px-2 py-3 text-base text-black outline-none focus:border-rose-400"
                     />
                   </div>
 
-                  <div className="min-w-0">
+                  <div className="w-[40%] min-w-0">
                     <label className="mb-1 block text-sm text-neutral-500">
                       {t.time}
                     </label>
 
                     <input
                       type="time"
-                      value={appointmentTime}
+                      value={
+                        appointmentTime
+                      }
                       onChange={(event) => {
-                        setAppointmentTime(event.target.value);
+                        setAppointmentTime(
+                          event.target.value
+                        );
 
                         clearAppointmentWarning();
                       }}
-                      className="block w-full min-w-0 max-w-full rounded-xl border border-rose-200 bg-white px-2 py-3 text-base text-black outline-none focus:border-rose-400"
+                      className="block w-full min-w-0 rounded-xl border border-rose-200 bg-white px-2 py-3 text-base text-black outline-none focus:border-rose-400"
                     />
                   </div>
                 </div>
@@ -3109,17 +3342,32 @@ export default function Home() {
                   </label>
 
                   <select
-                    value={appointmentDuration}
+                    value={
+                      appointmentDuration
+                    }
                     onChange={(event) => {
-                      setAppointmentDuration(event.target.value);
+                      setAppointmentDuration(
+                        event.target.value
+                      );
 
                       clearAppointmentWarning();
                     }}
                     className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
                   >
-                    {[30, 60, 90, 120, 150, 180].map((minutes) => (
-                      <option key={minutes} value={minutes}>
-                        {minutes} {t.minutes}
+                    {[
+                      30,
+                      60,
+                      90,
+                      120,
+                      150,
+                      180,
+                    ].map((minutes) => (
+                      <option
+                        key={minutes}
+                        value={minutes}
+                      >
+                        {minutes}{" "}
+                        {t.minutes}
                       </option>
                     ))}
                   </select>
@@ -3133,9 +3381,13 @@ export default function Home() {
                   <input
                     type="number"
                     min="0"
-                    value={appointmentPrice}
+                    value={
+                      appointmentPrice
+                    }
                     onChange={(event) =>
-                      setAppointmentPrice(event.target.value)
+                      setAppointmentPrice(
+                        event.target.value
+                      )
                     }
                     className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
                   />
@@ -3147,34 +3399,49 @@ export default function Home() {
                   </label>
 
                   <select
-                    value={appointmentStatus}
+                    value={
+                      appointmentStatus
+                    }
                     onChange={(event) =>
                       setAppointmentStatus(
-                        event.target.value as AppointmentStatus
+                        event.target
+                          .value as AppointmentStatus
                       )
                     }
                     className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
                   >
                     <option value="scheduled">
-                      {t.scheduledStatus}
+                      {
+                        t.scheduledStatus
+                      }
                     </option>
 
                     <option value="completed">
-                      {t.completedStatus}
+                      {
+                        t.completedStatus
+                      }
                     </option>
 
                     <option value="cancelled">
-                      {t.cancelledStatus}
+                      {
+                        t.cancelledStatus
+                      }
                     </option>
 
-                    <option value="no-show">{t.noShowStatus}</option>
+                    <option value="no-show">
+                      {t.noShowStatus}
+                    </option>
                   </select>
                 </div>
 
-                {editingAppointmentId !== null &&
-                  appointmentStatus === "scheduled" && (
+                {editingAppointmentId !==
+                  null &&
+                  appointmentStatus ===
+                    "scheduled" && (
                     <button
-                      onClick={openReminderForEditingAppointment}
+                      onClick={
+                        openReminderForEditingAppointment
+                      }
                       className="w-full rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 font-medium text-sky-700"
                     >
                       {t.remindClient}
@@ -3183,11 +3450,15 @@ export default function Home() {
 
                 {appointmentError && (
                   <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-                    {appointmentError}
+                    {
+                      appointmentError
+                    }
 
                     {hasConflict && (
                       <button
-                        onClick={actuallySaveAppointment}
+                        onClick={
+                          actuallySaveAppointment
+                        }
                         className="mt-3 w-full rounded-xl bg-white px-4 py-3"
                       >
                         {t.forceSave}
@@ -3197,22 +3468,30 @@ export default function Home() {
                 )}
 
                 <button
-                  onClick={saveAppointment}
+                  onClick={
+                    saveAppointment
+                  }
                   className="w-full rounded-xl bg-black px-4 py-4 font-medium text-white"
                 >
-                  {editingAppointmentId !== null
+                  {editingAppointmentId !==
+                  null
                     ? t.saveChanges
                     : t.createAppointment}
                 </button>
 
-                {editingAppointmentId !== null && (
+                {editingAppointmentId !==
+                  null && (
                   <button
                     onClick={() =>
-                      deleteAppointment(editingAppointmentId)
+                      deleteAppointment(
+                        editingAppointmentId
+                      )
                     }
                     className="w-full rounded-xl bg-red-50 px-4 py-4 font-medium text-red-600"
                   >
-                    {t.deleteAppointment}
+                    {
+                      t.deleteAppointment
+                    }
                   </button>
                 )}
               </div>
@@ -3225,13 +3504,18 @@ export default function Home() {
             <div className="max-h-[90dvh] w-full max-w-md overflow-y-auto rounded-t-3xl bg-rose-50 p-5">
               <div className="flex justify-between">
                 <h2 className="text-xl font-semibold">
-                  {editingClientId !== null
+                  {editingClientId !==
+                  null
                     ? t.editClient
                     : t.newClient}
                 </h2>
 
                 <button
-                  onClick={() => setIsClientModalOpen(false)}
+                  onClick={() =>
+                    setIsClientModalOpen(
+                      false
+                    )
+                  }
                   className="text-sm text-neutral-500"
                 >
                   {t.close}
@@ -3241,7 +3525,11 @@ export default function Home() {
               <div className="mt-5 space-y-4">
                 <input
                   value={clientName}
-                  onChange={(event) => setClientName(event.target.value)}
+                  onChange={(event) =>
+                    setClientName(
+                      event.target.value
+                    )
+                  }
                   placeholder={t.name}
                   className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
                 />
@@ -3249,7 +3537,9 @@ export default function Home() {
                 <input
                   value={clientPhone}
                   onChange={(event) =>
-                    setClientPhone(event.target.value)
+                    setClientPhone(
+                      event.target.value
+                    )
                   }
                   placeholder={t.phone}
                   className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
@@ -3258,7 +3548,9 @@ export default function Home() {
                 <input
                   value={clientSocial}
                   onChange={(event) =>
-                    setClientSocial(event.target.value)
+                    setClientSocial(
+                      event.target.value
+                    )
                   }
                   placeholder="@username"
                   className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
@@ -3266,7 +3558,11 @@ export default function Home() {
 
                 <textarea
                   value={clientNote}
-                  onChange={(event) => setClientNote(event.target.value)}
+                  onChange={(event) =>
+                    setClientNote(
+                      event.target.value
+                    )
+                  }
                   placeholder={t.note}
                   rows={3}
                   className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
@@ -3283,251 +3579,348 @@ export default function Home() {
           </div>
         )}
 
-        {isClientDetailsOpen && selectedClientDetails && (
-          <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40">
-            <div className="max-h-[92dvh] w-full max-w-md overflow-y-auto rounded-t-3xl bg-rose-50 p-5">
-              <div className="flex justify-between gap-4">
-                <div>
-                  <p className="text-sm text-neutral-500">
-                    {t.clientCard}
+        {isClientDetailsOpen &&
+          selectedClientDetails && (
+            <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40">
+              <div className="max-h-[92dvh] w-full max-w-md overflow-y-auto rounded-t-3xl bg-rose-50 p-5">
+                <div className="flex justify-between gap-4">
+                  <div>
+                    <p className="text-sm text-neutral-500">
+                      {t.clientCard}
+                    </p>
+
+                    <h2 className="mt-1 text-2xl font-semibold">
+                      {
+                        selectedClientDetails.name
+                      }
+                    </h2>
+                  </div>
+
+                  <button
+                    onClick={() =>
+                      setIsClientDetailsOpen(
+                        false
+                      )
+                    }
+                    className="text-sm text-neutral-500"
+                  >
+                    {t.close}
+                  </button>
+                </div>
+
+                <div className="mt-5 rounded-2xl border border-rose-200 bg-white/80 p-4">
+                  <p className="font-medium">
+                    {selectedClientDetails.phone ||
+                      t.phoneMissing}
                   </p>
 
-                  <h2 className="mt-1 text-2xl font-semibold">
-                    {selectedClientDetails.name}
-                  </h2>
+                  {selectedClientDetails.social && (
+                    <p className="mt-2 text-sm text-neutral-500">
+                      {
+                        selectedClientDetails.social
+                      }
+                    </p>
+                  )}
+
+                  {selectedClientDetails.note && (
+                    <p className="mt-3 rounded-xl bg-rose-50 p-3 text-sm">
+                      {
+                        selectedClientDetails.note
+                      }
+                    </p>
+                  )}
+
+                  <div className="mt-4 grid grid-cols-2 gap-2">
+                    {selectedClientDetails.phone && (
+                      <a
+                        href={getPhoneUrl(
+                          selectedClientDetails.phone
+                        )}
+                        className="rounded-xl bg-black px-3 py-3 text-center text-sm font-medium text-white"
+                      >
+                        {t.call}
+                      </a>
+                    )}
+
+                    {selectedClientDetails.social &&
+                      (getSocialType(
+                        selectedClientDetails.social
+                      ) ===
+                        "telegram" ||
+                        getSocialType(
+                          selectedClientDetails.social
+                        ) ===
+                          "unknown") && (
+                        <button
+                          onClick={() =>
+                            openExternal(
+                              getTelegramUrl(
+                                selectedClientDetails.social
+                              )
+                            )
+                          }
+                          className="rounded-xl border border-rose-200 bg-white px-3 py-3 text-sm font-medium"
+                        >
+                          {
+                            t.telegram
+                          }
+                        </button>
+                      )}
+
+                    {selectedClientDetails.social &&
+                      (getSocialType(
+                        selectedClientDetails.social
+                      ) ===
+                        "instagram" ||
+                        getSocialType(
+                          selectedClientDetails.social
+                        ) ===
+                          "unknown") && (
+                        <button
+                          onClick={() =>
+                            openExternal(
+                              getInstagramUrl(
+                                selectedClientDetails.social
+                              )
+                            )
+                          }
+                          className="rounded-xl border border-rose-200 bg-white px-3 py-3 text-sm font-medium"
+                        >
+                          {
+                            t.instagram
+                          }
+                        </button>
+                      )}
+                  </div>
+                </div>
+
+                <div className="mt-4 grid grid-cols-2 gap-3">
+                  <div className="rounded-2xl bg-white/80 p-4">
+                    <p className="text-xs text-neutral-500">
+                      {
+                        t.totalAppointments
+                      }
+                    </p>
+
+                    <p className="mt-1 text-2xl font-semibold">
+                      {
+                        selectedClientAppointments.length
+                      }
+                    </p>
+                  </div>
+
+                  <div className="rounded-2xl bg-white/80 p-4">
+                    <p className="text-xs text-neutral-500">
+                      {
+                        t.futureAppointmentsCount
+                      }
+                    </p>
+
+                    <p className="mt-1 text-2xl font-semibold">
+                      {
+                        futureClientAppointments.length
+                      }
+                    </p>
+                  </div>
                 </div>
 
                 <button
-                  onClick={() => setIsClientDetailsOpen(false)}
-                  className="text-sm text-neutral-500"
+                  onClick={() =>
+                    openNewAppointmentForClient(
+                      selectedClientDetails
+                    )
+                  }
+                  className="mt-4 w-full rounded-xl bg-black px-4 py-4 text-white"
                 >
-                  {t.close}
+                  {t.bookClient}
+                </button>
+
+                <button
+                  onClick={() =>
+                    openEditClient(
+                      selectedClientDetails
+                    )
+                  }
+                  className="mt-3 w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
+                >
+                  {
+                    t.editClientButton
+                  }
+                </button>
+
+                <div className="mt-6">
+                  <h3 className="text-lg font-semibold">
+                    {
+                      t.futureAppointments
+                    }
+                  </h3>
+
+                  <div className="mt-3 space-y-2">
+                    {futureClientAppointments.length ===
+                      0 && (
+                      <p className="rounded-xl bg-white/70 p-4 text-sm text-neutral-500">
+                        {
+                          t.noFutureAppointments
+                        }
+                      </p>
+                    )}
+
+                    {futureClientAppointments.map(
+                      (appointment) => (
+                        <div
+                          key={
+                            appointment.id
+                          }
+                          className="rounded-xl border border-rose-200 bg-white/80 p-3"
+                        >
+                          <div className="flex justify-between gap-3">
+                            <div>
+                              <p className="font-medium">
+                                {formatFullDate(
+                                  appointment.date,
+                                  language
+                                )}
+                              </p>
+
+                              <p className="mt-1 text-sm text-neutral-500">
+                                {
+                                  appointment.time
+                                }{" "}
+                                ·{" "}
+                                {
+                                  appointment.service
+                                }
+                              </p>
+
+                              <p className="mt-1 text-sm font-medium">
+                                {
+                                  appointment.price
+                                }{" "}
+                                грн
+                              </p>
+                            </div>
+
+                            <span
+                              className={`h-fit rounded-full border px-2 py-1 text-[10px] ${getStatusBadgeClass(
+                                appointment.status
+                              )}`}
+                            >
+                              {getStatusLabel(
+                                appointment.status
+                              )}
+                            </span>
+                          </div>
+
+                          {appointment.status ===
+                            "scheduled" && (
+                            <button
+                              onClick={() =>
+                                openReminder(
+                                  appointment
+                                )
+                              }
+                              className="mt-3 w-full rounded-xl bg-sky-50 px-3 py-2 text-sm font-medium text-sky-700"
+                            >
+                              {
+                                t.remind
+                              }
+                            </button>
+                          )}
+                        </div>
+                      )
+                    )}
+                  </div>
+                </div>
+
+                <div className="mt-6">
+                  <h3 className="text-lg font-semibold">
+                    {t.history}
+                  </h3>
+
+                  <div className="mt-3 space-y-2">
+                    {pastClientAppointments.length ===
+                      0 && (
+                      <p className="rounded-xl bg-white/70 p-4 text-sm text-neutral-500">
+                        {t.noHistory}
+                      </p>
+                    )}
+
+                    {pastClientAppointments.map(
+                      (appointment) => (
+                        <div
+                          key={
+                            appointment.id
+                          }
+                          className="rounded-xl border border-rose-200 bg-white/80 p-3"
+                        >
+                          <div className="flex justify-between gap-3">
+                            <div>
+                              <p className="font-medium">
+                                {formatFullDate(
+                                  appointment.date,
+                                  language
+                                )}
+                              </p>
+
+                              <p className="mt-1 text-sm text-neutral-500">
+                                {
+                                  appointment.service
+                                }{" "}
+                                ·{" "}
+                                {
+                                  appointment.price
+                                }{" "}
+                                грн
+                              </p>
+                            </div>
+
+                            <span
+                              className={`h-fit rounded-full border px-2 py-1 text-[10px] ${getStatusBadgeClass(
+                                appointment.status
+                              )}`}
+                            >
+                              {getStatusLabel(
+                                appointment.status
+                              )}
+                            </span>
+                          </div>
+                        </div>
+                      )
+                    )}
+                  </div>
+                </div>
+
+                <button
+                  onClick={() =>
+                    deleteClient(
+                      selectedClientDetails.id
+                    )
+                  }
+                  className="mt-6 w-full rounded-xl bg-red-50 px-4 py-3 text-red-600"
+                >
+                  {t.deleteClient}
                 </button>
               </div>
-
-              <div className="mt-5 rounded-2xl border border-rose-200 bg-white/80 p-4">
-                <p className="font-medium">
-                  {selectedClientDetails.phone || t.phoneMissing}
-                </p>
-
-                {selectedClientDetails.social && (
-                  <p className="mt-2 text-sm text-neutral-500">
-                    {selectedClientDetails.social}
-                  </p>
-                )}
-
-                {selectedClientDetails.note && (
-                  <p className="mt-3 rounded-xl bg-rose-50 p-3 text-sm">
-                    {selectedClientDetails.note}
-                  </p>
-                )}
-
-                <div className="mt-4 grid grid-cols-2 gap-2">
-                  {selectedClientDetails.phone && (
-                    <a
-                      href={getPhoneUrl(selectedClientDetails.phone)}
-                      className="rounded-xl bg-black px-3 py-3 text-center text-sm font-medium text-white"
-                    >
-                      {t.call}
-                    </a>
-                  )}
-
-                  {selectedClientDetails.social &&
-                    (getSocialType(selectedClientDetails.social) ===
-                      "telegram" ||
-                      getSocialType(selectedClientDetails.social) ===
-                        "unknown") && (
-                      <button
-                        onClick={() =>
-                          openExternal(
-                            getTelegramUrl(selectedClientDetails.social)
-                          )
-                        }
-                        className="rounded-xl border border-rose-200 bg-white px-3 py-3 text-sm font-medium"
-                      >
-                        {t.telegram}
-                      </button>
-                    )}
-
-                  {selectedClientDetails.social &&
-                    (getSocialType(selectedClientDetails.social) ===
-                      "instagram" ||
-                      getSocialType(selectedClientDetails.social) ===
-                        "unknown") && (
-                      <button
-                        onClick={() =>
-                          openExternal(
-                            getInstagramUrl(selectedClientDetails.social)
-                          )
-                        }
-                        className="rounded-xl border border-rose-200 bg-white px-3 py-3 text-sm font-medium"
-                      >
-                        {t.instagram}
-                      </button>
-                    )}
-                </div>
-              </div>
-
-              <div className="mt-4 grid grid-cols-2 gap-3">
-                <div className="rounded-2xl bg-white/80 p-4">
-                  <p className="text-xs text-neutral-500">
-                    {t.totalAppointments}
-                  </p>
-
-                  <p className="mt-1 text-2xl font-semibold">
-                    {selectedClientAppointments.length}
-                  </p>
-                </div>
-
-                <div className="rounded-2xl bg-white/80 p-4">
-                  <p className="text-xs text-neutral-500">
-                    {t.futureAppointmentsCount}
-                  </p>
-
-                  <p className="mt-1 text-2xl font-semibold">
-                    {futureClientAppointments.length}
-                  </p>
-                </div>
-              </div>
-
-              <button
-                onClick={() =>
-                  openNewAppointmentForClient(selectedClientDetails)
-                }
-                className="mt-4 w-full rounded-xl bg-black px-4 py-4 text-white"
-              >
-                {t.bookClient}
-              </button>
-
-              <button
-                onClick={() => openEditClient(selectedClientDetails)}
-                className="mt-3 w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
-              >
-                {t.editClientButton}
-              </button>
-
-              <div className="mt-6">
-                <h3 className="text-lg font-semibold">
-                  {t.futureAppointments}
-                </h3>
-
-                <div className="mt-3 space-y-2">
-                  {futureClientAppointments.length === 0 && (
-                    <p className="rounded-xl bg-white/70 p-4 text-sm text-neutral-500">
-                      {t.noFutureAppointments}
-                    </p>
-                  )}
-
-                  {futureClientAppointments.map((appointment) => (
-                    <div
-                      key={appointment.id}
-                      className="rounded-xl border border-rose-200 bg-white/80 p-3"
-                    >
-                      <div className="flex justify-between gap-3">
-                        <div>
-                          <p className="font-medium">
-                            {formatFullDate(
-                              appointment.date,
-                              language
-                            )}
-                          </p>
-
-                          <p className="mt-1 text-sm text-neutral-500">
-                            {appointment.time} · {appointment.service}
-                          </p>
-
-                          <p className="mt-1 text-sm font-medium">
-                            {appointment.price} грн
-                          </p>
-                        </div>
-
-                        <span
-                          className={`h-fit rounded-full border px-2 py-1 text-[10px] ${getStatusBadgeClass(
-                            appointment.status
-                          )}`}
-                        >
-                          {getStatusLabel(appointment.status)}
-                        </span>
-                      </div>
-
-                      {appointment.status === "scheduled" && (
-                        <button
-                          onClick={() => openReminder(appointment)}
-                          className="mt-3 w-full rounded-xl bg-sky-50 px-3 py-2 text-sm font-medium text-sky-700"
-                        >
-                          {t.remind}
-                        </button>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="mt-6">
-                <h3 className="text-lg font-semibold">{t.history}</h3>
-
-                <div className="mt-3 space-y-2">
-                  {pastClientAppointments.length === 0 && (
-                    <p className="rounded-xl bg-white/70 p-4 text-sm text-neutral-500">
-                      {t.noHistory}
-                    </p>
-                  )}
-
-                  {pastClientAppointments.map((appointment) => (
-                    <div
-                      key={appointment.id}
-                      className="rounded-xl border border-rose-200 bg-white/80 p-3"
-                    >
-                      <div className="flex justify-between gap-3">
-                        <div>
-                          <p className="font-medium">
-                            {formatFullDate(
-                              appointment.date,
-                              language
-                            )}
-                          </p>
-
-                          <p className="mt-1 text-sm text-neutral-500">
-                            {appointment.service} · {appointment.price}{" "}
-                            грн
-                          </p>
-                        </div>
-
-                        <span
-                          className={`h-fit rounded-full border px-2 py-1 text-[10px] ${getStatusBadgeClass(
-                            appointment.status
-                          )}`}
-                        >
-                          {getStatusLabel(appointment.status)}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <button
-                onClick={() => deleteClient(selectedClientDetails.id)}
-                className="mt-6 w-full rounded-xl bg-red-50 px-4 py-3 text-red-600"
-              >
-                {t.deleteClient}
-              </button>
             </div>
-          </div>
-        )}
+          )}
 
         {isServiceModalOpen && (
           <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40">
             <div className="w-full max-w-md rounded-t-3xl bg-rose-50 p-5">
               <div className="flex justify-between">
                 <h2 className="text-xl font-semibold">
-                  {editingServiceId !== null
+                  {editingServiceId !==
+                  null
                     ? t.editService
                     : t.newService}
                 </h2>
 
                 <button
-                  onClick={() => setIsServiceModalOpen(false)}
+                  onClick={() =>
+                    setIsServiceModalOpen(
+                      false
+                    )
+                  }
                   className="text-sm text-neutral-500"
                 >
                   {t.close}
@@ -3537,21 +3930,42 @@ export default function Home() {
               <div className="mt-5 space-y-4">
                 <input
                   value={serviceName}
-                  onChange={(event) => setServiceName(event.target.value)}
-                  placeholder={t.serviceName}
+                  onChange={(event) =>
+                    setServiceName(
+                      event.target.value
+                    )
+                  }
+                  placeholder={
+                    t.serviceName
+                  }
                   className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
                 />
 
                 <select
-                  value={serviceDuration}
+                  value={
+                    serviceDuration
+                  }
                   onChange={(event) =>
-                    setServiceDuration(event.target.value)
+                    setServiceDuration(
+                      event.target.value
+                    )
                   }
                   className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
                 >
-                  {[30, 60, 90, 120, 150, 180].map((minutes) => (
-                    <option key={minutes} value={minutes}>
-                      {minutes} {t.minutes}
+                  {[
+                    30,
+                    60,
+                    90,
+                    120,
+                    150,
+                    180,
+                  ].map((minutes) => (
+                    <option
+                      key={minutes}
+                      value={minutes}
+                    >
+                      {minutes}{" "}
+                      {t.minutes}
                     </option>
                   ))}
                 </select>
@@ -3561,9 +3975,13 @@ export default function Home() {
                   min="0"
                   value={servicePrice}
                   onChange={(event) =>
-                    setServicePrice(event.target.value)
+                    setServicePrice(
+                      event.target.value
+                    )
                   }
-                  placeholder={t.servicePrice}
+                  placeholder={
+                    t.servicePrice
+                  }
                   className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
                 />
 
@@ -3583,15 +4001,23 @@ export default function Home() {
             <div className="w-full max-w-md rounded-t-3xl bg-rose-50 p-5">
               <div className="flex justify-between gap-4">
                 <div>
-                  <h2 className="text-xl font-semibold">{t.reminder}</h2>
+                  <h2 className="text-xl font-semibold">
+                    {t.reminder}
+                  </h2>
 
                   <p className="mt-1 text-sm text-neutral-500">
-                    {t.reminderHint}
+                    {
+                      t.reminderHint
+                    }
                   </p>
                 </div>
 
                 <button
-                  onClick={() => setIsReminderModalOpen(false)}
+                  onClick={() =>
+                    setIsReminderModalOpen(
+                      false
+                    )
+                  }
                   className="text-sm text-neutral-500"
                 >
                   {t.close}
@@ -3601,8 +4027,13 @@ export default function Home() {
               <textarea
                 value={reminderText}
                 onChange={(event) => {
-                  setReminderText(event.target.value);
-                  setReminderCopied(false);
+                  setReminderText(
+                    event.target.value
+                  );
+
+                  setReminderCopied(
+                    false
+                  );
                 }}
                 rows={7}
                 className="mt-5 w-full resize-none rounded-2xl border border-rose-200 bg-white p-4 outline-none focus:border-rose-400"
@@ -3612,39 +4043,56 @@ export default function Home() {
                 onClick={copyReminder}
                 className="mt-3 w-full rounded-xl bg-black px-4 py-4 font-medium text-white"
               >
-                {reminderCopied ? t.copied : t.copyText}
+                {reminderCopied
+                  ? t.copied
+                  : t.copyText}
               </button>
 
               {reminderClient?.social && (
                 <div className="mt-3 grid grid-cols-2 gap-2">
-                  {(getSocialType(reminderClient.social) === "telegram" ||
-                    getSocialType(reminderClient.social) ===
+                  {(getSocialType(
+                    reminderClient.social
+                  ) === "telegram" ||
+                    getSocialType(
+                      reminderClient.social
+                    ) ===
                       "unknown") && (
                     <button
                       onClick={() =>
                         openExternal(
-                          getTelegramUrl(reminderClient.social)
+                          getTelegramUrl(
+                            reminderClient.social
+                          )
                         )
                       }
                       className="rounded-xl border border-rose-200 bg-white px-3 py-3 text-sm font-medium"
                     >
-                      {t.openTelegram}
+                      {
+                        t.openTelegram
+                      }
                     </button>
                   )}
 
-                  {(getSocialType(reminderClient.social) ===
-                    "instagram" ||
-                    getSocialType(reminderClient.social) ===
+                  {(getSocialType(
+                    reminderClient.social
+                  ) === "instagram" ||
+                    getSocialType(
+                      reminderClient.social
+                    ) ===
                       "unknown") && (
                     <button
                       onClick={() =>
                         openExternal(
-                          getInstagramUrl(reminderClient.social)
+                          getInstagramUrl(
+                            reminderClient.social
+                          )
                         )
                       }
                       className="rounded-xl border border-rose-200 bg-white px-3 py-3 text-sm font-medium"
                     >
-                      {t.openInstagram}
+                      {
+                        t.openInstagram
+                      }
                     </button>
                   )}
                 </div>
