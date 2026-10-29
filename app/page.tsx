@@ -3004,7 +3004,7 @@ export default function Home() {
                       height: `${calendarHeight}px`,
                     }}
                   >
-                    <div className="relative border-r border-rose-200/80">
+                    <div className="relative border-r border-neutral-500/60">
                       {hours.map(
                         (hour) => (
                           <div
@@ -3044,7 +3044,7 @@ export default function Home() {
                             key={
                               hour
                             }
-                            className="absolute left-0 right-0 border-t border-rose-200/80"
+                            className="absolute left-0 right-0 border-t border-neutral-500/60"
                             style={{
                               top: `${
                                 (hour -
