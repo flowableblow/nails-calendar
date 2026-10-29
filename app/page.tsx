@@ -94,9 +94,7 @@ const CLIENTS_STORAGE_KEY = "nails-calendar-clients";
 const SERVICES_STORAGE_KEY = "nails-calendar-services";
 const WORK_SETTINGS_STORAGE_KEY = "nails-calendar-work-settings";
 const LANGUAGE_STORAGE_KEY = "nails-calendar-language";
-
-const OFFLINE_QUEUE_STORAGE_KEY =
-  "nails-calendar-offline-queue";
+const OFFLINE_QUEUE_STORAGE_KEY = "nails-calendar-offline-queue";
 
 const DEFAULT_WORK_SETTINGS: WorkSettings = {
   startHour: 8,
@@ -132,6 +130,9 @@ const translations = {
 
     today: "Сегодня",
     currentMonth: "Текущий месяц",
+    returnToday: "Вернуться на сегодня",
+    returnCurrentMonth: "Вернуться на текущий месяц",
+
     day: "День",
     month: "Месяц",
     records: "Записей",
@@ -241,6 +242,9 @@ const translations = {
 
     today: "Сьогодні",
     currentMonth: "Поточний місяць",
+    returnToday: "Повернутися на сьогодні",
+    returnCurrentMonth: "Повернутися на поточний місяць",
+
     day: "День",
     month: "Місяць",
     records: "Записів",
@@ -474,8 +478,7 @@ function getMonthCalendarDays(date: Date) {
   }
 
   while (cells.length % 7 !== 0) {
-    const day =
-      cells.length - before - last.getDate() + 1;
+    const day = cells.length - before - last.getDate() + 1;
 
     cells.push({
       date: new Date(year, month + 1, day),
@@ -567,7 +570,6 @@ export default function Home() {
   const [loginLoading, setLoginLoading] = useState(false);
 
   const [language, setLanguage] = useState<Language>("uk");
-
   const t = translations[language];
 
   const [databaseStatus, setDatabaseStatus] =
@@ -592,11 +594,8 @@ export default function Home() {
   const [appointments, setAppointments] =
     useState<Appointment[]>([]);
 
-  const [clients, setClients] =
-    useState<Client[]>([]);
-
-  const [services, setServices] =
-    useState<Service[]>([]);
+  const [clients, setClients] = useState<Client[]>([]);
+  const [services, setServices] = useState<Service[]>([]);
 
   const [workSettings, setWorkSettings] =
     useState<WorkSettings>(DEFAULT_WORK_SETTINGS);
@@ -639,6 +638,7 @@ export default function Home() {
   const [appointmentService, setAppointmentService] = useState("");
   const [appointmentDuration, setAppointmentDuration] =
     useState("90");
+
   const [appointmentPrice, setAppointmentPrice] = useState("");
 
   const [appointmentStatus, setAppointmentStatus] =
@@ -720,10 +720,7 @@ export default function Home() {
   );
 
   const syncOfflineQueue = useCallback(async () => {
-    if (
-      !navigator.onLine ||
-      syncingRef.current
-    ) {
+    if (!navigator.onLine || syncingRef.current) {
       return;
     }
 
@@ -773,9 +770,7 @@ export default function Home() {
     }
   }, [executeOperation]);
 
-  async function saveOrQueue(
-    operation: PendingOperation
-  ) {
+  async function saveOrQueue(operation: PendingOperation) {
     if (!navigator.onLine) {
       enqueueOperation(operation);
       setIsOnline(false);
@@ -826,10 +821,7 @@ export default function Home() {
     const storedLanguage =
       localStorage.getItem(LANGUAGE_STORAGE_KEY);
 
-    if (
-      storedLanguage === "ru" ||
-      storedLanguage === "uk"
-    ) {
+    if (storedLanguage === "ru" || storedLanguage === "uk") {
       setLanguage(storedLanguage);
     }
   }
@@ -881,10 +873,7 @@ export default function Home() {
     const storedLanguage =
       localStorage.getItem(LANGUAGE_STORAGE_KEY);
 
-    if (
-      storedLanguage === "ru" ||
-      storedLanguage === "uk"
-    ) {
+    if (storedLanguage === "ru" || storedLanguage === "uk") {
       setLanguage(storedLanguage);
     }
 
@@ -1168,6 +1157,13 @@ export default function Home() {
   const todayKey = formatDateKey(today);
   const selectedDateKey = formatDateKey(selectedDate);
 
+  const selectedDateIsToday =
+    selectedDateKey === todayKey;
+
+  const visibleMonthIsCurrent =
+    visibleMonth.getFullYear() === today.getFullYear() &&
+    visibleMonth.getMonth() === today.getMonth();
+
   const selectedDayAppointments = appointments
     .filter(
       (appointment) =>
@@ -1176,9 +1172,6 @@ export default function Home() {
     .sort((a, b) =>
       a.time.localeCompare(b.time)
     );
-
-  const selectedDateIsToday =
-    selectedDateKey === todayKey;
 
   const hours = Array.from(
     {
@@ -2270,8 +2263,12 @@ export default function Home() {
                   className="mx-auto rounded-xl bg-rose-100/70 px-4 py-2 text-sm"
                 >
                   {calendarView === "day"
-                    ? t.today
-                    : t.currentMonth}
+                    ? selectedDateIsToday
+                      ? t.today
+                      : t.returnToday
+                    : visibleMonthIsCurrent
+                    ? t.currentMonth
+                    : t.returnCurrentMonth}
                 </button>
 
                 <button
