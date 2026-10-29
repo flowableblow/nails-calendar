@@ -3292,7 +3292,7 @@ export default function Home() {
                   </div>
                 )}
 
-                <div className="flex min-w-0 items-start gap-3">
+                <div className="flex min-w-0 items-start gap-5">
                   <div className="w-[40%] min-w-0">
                     <label className="mb-1 block text-sm text-neutral-500">
                       {t.date}
