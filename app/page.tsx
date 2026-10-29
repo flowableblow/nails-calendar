@@ -65,9 +65,6 @@ const DEFAULT_WORK_SETTINGS: WorkSettings = {
   workDays: [0, 1, 2, 3, 4, 5, 6],
 };
 
-const FIELD_CLASS =
-  "h-[50px] min-h-[50px] max-h-[50px] w-full min-w-0 rounded-xl border border-rose-200 bg-white px-4 text-base text-black outline-none focus:border-rose-400";
-
 const WEEKDAYS = [
   { value: 1, ru: "Пн", uk: "Пн" },
   { value: 2, ru: "Вт", uk: "Вт" },
@@ -84,20 +81,24 @@ const translations = {
     clients: "Клиенты",
     analytics: "Аналитика",
     settings: "Настройки",
+
     today: "Сегодня",
     returnToday: "Вернуться на сегодня",
     currentMonth: "Текущий месяц",
     returnCurrentMonth: "Вернуться на текущий месяц",
+
     day: "День",
     month: "Месяц",
     records: "Записей",
     totalRecords: "Всего записей",
+
     clientBase: "База клиентов",
     total: "Всего",
     searchClient: "Поиск по имени, телефону...",
     noClients: "Клиентов пока нет",
     addFirstClient: "Нажми +, чтобы добавить первого клиента",
     nothingFound: "Никого не нашли",
+
     financeRecords: "Финансы и записи",
     completedOnlyIncome: "Доход только по завершённым записям",
     todayIncome: "Сегодня",
@@ -109,52 +110,65 @@ const translations = {
     noShow: "Не пришли",
     topServices: "Топ услуг",
     noCompleted: "Пока нет завершённых записей",
+
     app: "Приложение",
     language: "Язык приложения",
     languageHint: "Изменяется весь интерфейс приложения",
+
     workSchedule: "Рабочий график",
     workScheduleHint: "Эти настройки меняют дневной календарь",
     startDay: "Начало дня",
     endDay: "Конец дня",
     workDays: "Рабочие дни",
+
     database: "Облачная база",
     databaseConnected: "Supabase подключён",
     databaseConnecting: "Подключение к Supabase...",
     databaseError: "Ошибка подключения к Supabase",
+
     account: "Аккаунт",
     signedInAs: "Выполнен вход",
     logout: "Выйти",
+
     services: "Услуги",
     servicePriceDuration: "Цена и длительность",
     addFirstService: "Добавь первую услугу",
     edit: "Изменить",
     delete: "Удалить",
+
     dayOff: "Выходной день",
     dayOffHint: "Запись всё равно можно создать, если нужно.",
     dayOffShort: "выходной",
+
     appointmentNew: "Новая запись",
     appointmentEdit: "Редактировать запись",
     appointmentSubtitle: "Клиент, услуга, время и статус",
     close: "Закрыть",
+
     client: "Клиент",
     manualName: "Ввести имя вручную",
     clientName: "Имя клиента",
+
     service: "Услуга",
     manualService: "Ввести вручную",
     serviceName: "Название услуги",
+
     date: "Дата",
     time: "Время",
     duration: "Длительность",
     price: "Цена, грн",
     status: "Статус",
+
     createAppointment: "Создать запись",
     saveChanges: "Сохранить изменения",
     deleteAppointment: "Удалить запись",
     forceSave: "Всё равно сохранить",
+
     scheduledStatus: "Запланирована",
     completedStatus: "Завершена",
     cancelledStatus: "Отменена",
     noShowStatus: "Не пришла",
+
     newClient: "Новый клиент",
     editClient: "Редактировать клиента",
     name: "Имя",
@@ -162,41 +176,51 @@ const translations = {
     social: "Instagram / Telegram",
     note: "Заметка",
     save: "Сохранить",
+
     clientCard: "Карточка клиента",
     phoneMissing: "Телефон не указан",
     totalAppointments: "Всего записей",
     futureAppointmentsCount: "Будущих",
     bookClient: "Записать клиента",
     editClientButton: "Редактировать",
+
     futureAppointments: "Ближайшие записи",
     noFutureAppointments: "Будущих записей нет",
     history: "История",
     noHistory: "Прошлых записей нет",
     deleteClient: "Удалить клиента",
+
     call: "Позвонить",
     telegram: "Telegram",
     instagram: "Instagram",
     remind: "Напомнить",
+    remindClient: "Напомнить клиенту",
+
     reminder: "Напоминание клиенту",
     reminderHint: "Текст всегда формируется на украинском языке",
     copyText: "Скопировать текст",
     copied: "Скопировано",
     openTelegram: "Открыть Telegram",
     openInstagram: "Открыть Instagram",
+
     newService: "Новая услуга",
     editService: "Редактировать услугу",
     serviceDuration: "Длительность",
     servicePrice: "Цена, грн",
+
     minutes: "мин.",
     completed: "завершено",
+
     clientRequired: "Укажи клиента.",
     dateRequired: "Укажи дату.",
     timeRequired: "Укажи время.",
     conflict: "Это время пересекается с записью",
+
     deleteAppointmentConfirm: "Удалить эту запись?",
     deleteClientConfirm:
       "Удалить клиента? Его записи останутся в календаре.",
     deleteServiceConfirm: "Удалить эту услугу?",
+
     databaseSaveError: "Не удалось сохранить данные в облако.",
     databaseDeleteError: "Не удалось удалить данные из облака.",
   },
@@ -206,20 +230,24 @@ const translations = {
     clients: "Клієнти",
     analytics: "Аналітика",
     settings: "Налаштування",
+
     today: "Сьогодні",
     returnToday: "Повернутися на сьогодні",
     currentMonth: "Поточний місяць",
     returnCurrentMonth: "Повернутися на поточний місяць",
+
     day: "День",
     month: "Місяць",
     records: "Записів",
     totalRecords: "Усього записів",
+
     clientBase: "База клієнтів",
     total: "Усього",
     searchClient: "Пошук за ім'ям, телефоном...",
     noClients: "Клієнтів поки немає",
     addFirstClient: "Натисни +, щоб додати першого клієнта",
     nothingFound: "Нічого не знайдено",
+
     financeRecords: "Фінанси та записи",
     completedOnlyIncome: "Дохід лише за завершеними записами",
     todayIncome: "Сьогодні",
@@ -231,52 +259,65 @@ const translations = {
     noShow: "Не прийшли",
     topServices: "Топ послуг",
     noCompleted: "Поки немає завершених записів",
+
     app: "Застосунок",
     language: "Мова застосунку",
     languageHint: "Змінюється весь інтерфейс застосунку",
+
     workSchedule: "Робочий графік",
     workScheduleHint: "Ці налаштування змінюють денний календар",
     startDay: "Початок дня",
     endDay: "Кінець дня",
     workDays: "Робочі дні",
+
     database: "Хмарна база",
     databaseConnected: "Supabase підключено",
     databaseConnecting: "Підключення до Supabase...",
     databaseError: "Помилка підключення до Supabase",
+
     account: "Акаунт",
     signedInAs: "Виконано вхід",
     logout: "Вийти",
+
     services: "Послуги",
     servicePriceDuration: "Ціна та тривалість",
     addFirstService: "Додай першу послугу",
     edit: "Змінити",
     delete: "Видалити",
+
     dayOff: "Вихідний день",
     dayOffHint: "Запис усе одно можна створити, якщо потрібно.",
     dayOffShort: "вихідний",
+
     appointmentNew: "Новий запис",
     appointmentEdit: "Редагувати запис",
     appointmentSubtitle: "Клієнт, послуга, час і статус",
     close: "Закрити",
+
     client: "Клієнт",
     manualName: "Ввести ім'я вручну",
     clientName: "Ім'я клієнта",
+
     service: "Послуга",
     manualService: "Ввести вручну",
     serviceName: "Назва послуги",
+
     date: "Дата",
     time: "Час",
     duration: "Тривалість",
     price: "Ціна, грн",
     status: "Статус",
+
     createAppointment: "Створити запис",
     saveChanges: "Зберегти зміни",
     deleteAppointment: "Видалити запис",
     forceSave: "Усе одно зберегти",
+
     scheduledStatus: "Заплановано",
     completedStatus: "Завершено",
     cancelledStatus: "Скасовано",
     noShowStatus: "Не прийшла",
+
     newClient: "Новий клієнт",
     editClient: "Редагувати клієнта",
     name: "Ім'я",
@@ -284,41 +325,51 @@ const translations = {
     social: "Instagram / Telegram",
     note: "Нотатка",
     save: "Зберегти",
+
     clientCard: "Картка клієнта",
     phoneMissing: "Телефон не вказано",
     totalAppointments: "Усього записів",
     futureAppointmentsCount: "Майбутніх",
     bookClient: "Записати клієнта",
     editClientButton: "Редагувати",
+
     futureAppointments: "Найближчі записи",
     noFutureAppointments: "Майбутніх записів немає",
     history: "Історія",
     noHistory: "Минулих записів немає",
     deleteClient: "Видалити клієнта",
+
     call: "Подзвонити",
     telegram: "Telegram",
     instagram: "Instagram",
     remind: "Нагадати",
+    remindClient: "Нагадати клієнту",
+
     reminder: "Нагадування клієнту",
     reminderHint: "Текст завжди формується українською мовою",
     copyText: "Скопіювати текст",
     copied: "Скопійовано",
     openTelegram: "Відкрити Telegram",
     openInstagram: "Відкрити Instagram",
+
     newService: "Нова послуга",
     editService: "Редагувати послугу",
     serviceDuration: "Тривалість",
     servicePrice: "Ціна, грн",
+
     minutes: "хв.",
     completed: "завершено",
+
     clientRequired: "Вкажи клієнта.",
     dateRequired: "Вкажи дату.",
     timeRequired: "Вкажи час.",
     conflict: "Цей час перетинається із записом",
+
     deleteAppointmentConfirm: "Видалити цей запис?",
     deleteClientConfirm:
       "Видалити клієнта? Його записи залишаться в календарі.",
     deleteServiceConfirm: "Видалити цю послугу?",
+
     databaseSaveError: "Не вдалося зберегти дані у хмарі.",
     databaseDeleteError: "Не вдалося видалити дані з хмари.",
   },
@@ -529,7 +580,7 @@ function getStatusBadgeClass(status: AppointmentStatus) {
     return "border-orange-200 bg-orange-50 text-orange-700";
   }
 
-  return "border-rose-200 bg-rose-100 text-rose-700";
+  return "border-sky-200 bg-sky-50 text-sky-700";
 }
 
 function getAppointmentCardClass(status: AppointmentStatus) {
@@ -545,7 +596,7 @@ function getAppointmentCardClass(status: AppointmentStatus) {
     return "border-orange-300 bg-orange-50/90";
   }
 
-  return "border-rose-300 bg-rose-100/95";
+  return "border-sky-300 bg-sky-50/95";
 }
 
 export default function Home() {
@@ -572,7 +623,6 @@ export default function Home() {
     useState<DatabaseStatus>("connecting");
 
   const [activeTab, setActiveTab] = useState<Tab>("calendar");
-
   const [calendarView, setCalendarView] =
     useState<CalendarView>("day");
 
@@ -644,11 +694,9 @@ export default function Home() {
   const [clientSearch, setClientSearch] = useState("");
 
   const [reminderText, setReminderText] = useState("");
-
   const [reminderClientId, setReminderClientId] = useState<number | null>(
     null
   );
-
   const [reminderCopied, setReminderCopied] = useState(false);
 
   useEffect(() => {
@@ -1816,6 +1864,19 @@ export default function Home() {
     setIsReminderModalOpen(true);
   }
 
+  function openReminderForEditingAppointment() {
+    if (editingAppointmentId === null) return;
+
+    const appointment = appointments.find(
+      (item) => item.id === editingAppointmentId
+    );
+
+    if (!appointment) return;
+
+    setIsAppointmentModalOpen(false);
+    openReminder(appointment);
+  }
+
   async function copyReminder() {
     try {
       await navigator.clipboard.writeText(reminderText);
@@ -1893,7 +1954,7 @@ export default function Home() {
                   setLoginError("");
                 }}
                 placeholder="name@example.com"
-                className={FIELD_CLASS}
+                className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3 text-black caret-black outline-none placeholder:text-neutral-400 focus:border-rose-400"
               />
             </div>
 
@@ -1912,7 +1973,7 @@ export default function Home() {
                   setLoginError("");
                 }}
                 placeholder="••••••••"
-                className={FIELD_CLASS}
+                className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3 text-black caret-black outline-none placeholder:text-neutral-400 focus:border-rose-400"
               />
             </div>
 
@@ -2365,9 +2426,7 @@ export default function Home() {
                     {t.clientBase}
                   </p>
 
-                  <h1 className="text-2xl font-semibold">
-                    {t.clients}
-                  </h1>
+                  <h1 className="text-2xl font-semibold">{t.clients}</h1>
 
                   <p className="mt-1 text-xs text-neutral-400">
                     {t.total}: {clients.length}
@@ -2386,7 +2445,7 @@ export default function Home() {
                 value={clientSearch}
                 onChange={(event) => setClientSearch(event.target.value)}
                 placeholder={t.searchClient}
-                className={`mt-4 ${FIELD_CLASS}`}
+                className="mt-4 w-full rounded-xl border border-rose-200 bg-white px-4 py-3 outline-none focus:border-rose-400"
               />
             </header>
 
@@ -2447,9 +2506,7 @@ export default function Home() {
                 {t.financeRecords}
               </p>
 
-              <h1 className="text-2xl font-semibold">
-                {t.analytics}
-              </h1>
+              <h1 className="text-2xl font-semibold">{t.analytics}</h1>
 
               <p className="mt-1 text-xs text-neutral-400">
                 {t.completedOnlyIncome}
@@ -2466,6 +2523,10 @@ export default function Home() {
                   <p className="mt-2 text-2xl font-semibold">
                     {todayIncome} грн
                   </p>
+
+                  <p className="mt-1 text-xs text-neutral-400">
+                    {todayCompletedAppointments.length} {t.completed}
+                  </p>
                 </div>
 
                 <div className="rounded-2xl border border-rose-200 bg-white/80 p-4">
@@ -2475,6 +2536,10 @@ export default function Home() {
 
                   <p className="mt-2 text-2xl font-semibold">
                     {weekIncome} грн
+                  </p>
+
+                  <p className="mt-1 text-xs text-neutral-400">
+                    {weekCompletedAppointments.length} {t.completed}
                   </p>
                 </div>
               </div>
@@ -2486,6 +2551,11 @@ export default function Home() {
 
                 <p className="mt-2 text-3xl font-semibold">
                   {monthIncome} грн
+                </p>
+
+                <p className="mt-2 text-sm text-neutral-500">
+                  {currentMonthCompletedAppointments.length}{" "}
+                  {t.completed}
                 </p>
               </div>
 
@@ -2500,8 +2570,10 @@ export default function Home() {
                   </p>
                 </div>
 
-                <div className="rounded-2xl bg-rose-100 p-4">
-                  <p className="text-xs text-rose-700">{t.scheduled}</p>
+                <div className="rounded-2xl bg-sky-50 p-4">
+                  <p className="text-xs text-sky-700">
+                    {t.scheduled}
+                  </p>
 
                   <p className="mt-2 text-xl font-semibold">
                     {monthScheduledCount}
@@ -2509,7 +2581,9 @@ export default function Home() {
                 </div>
 
                 <div className="rounded-2xl bg-red-50 p-4">
-                  <p className="text-xs text-red-600">{t.cancelled}</p>
+                  <p className="text-xs text-red-600">
+                    {t.cancelled}
+                  </p>
 
                   <p className="mt-2 text-xl font-semibold">
                     {monthCancelledCount}
@@ -2526,9 +2600,7 @@ export default function Home() {
               </div>
 
               <div className="mt-6">
-                <h2 className="text-lg font-semibold">
-                  {t.topServices}
-                </h2>
+                <h2 className="text-lg font-semibold">{t.topServices}</h2>
 
                 <div className="mt-3 space-y-2">
                   {serviceStats.length === 0 && (
@@ -2572,9 +2644,7 @@ export default function Home() {
             <header className="shrink-0 border-b border-rose-200 bg-rose-50/95 px-5 py-4">
               <p className="text-sm text-neutral-500">{t.app}</p>
 
-              <h1 className="text-2xl font-semibold">
-                {t.settings}
-              </h1>
+              <h1 className="text-2xl font-semibold">{t.settings}</h1>
             </header>
 
             <section className="min-h-0 flex-1 overflow-y-auto p-5">
@@ -2634,6 +2704,10 @@ export default function Home() {
               <div className="mt-7">
                 <h2 className="text-lg font-semibold">{t.language}</h2>
 
+                <p className="mt-1 text-sm text-neutral-500">
+                  {t.languageHint}
+                </p>
+
                 <div className="mt-4 grid grid-cols-2 gap-2 rounded-2xl border border-rose-200 bg-white/80 p-2">
                   <button
                     onClick={() => setLanguage("ru")}
@@ -2664,6 +2738,10 @@ export default function Home() {
                   {t.workSchedule}
                 </h2>
 
+                <p className="mt-1 text-sm text-neutral-500">
+                  {t.workScheduleHint}
+                </p>
+
                 <div className="mt-4 rounded-2xl border border-rose-200 bg-white/80 p-4">
                   <div className="grid grid-cols-2 gap-3">
                     <div>
@@ -2685,7 +2763,7 @@ export default function Home() {
                             ),
                           });
                         }}
-                        className={FIELD_CLASS}
+                        className="w-full rounded-xl border border-rose-200 bg-white px-3 py-3"
                       >
                         {Array.from(
                           { length: 18 },
@@ -2711,7 +2789,7 @@ export default function Home() {
                             endHour: Number(event.target.value),
                           })
                         }
-                        className={FIELD_CLASS}
+                        className="w-full rounded-xl border border-rose-200 bg-white px-3 py-3"
                       >
                         {Array.from(
                           { length: 18 },
@@ -2732,7 +2810,11 @@ export default function Home() {
                   </div>
 
                   <div className="mt-5">
-                    <div className="grid grid-cols-7 gap-1">
+                    <p className="text-xs text-neutral-500">
+                      {t.workDays}
+                    </p>
+
+                    <div className="mt-2 grid grid-cols-7 gap-1">
                       {WEEKDAYS.map((day) => {
                         const active = workSettings.workDays.includes(
                           day.value
@@ -2776,6 +2858,12 @@ export default function Home() {
                 </div>
 
                 <div className="mt-4 space-y-3">
+                  {services.length === 0 && (
+                    <div className="rounded-2xl border border-dashed border-rose-300 bg-white/70 p-6 text-center text-sm text-neutral-500">
+                      {t.addFirstService}
+                    </div>
+                  )}
+
                   {services.map((service) => (
                     <div
                       key={service.id}
@@ -2892,11 +2980,13 @@ export default function Home() {
                       onChange={(event) => {
                         setSelectedClientId(event.target.value);
 
+                        clearAppointmentWarning();
+
                         if (event.target.value) {
                           setAppointmentName("");
                         }
                       }}
-                      className={FIELD_CLASS}
+                      className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
                     >
                       <option value="">{t.manualName}</option>
 
@@ -2925,10 +3015,12 @@ export default function Home() {
 
                     <input
                       value={appointmentName}
-                      onChange={(event) =>
-                        setAppointmentName(event.target.value)
-                      }
-                      className={FIELD_CLASS}
+                      onChange={(event) => {
+                        setAppointmentName(event.target.value);
+
+                        clearAppointmentWarning();
+                      }}
+                      className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
                     />
                   </div>
                 )}
@@ -2944,7 +3036,7 @@ export default function Home() {
                       onChange={(event) =>
                         handleServiceSelection(event.target.value)
                       }
-                      className={FIELD_CLASS}
+                      className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
                     >
                       <option value="">{t.manualService}</option>
 
@@ -2965,42 +3057,50 @@ export default function Home() {
 
                     <input
                       value={appointmentService}
-                      onChange={(event) =>
-                        setAppointmentService(event.target.value)
-                      }
-                      className={FIELD_CLASS}
+                      onChange={(event) => {
+                        setAppointmentService(event.target.value);
+
+                        clearAppointmentWarning();
+                      }}
+                      className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
                     />
                   </div>
                 )}
 
-                <div>
-                  <label className="mb-1 block text-sm text-neutral-500">
-                    {t.date}
-                  </label>
+                <div className="grid min-w-0 grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)] gap-3">
+                  <div className="min-w-0">
+                    <label className="mb-1 block text-sm text-neutral-500">
+                      {t.date}
+                    </label>
 
-                  <input
-                    type="date"
-                    value={appointmentDate}
-                    onChange={(event) =>
-                      setAppointmentDate(event.target.value)
-                    }
-                    className={`${FIELD_CLASS} appearance-none`}
-                  />
-                </div>
+                    <input
+                      type="date"
+                      value={appointmentDate}
+                      onChange={(event) => {
+                        setAppointmentDate(event.target.value);
 
-                <div>
-                  <label className="mb-1 block text-sm text-neutral-500">
-                    {t.time}
-                  </label>
+                        clearAppointmentWarning();
+                      }}
+                      className="block w-full min-w-0 max-w-full rounded-xl border border-rose-200 bg-white px-2 py-3 text-base text-black outline-none focus:border-rose-400"
+                    />
+                  </div>
 
-                  <input
-                    type="time"
-                    value={appointmentTime}
-                    onChange={(event) =>
-                      setAppointmentTime(event.target.value)
-                    }
-                    className={`${FIELD_CLASS} appearance-none`}
-                  />
+                  <div className="min-w-0">
+                    <label className="mb-1 block text-sm text-neutral-500">
+                      {t.time}
+                    </label>
+
+                    <input
+                      type="time"
+                      value={appointmentTime}
+                      onChange={(event) => {
+                        setAppointmentTime(event.target.value);
+
+                        clearAppointmentWarning();
+                      }}
+                      className="block w-full min-w-0 max-w-full rounded-xl border border-rose-200 bg-white px-2 py-3 text-base text-black outline-none focus:border-rose-400"
+                    />
+                  </div>
                 </div>
 
                 <div>
@@ -3010,10 +3110,12 @@ export default function Home() {
 
                   <select
                     value={appointmentDuration}
-                    onChange={(event) =>
-                      setAppointmentDuration(event.target.value)
-                    }
-                    className={FIELD_CLASS}
+                    onChange={(event) => {
+                      setAppointmentDuration(event.target.value);
+
+                      clearAppointmentWarning();
+                    }}
+                    className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
                   >
                     {[30, 60, 90, 120, 150, 180].map((minutes) => (
                       <option key={minutes} value={minutes}>
@@ -3035,7 +3137,7 @@ export default function Home() {
                     onChange={(event) =>
                       setAppointmentPrice(event.target.value)
                     }
-                    className={FIELD_CLASS}
+                    className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
                   />
                 </div>
 
@@ -3051,14 +3153,33 @@ export default function Home() {
                         event.target.value as AppointmentStatus
                       )
                     }
-                    className={FIELD_CLASS}
+                    className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
                   >
-                    <option value="scheduled">{t.scheduledStatus}</option>
-                    <option value="completed">{t.completedStatus}</option>
-                    <option value="cancelled">{t.cancelledStatus}</option>
+                    <option value="scheduled">
+                      {t.scheduledStatus}
+                    </option>
+
+                    <option value="completed">
+                      {t.completedStatus}
+                    </option>
+
+                    <option value="cancelled">
+                      {t.cancelledStatus}
+                    </option>
+
                     <option value="no-show">{t.noShowStatus}</option>
                   </select>
                 </div>
+
+                {editingAppointmentId !== null &&
+                  appointmentStatus === "scheduled" && (
+                    <button
+                      onClick={openReminderForEditingAppointment}
+                      className="w-full rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 font-medium text-sky-700"
+                    >
+                      {t.remindClient}
+                    </button>
+                  )}
 
                 {appointmentError && (
                   <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
@@ -3104,7 +3225,9 @@ export default function Home() {
             <div className="max-h-[90dvh] w-full max-w-md overflow-y-auto rounded-t-3xl bg-rose-50 p-5">
               <div className="flex justify-between">
                 <h2 className="text-xl font-semibold">
-                  {editingClientId !== null ? t.editClient : t.newClient}
+                  {editingClientId !== null
+                    ? t.editClient
+                    : t.newClient}
                 </h2>
 
                 <button
@@ -3120,7 +3243,7 @@ export default function Home() {
                   value={clientName}
                   onChange={(event) => setClientName(event.target.value)}
                   placeholder={t.name}
-                  className={FIELD_CLASS}
+                  className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
                 />
 
                 <input
@@ -3129,7 +3252,7 @@ export default function Home() {
                     setClientPhone(event.target.value)
                   }
                   placeholder={t.phone}
-                  className={FIELD_CLASS}
+                  className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
                 />
 
                 <input
@@ -3138,7 +3261,7 @@ export default function Home() {
                     setClientSocial(event.target.value)
                   }
                   placeholder="@username"
-                  className={FIELD_CLASS}
+                  className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
                 />
 
                 <textarea
@@ -3156,6 +3279,239 @@ export default function Home() {
                   {t.save}
                 </button>
               </div>
+            </div>
+          </div>
+        )}
+
+        {isClientDetailsOpen && selectedClientDetails && (
+          <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40">
+            <div className="max-h-[92dvh] w-full max-w-md overflow-y-auto rounded-t-3xl bg-rose-50 p-5">
+              <div className="flex justify-between gap-4">
+                <div>
+                  <p className="text-sm text-neutral-500">
+                    {t.clientCard}
+                  </p>
+
+                  <h2 className="mt-1 text-2xl font-semibold">
+                    {selectedClientDetails.name}
+                  </h2>
+                </div>
+
+                <button
+                  onClick={() => setIsClientDetailsOpen(false)}
+                  className="text-sm text-neutral-500"
+                >
+                  {t.close}
+                </button>
+              </div>
+
+              <div className="mt-5 rounded-2xl border border-rose-200 bg-white/80 p-4">
+                <p className="font-medium">
+                  {selectedClientDetails.phone || t.phoneMissing}
+                </p>
+
+                {selectedClientDetails.social && (
+                  <p className="mt-2 text-sm text-neutral-500">
+                    {selectedClientDetails.social}
+                  </p>
+                )}
+
+                {selectedClientDetails.note && (
+                  <p className="mt-3 rounded-xl bg-rose-50 p-3 text-sm">
+                    {selectedClientDetails.note}
+                  </p>
+                )}
+
+                <div className="mt-4 grid grid-cols-2 gap-2">
+                  {selectedClientDetails.phone && (
+                    <a
+                      href={getPhoneUrl(selectedClientDetails.phone)}
+                      className="rounded-xl bg-black px-3 py-3 text-center text-sm font-medium text-white"
+                    >
+                      {t.call}
+                    </a>
+                  )}
+
+                  {selectedClientDetails.social &&
+                    (getSocialType(selectedClientDetails.social) ===
+                      "telegram" ||
+                      getSocialType(selectedClientDetails.social) ===
+                        "unknown") && (
+                      <button
+                        onClick={() =>
+                          openExternal(
+                            getTelegramUrl(selectedClientDetails.social)
+                          )
+                        }
+                        className="rounded-xl border border-rose-200 bg-white px-3 py-3 text-sm font-medium"
+                      >
+                        {t.telegram}
+                      </button>
+                    )}
+
+                  {selectedClientDetails.social &&
+                    (getSocialType(selectedClientDetails.social) ===
+                      "instagram" ||
+                      getSocialType(selectedClientDetails.social) ===
+                        "unknown") && (
+                      <button
+                        onClick={() =>
+                          openExternal(
+                            getInstagramUrl(selectedClientDetails.social)
+                          )
+                        }
+                        className="rounded-xl border border-rose-200 bg-white px-3 py-3 text-sm font-medium"
+                      >
+                        {t.instagram}
+                      </button>
+                    )}
+                </div>
+              </div>
+
+              <div className="mt-4 grid grid-cols-2 gap-3">
+                <div className="rounded-2xl bg-white/80 p-4">
+                  <p className="text-xs text-neutral-500">
+                    {t.totalAppointments}
+                  </p>
+
+                  <p className="mt-1 text-2xl font-semibold">
+                    {selectedClientAppointments.length}
+                  </p>
+                </div>
+
+                <div className="rounded-2xl bg-white/80 p-4">
+                  <p className="text-xs text-neutral-500">
+                    {t.futureAppointmentsCount}
+                  </p>
+
+                  <p className="mt-1 text-2xl font-semibold">
+                    {futureClientAppointments.length}
+                  </p>
+                </div>
+              </div>
+
+              <button
+                onClick={() =>
+                  openNewAppointmentForClient(selectedClientDetails)
+                }
+                className="mt-4 w-full rounded-xl bg-black px-4 py-4 text-white"
+              >
+                {t.bookClient}
+              </button>
+
+              <button
+                onClick={() => openEditClient(selectedClientDetails)}
+                className="mt-3 w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
+              >
+                {t.editClientButton}
+              </button>
+
+              <div className="mt-6">
+                <h3 className="text-lg font-semibold">
+                  {t.futureAppointments}
+                </h3>
+
+                <div className="mt-3 space-y-2">
+                  {futureClientAppointments.length === 0 && (
+                    <p className="rounded-xl bg-white/70 p-4 text-sm text-neutral-500">
+                      {t.noFutureAppointments}
+                    </p>
+                  )}
+
+                  {futureClientAppointments.map((appointment) => (
+                    <div
+                      key={appointment.id}
+                      className="rounded-xl border border-rose-200 bg-white/80 p-3"
+                    >
+                      <div className="flex justify-between gap-3">
+                        <div>
+                          <p className="font-medium">
+                            {formatFullDate(
+                              appointment.date,
+                              language
+                            )}
+                          </p>
+
+                          <p className="mt-1 text-sm text-neutral-500">
+                            {appointment.time} · {appointment.service}
+                          </p>
+
+                          <p className="mt-1 text-sm font-medium">
+                            {appointment.price} грн
+                          </p>
+                        </div>
+
+                        <span
+                          className={`h-fit rounded-full border px-2 py-1 text-[10px] ${getStatusBadgeClass(
+                            appointment.status
+                          )}`}
+                        >
+                          {getStatusLabel(appointment.status)}
+                        </span>
+                      </div>
+
+                      {appointment.status === "scheduled" && (
+                        <button
+                          onClick={() => openReminder(appointment)}
+                          className="mt-3 w-full rounded-xl bg-sky-50 px-3 py-2 text-sm font-medium text-sky-700"
+                        >
+                          {t.remind}
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="mt-6">
+                <h3 className="text-lg font-semibold">{t.history}</h3>
+
+                <div className="mt-3 space-y-2">
+                  {pastClientAppointments.length === 0 && (
+                    <p className="rounded-xl bg-white/70 p-4 text-sm text-neutral-500">
+                      {t.noHistory}
+                    </p>
+                  )}
+
+                  {pastClientAppointments.map((appointment) => (
+                    <div
+                      key={appointment.id}
+                      className="rounded-xl border border-rose-200 bg-white/80 p-3"
+                    >
+                      <div className="flex justify-between gap-3">
+                        <div>
+                          <p className="font-medium">
+                            {formatFullDate(
+                              appointment.date,
+                              language
+                            )}
+                          </p>
+
+                          <p className="mt-1 text-sm text-neutral-500">
+                            {appointment.service} · {appointment.price}{" "}
+                            грн
+                          </p>
+                        </div>
+
+                        <span
+                          className={`h-fit rounded-full border px-2 py-1 text-[10px] ${getStatusBadgeClass(
+                            appointment.status
+                          )}`}
+                        >
+                          {getStatusLabel(appointment.status)}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <button
+                onClick={() => deleteClient(selectedClientDetails.id)}
+                className="mt-6 w-full rounded-xl bg-red-50 px-4 py-3 text-red-600"
+              >
+                {t.deleteClient}
+              </button>
             </div>
           </div>
         )}
@@ -3183,7 +3539,7 @@ export default function Home() {
                   value={serviceName}
                   onChange={(event) => setServiceName(event.target.value)}
                   placeholder={t.serviceName}
-                  className={FIELD_CLASS}
+                  className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
                 />
 
                 <select
@@ -3191,7 +3547,7 @@ export default function Home() {
                   onChange={(event) =>
                     setServiceDuration(event.target.value)
                   }
-                  className={FIELD_CLASS}
+                  className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
                 >
                   {[30, 60, 90, 120, 150, 180].map((minutes) => (
                     <option key={minutes} value={minutes}>
@@ -3208,7 +3564,7 @@ export default function Home() {
                     setServicePrice(event.target.value)
                   }
                   placeholder={t.servicePrice}
-                  className={FIELD_CLASS}
+                  className="w-full rounded-xl border border-rose-200 bg-white px-4 py-3"
                 />
 
                 <button
@@ -3261,25 +3617,36 @@ export default function Home() {
 
               {reminderClient?.social && (
                 <div className="mt-3 grid grid-cols-2 gap-2">
-                  <button
-                    onClick={() =>
-                      openExternal(getTelegramUrl(reminderClient.social))
-                    }
-                    className="rounded-xl border border-rose-200 bg-white px-3 py-3 text-sm font-medium"
-                  >
-                    {t.openTelegram}
-                  </button>
+                  {(getSocialType(reminderClient.social) === "telegram" ||
+                    getSocialType(reminderClient.social) ===
+                      "unknown") && (
+                    <button
+                      onClick={() =>
+                        openExternal(
+                          getTelegramUrl(reminderClient.social)
+                        )
+                      }
+                      className="rounded-xl border border-rose-200 bg-white px-3 py-3 text-sm font-medium"
+                    >
+                      {t.openTelegram}
+                    </button>
+                  )}
 
-                  <button
-                    onClick={() =>
-                      openExternal(
-                        getInstagramUrl(reminderClient.social)
-                      )
-                    }
-                    className="rounded-xl border border-rose-200 bg-white px-3 py-3 text-sm font-medium"
-                  >
-                    {t.openInstagram}
-                  </button>
+                  {(getSocialType(reminderClient.social) ===
+                    "instagram" ||
+                    getSocialType(reminderClient.social) ===
+                      "unknown") && (
+                    <button
+                      onClick={() =>
+                        openExternal(
+                          getInstagramUrl(reminderClient.social)
+                        )
+                      }
+                      className="rounded-xl border border-rose-200 bg-white px-3 py-3 text-sm font-medium"
+                    >
+                      {t.openInstagram}
+                    </button>
+                  )}
                 </div>
               )}
             </div>
