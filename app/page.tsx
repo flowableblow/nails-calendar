@@ -5757,24 +5757,35 @@ useEffect(() => {
                                   appointment
                                 );
                               }}
-                              className="absolute left-3 right-3 z-10 overflow-hidden rounded-[24px] border border-white/95 bg-white/82 text-left shadow-[0_12px_30px_rgba(120,85,100,0.13)] backdrop-blur-xl transition-all duration-200 active:scale-[0.985]"
+                              className="absolute left-3 right-3 z-10 overflow-hidden rounded-[30px] text-left transition-all duration-200 active:scale-[0.985]"
                               style={{
                                 top: `${top + 6}px`,
 
                                 height: `${Math.max(
                                   height -
                                     12,
-                                  54
+                                  62
                                 )}px`,
                               }}
                             >
+                              <Image
+                                src="/icons/appointment-pillow.png"
+                                alt=""
+                                fill
+                                sizes="(max-width: 768px) 100vw, 420px"
+                                className="pointer-events-none select-none object-fill drop-shadow-[0_12px_22px_rgba(170,105,130,0.20)]"
+                                priority={false}
+                              />
+
+                              <div className="pointer-events-none absolute inset-x-8 top-[9%] h-[18%] rounded-full bg-white/25 blur-xl" />
+
                               <div
-                                className={`absolute bottom-2 left-2 top-2 w-[4px] rounded-full ${getAppointmentAccentClass(
+                                className={`absolute bottom-[14%] left-[5%] top-[14%] z-10 w-[4px] rounded-full shadow-[0_0_8px_rgba(255,255,255,0.45)] ${getAppointmentAccentClass(
                                   appointment.status
                                 )}`}
                               />
 
-                              <div className="flex h-full flex-col justify-center px-4 pl-6">
+                              <div className="relative z-20 flex h-full flex-col justify-center px-5 pl-8 pr-6">
                                 <div className="flex items-start justify-between gap-3">
                                   <div className="min-w-0">
                                     <p className="truncate text-[15px] font-semibold tracking-[-0.01em] text-neutral-900">
