@@ -3439,6 +3439,24 @@ useEffect(() => {
     return "border-emerald-300 bg-emerald-50/90 text-emerald-700";
   }
 
+  function connectionDotClass() {
+    if (
+      !isOnline
+    ) {
+      return "bg-orange-500";
+    }
+
+    if (
+      isSyncing ||
+      pendingCount >
+        0
+    ) {
+      return "bg-amber-500";
+    }
+
+    return "bg-emerald-500";
+  }
+
   function statusLabel(
     status: AppointmentStatus
   ) {
@@ -5488,8 +5506,11 @@ useEffect(() => {
                   </div>
 
                   <span
-                    className={`rounded-full border px-3 py-1.5 text-[10px] font-medium ${connectionClass()}`}
+                    className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[10px] font-medium ${connectionClass()}`}
                   >
+                    <span
+                      className={`h-2 w-2 rounded-full ${connectionDotClass()}`}
+                    />
                     {connectionLabel()}
                   </span>
                 </div>
@@ -5738,6 +5759,14 @@ useEffect(() => {
                             linkedClient?.phone ??
                             "";
 
+                          const telegram =
+                            linkedClient?.telegram ??
+                            "";
+
+                          const instagram =
+                            linkedClient?.instagram ??
+                            "";
+
                           const serviceLabel =
                             getAppointmentServiceLabel(
                               appointment
@@ -5745,72 +5774,144 @@ useEffect(() => {
 
                           return (
                             <button
-  key={appointment.id}
-  onClick={(event) => {
-    event.stopPropagation();
+                              key={
+                                appointment.id
+                              }
+                              onClick={(
+                                event
+                              ) => {
+                                event.stopPropagation();
 
-    openEditAppointment(
-      appointment
-    );
-  }}
-  className="absolute left-3 right-3 z-10 overflow-hidden text-left"
-  style={{
-    top: `${top + 6}px`,
-    height: `${Math.max(
-      height - 12,
-      54
-    )}px`,
-  }}
->
-  <div className="absolute inset-0">
-    <Image
-      src="/icons/appointment-card.png"
-      alt=""
-      fill
-      className="object-fill"
-    />
-  </div>
+                                openEditAppointment(
+                                  appointment
+                                );
+                              }}
+                              className="absolute left-3 right-3 z-10 overflow-hidden rounded-[30px] text-left transition-all duration-200 active:scale-[0.985]"
+                              style={{
+                                top: `${top + 6}px`,
 
-  <div className="relative z-10 flex h-full flex-col justify-center px-5 pl-7">
-    <div className="flex items-start justify-between gap-3">
-      <div className="min-w-0">
-        <p className="truncate text-[14px] font-semibold text-neutral-900">
-          {appointment.name}
-        </p>
+                                height: `${Math.max(
+                                  height -
+                                    12,
+                                  62
+                                )}px`,
+                              }}
+                            >
+                              <Image
+                                src="/icons/appointment-card.png"
+                                alt=""
+                                fill
+                                sizes="(max-width: 768px) 100vw, 420px"
+                                className="pointer-events-none select-none object-fill drop-shadow-[0_10px_18px_rgba(170,105,130,0.16)]"
+                                priority={false}
+                              />
 
-        {phone && (
-          <p className="mt-0.5 truncate text-[10px] font-medium text-neutral-500">
-            {phone}
-          </p>
-        )}
+                              <div className="pointer-events-none absolute inset-x-8 top-[9%] h-[18%] rounded-full bg-white/25 blur-xl" />
 
-        {height >= 82 && (
-          <p className="mt-1 truncate text-[11px] text-neutral-500">
-            {serviceLabel}
-          </p>
-        )}
-      </div>
+                              <div
+                                className={`absolute left-[5%] top-1/2 z-10 h-8 w-[4px] -translate-y-1/2 rounded-full shadow-[0_0_8px_rgba(255,255,255,0.45)] ${getAppointmentAccentClass(
+                                  appointment.status
+                                )}`}
+                              />
 
-      <div className="shrink-0 text-right">
-        <p className="text-[10px] font-medium text-neutral-500">
-          {appointment.time} – {endTime}
-        </p>
+                              <div
+                                className="relative z-20 flex h-full flex-col justify-center px-5 pl-8 pr-6"
+                                style={{
+                                  fontFamily:
+                                    '"Avenir Next", "SF Pro Rounded", "Segoe UI", sans-serif',
+                                }}
+                              >
+                                <div className="flex items-start justify-between gap-3">
+                                  <div className="min-w-0 flex-1">
+                                    <p className="truncate text-[15px] font-semibold tracking-[-0.025em] text-[#262126]">
+                                      {appointment.name}
+                                    </p>
 
-        {height >= 76 && (
-          <span
-            className={`mt-1 inline-block rounded-full border px-2 py-0.5 text-[8px] ${getStatusBadgeClass(
-              appointment.status
-            )}`}
-          >
-            {statusLabel(
-              appointment.status
-            )}
-          </span>
-        )}
-      </div>
-    </div>
-  </div>
-</button>
+                                    {height >=
+                                      82 && (
+                                      <p className="mt-1 truncate text-[11px] font-medium tracking-[-0.01em] text-[#8f7c84]">
+                                        {serviceLabel}
+                                      </p>
+                                    )}
+                                  </div>
+
+                                  <div className="shrink-0 text-right">
+                                    <p className="text-[10px] font-medium tracking-[-0.015em] text-[#74676d]">
+                                      {appointment.time} – {endTime}
+                                    </p>
+
+                                    {height >=
+                                      76 && (
+                                      <div className="mt-2 flex items-center justify-end gap-1.5">
+                                        {phone && (
+                                          <span
+                                            className="flex h-5 w-5 items-center justify-center text-[#b6748b]"
+                                            title={phone}
+                                          >
+                                            <svg
+                                              viewBox="0 0 24 24"
+                                              fill="none"
+                                              stroke="currentColor"
+                                              strokeWidth="1.8"
+                                              strokeLinecap="round"
+                                              strokeLinejoin="round"
+                                              className="h-4 w-4"
+                                            >
+                                              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.69 2.8a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.28-1.28a2 2 0 0 1 2.11-.45c.9.33 1.84.56 2.8.69A2 2 0 0 1 22 16.92z" />
+                                            </svg>
+                                          </span>
+                                        )}
+
+                                        {telegram && (
+                                          <span
+                                            className="flex h-5 w-5 items-center justify-center text-[#b6748b]"
+                                            title={telegram}
+                                          >
+                                            <svg
+                                              viewBox="0 0 24 24"
+                                              fill="currentColor"
+                                              className="h-4 w-4"
+                                            >
+                                              <path d="M21.6 3.2 2.8 10.45c-1.28.51-1.27 1.22-.23 1.54l4.82 1.5 1.85 5.76c.23.64.12.9.78.9.51 0 .74-.23 1.02-.5l2.34-2.27 4.87 3.6c.9.5 1.55.24 1.77-.83L23.03 5.8c.31-1.43-.55-2.08-1.43-1.6ZM8.15 13.15l9.4-5.93c.47-.29.9-.13.55.18l-7.76 7-.3 3.21-1.89-4.46Z" />
+                                            </svg>
+                                          </span>
+                                        )}
+
+                                        {instagram && (
+                                          <span
+                                            className="flex h-5 w-5 items-center justify-center text-[#b6748b]"
+                                            title={instagram}
+                                          >
+                                            <svg
+                                              viewBox="0 0 24 24"
+                                              fill="none"
+                                              stroke="currentColor"
+                                              strokeWidth="1.8"
+                                              strokeLinecap="round"
+                                              strokeLinejoin="round"
+                                              className="h-4 w-4"
+                                            >
+                                              <rect x="3" y="3" width="18" height="18" rx="5" />
+                                              <circle cx="12" cy="12" r="4" />
+                                              <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
+                                            </svg>
+                                          </span>
+                                        )}
+
+                                        <span
+                                          className={`ml-0.5 h-2 w-2 rounded-full shadow-[0_0_0_3px_rgba(255,255,255,0.60)] ${getAppointmentAccentClass(
+                                            appointment.status
+                                          )}`}
+                                          title={statusLabel(
+                                            appointment.status
+                                          )}
+                                        />
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            </button>
                           );
                         }
                       )}
@@ -5927,14 +6028,14 @@ useEffect(() => {
               </section>
             )}
 
-            <button
-              onClick={() =>
-                openNewAppointment()
-              }
-              className="absolute bottom-4 right-5 z-30 flex h-14 w-14 items-center justify-center rounded-[22px] border border-white/70 bg-gradient-to-br from-rose-300 via-rose-400 to-pink-500 text-[30px] font-light text-white shadow-[0_14px_30px_rgba(225,100,145,0.30)] backdrop-blur-md transition-all active:scale-95"
-            >
-              +
-            </button>
+            <div className="absolute bottom-4 right-5 z-30">
+              <AddButton
+                onClick={() =>
+                  openNewAppointment()
+                }
+                size="lg"
+              />
+            </div>
           </div>
         )}
 
@@ -5954,14 +6055,12 @@ useEffect(() => {
                     </h1>
                   </div>
 
-                  <button
+                  <AddButton
                     onClick={
                       openNewClient
                     }
-                    className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-rose-400 to-pink-500 text-2xl text-white shadow-lg"
-                  >
-                    +
-                  </button>
+                    size="md"
+                  />
                 </div>
 
                 <input
@@ -6433,14 +6532,12 @@ useEffect(() => {
                     {t.services}
                   </h2>
 
-                  <button
+                  <AddButton
                     onClick={
                       openNewService
                     }
-                    className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-rose-400 to-pink-500 text-xl text-white shadow-md"
-                  >
-                    +
-                  </button>
+                    size="sm"
+                  />
                 </div>
 
                 <div className="mt-3 space-y-2">
@@ -7797,6 +7894,32 @@ useEffect(() => {
         )}
       </div>
     </main>
+  );
+}
+
+function AddButton({
+  onClick,
+  size = "md",
+}: {
+  onClick: () => void;
+  size?: "sm" | "md" | "lg";
+}) {
+  const sizes = {
+    sm: "h-10 w-10 rounded-[14px] text-xl",
+    md: "h-11 w-11 rounded-[16px] text-2xl",
+    lg: "h-14 w-14 rounded-[20px] text-[30px]",
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={
+        onClick
+      }
+      className={`flex items-center justify-center border border-white/70 bg-[linear-gradient(145deg,#ff9bb8_0%,#ff5f94_55%,#ff3f82_100%)] font-light text-white shadow-[0_10px_24px_rgba(229,95,143,0.28),inset_0_1px_0_rgba(255,255,255,0.72)] backdrop-blur-md transition-all active:scale-95 ${sizes[size]}`}
+    >
+      +
+    </button>
   );
 }
 
