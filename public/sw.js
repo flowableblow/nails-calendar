@@ -1,5 +1,5 @@
-const CACHE_NAME = "nails-calendar-v4";
-const APP_SHELL_CACHE = "nails-calendar-shell-v4";
+const CACHE_NAME = "nails-calendar-v5";
+const APP_SHELL_CACHE = "nails-calendar-shell-v5";
 
 const OFFLINE_URL = "/offline";
 
@@ -41,6 +41,79 @@ self.addEventListener("activate", (event) => {
   );
 });
 
+self.addEventListener("push", (event) => {
+  let data = {};
+
+  try {
+    data = event.data ? event.data.json() : {};
+  } catch {
+    data = {
+      body: event.data ? event.data.text() : "",
+    };
+  }
+
+  const title = data.title || "Напоминание";
+  const body =
+    data.body ||
+    "У вас скоро запись клиента.";
+
+  const options = {
+    body,
+    icon: "/icon-192.png",
+    badge: "/icon-192.png",
+    tag:
+      data.tag ||
+      `appointment-${data.appointmentId || Date.now()}`,
+    data: {
+      url: data.url || "/",
+      appointmentId:
+        data.appointmentId || null,
+    },
+  };
+
+  event.waitUntil(
+    self.registration.showNotification(
+      title,
+      options
+    )
+  );
+});
+
+self.addEventListener(
+  "notificationclick",
+  (event) => {
+    event.notification.close();
+
+    const targetUrl =
+      event.notification?.data?.url || "/";
+
+    event.waitUntil(
+      self.clients
+        .matchAll({
+          type: "window",
+          includeUncontrolled: true,
+        })
+        .then((clients) => {
+          for (const client of clients) {
+            if ("focus" in client) {
+              if ("navigate" in client) {
+                client.navigate(targetUrl);
+              }
+
+              return client.focus();
+            }
+          }
+
+          if (self.clients.openWindow) {
+            return self.clients.openWindow(
+              targetUrl
+            );
+          }
+        })
+    );
+  }
+);
+
 self.addEventListener("fetch", (event) => {
   const request = event.request;
   const url = new URL(request.url);
@@ -49,24 +122,32 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // HTML / переходы:
-  // пытаемся получить свежую страницу,
-  // если сети нет — используем сохранённую главную.
   if (request.mode === "navigate") {
     event.respondWith(
       fetch(request)
         .then(async (response) => {
-          if (response && response.status === 200) {
-            const cache = await caches.open(APP_SHELL_CACHE);
+          if (
+            response &&
+            response.status === 200
+          ) {
+            const cache =
+              await caches.open(
+                APP_SHELL_CACHE
+              );
 
-            await cache.put("/", response.clone());
+            await cache.put(
+              "/",
+              response.clone()
+            );
           }
 
           return response;
         })
         .catch(async () => {
           const shellCache =
-            await caches.open(APP_SHELL_CACHE);
+            await caches.open(
+              APP_SHELL_CACHE
+            );
 
           const cachedHome =
             await shellCache.match("/");
@@ -86,27 +167,30 @@ self.addEventListener("fetch", (event) => {
           }
 
           const offline =
-            await precache.match(OFFLINE_URL);
+            await precache.match(
+              OFFLINE_URL
+            );
 
           if (offline) {
             return offline;
           }
 
-          return new Response("Offline", {
-            status: 503,
-            headers: {
-              "Content-Type":
-                "text/plain; charset=utf-8",
-            },
-          });
+          return new Response(
+            "Offline",
+            {
+              status: 503,
+              headers: {
+                "Content-Type":
+                  "text/plain; charset=utf-8",
+              },
+            }
+          );
         })
     );
 
     return;
   }
 
-  // Next.js JS/CSS/chunks:
-  // после первого онлайн-запуска сохраняем их.
   if (
     url.origin === self.location.origin &&
     url.pathname.startsWith("/_next/")
@@ -151,8 +235,6 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Картинки, manifest и прочая статика:
-  // сначала кэш, потом сеть.
   if (
     url.origin === self.location.origin
   ) {
