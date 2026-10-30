@@ -11,6 +11,7 @@ import {
   type ReactNode,
 } from "react";
 import type { Session } from "@supabase/supabase-js";
+import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import NotificationSettings from "./notification-settings";
 
@@ -1208,6 +1209,29 @@ export default function Home() {
     translations[
       language
     ];
+
+  const bottomNavItems = [
+    {
+      key: "calendar",
+      label: t.calendar,
+      icon: "/icons/nav-calendar.png",
+    },
+    {
+      key: "clients",
+      label: t.clients,
+      icon: "/icons/nav-clients.png",
+    },
+    {
+      key: "analytics",
+      label: t.analytics,
+      icon: "/icons/nav-analytics.png",
+    },
+    {
+      key: "settings",
+      label: t.settings,
+      icon: "/icons/nav-settings.png",
+    },
+  ] as const;
 
   const [
     databaseStatus,
@@ -6506,139 +6530,60 @@ useEffect(() => {
 
         <nav className="shrink-0 px-3 pb-3 pt-2">
           <div className="grid grid-cols-4 gap-1 rounded-[28px] border border-white/75 bg-white/62 p-2 shadow-[0_12px_40px_rgba(110,75,90,0.16)] backdrop-blur-xl">
-            <NavButton
-              active={
-                activeTab ===
-                "calendar"
-              }
-              onClick={() =>
-                setActiveTab(
-                  "calendar"
-                )
-              }
-              icon={
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="h-5 w-5"
-                >
-                  <rect
-                    x="3"
-                    y="5"
-                    width="18"
-                    height="16"
-                    rx="3"
-                  />
-                  <path d="M7 3v4M17 3v4M3 10h18" />
-                </svg>
-              }
-            >
-              {t.calendar}
-            </NavButton>
+            {bottomNavItems.map(
+              (item) => {
+                const active =
+                  activeTab ===
+                  item.key;
 
-            <NavButton
-              active={
-                activeTab ===
-                "clients"
-              }
-              onClick={() =>
-                setActiveTab(
-                  "clients"
-                )
-              }
-              icon={
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="h-5 w-5"
-                >
-                  <circle
-                    cx="9"
-                    cy="8"
-                    r="3"
-                  />
-                  <path d="M3.5 20c.7-4 2.8-6 5.5-6s4.8 2 5.5 6" />
-                  <circle
-                    cx="17"
-                    cy="9"
-                    r="2.3"
-                  />
-                  <path d="M15.5 14.5c2.6.3 4.3 2.2 5 5.5" />
-                </svg>
-              }
-            >
-              {t.clients}
-            </NavButton>
+                return (
+                  <button
+                    key={item.key}
+                    type="button"
+                    onClick={() =>
+                      setActiveTab(
+                        item.key
+                      )
+                    }
+                    className={`flex h-[66px] min-w-0 flex-col items-center justify-center gap-1 rounded-[20px] px-1 transition-all ${
+                      active
+                        ? "bg-rose-100/90 shadow-sm"
+                        : "bg-transparent"
+                    }`}
+                  >
+                    <div
+                      className={`relative h-8 w-8 transition-all ${
+                        active
+                          ? "scale-110 opacity-100"
+                          : "opacity-65"
+                      }`}
+                    >
+                      <Image
+                        src={
+                          item.icon
+                        }
+                        alt={
+                          item.label
+                        }
+                        fill
+                        sizes="32px"
+                        className="object-contain"
+                      />
+                    </div>
 
-            <NavButton
-              active={
-                activeTab ===
-                "analytics"
+                    <span
+                      className={`max-w-full truncate text-[10px] font-medium ${
+                        active
+                          ? "text-rose-500"
+                          : "text-neutral-500"
+                      }`}
+                    >
+                      {item.label}
+                    </span>
+                  </button>
+                );
               }
-              onClick={() =>
-                setActiveTab(
-                  "analytics"
-                )
-              }
-              icon={
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="h-5 w-5"
-                >
-                  <path d="M5 20V11" />
-                  <path d="M12 20V5" />
-                  <path d="M19 20v-7" />
-                  <path d="M3 20h18" />
-                </svg>
-              }
-            >
-              {t.analytics}
-            </NavButton>
-
-            <NavButton
-              active={
-                activeTab ===
-                "settings"
-              }
-              onClick={() =>
-                setActiveTab(
-                  "settings"
-                )
-              }
-              icon={
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="h-5 w-5"
-                >
-                  <circle
-                    cx="12"
-                    cy="12"
-                    r="3"
-                  />
-                  <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.8 2.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21h-4v-.1a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1L4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9A1.7 1.7 0 0 0 3 14H3v-4h.1a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9L4.2 7 7 4.2l.1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.6V3h4v.1a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1L19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.1v4H21a1.7 1.7 0 0 0-1.6 1Z" />
-                </svg>
-              }
-            >
-              {t.settings}
-            </NavButton>
+            )}
           </div>
         </nav>
 
