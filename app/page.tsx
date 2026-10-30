@@ -117,6 +117,9 @@ const LANGUAGE_STORAGE_KEY =
 const OFFLINE_QUEUE_STORAGE_KEY =
   "nails-calendar-offline-queue";
 
+const LOCAL_STORAGE_OWNER_KEY =
+  "nails-calendar-local-owner";
+
 const DEFAULT_WORK_SETTINGS: WorkSettings = {
   startHour: 8,
   endHour: 21,
@@ -1178,6 +1181,22 @@ export default function Home() {
     );
 
   const [
+    authMode,
+    setAuthMode,
+  ] =
+    useState<
+      "login" | "register"
+    >(
+      "login"
+    );
+
+  const [
+    registerName,
+    setRegisterName,
+  ] =
+    useState("");
+
+  const [
     language,
     setLanguage,
   ] =
@@ -1542,10 +1561,80 @@ export default function Home() {
       null
     );
 
+  function getStorageKey(
+    baseKey: string
+  ) {
+    const userId =
+      session?.user.id;
+
+    return userId
+      ? `${baseKey}:${userId}`
+      : baseKey;
+  }
+
+  function migrateLegacyLocalStorage(
+    userId: string
+  ) {
+    const existingOwner =
+      localStorage.getItem(
+        LOCAL_STORAGE_OWNER_KEY
+      );
+
+    if (
+      existingOwner
+    ) {
+      return;
+    }
+
+    const keys = [
+      APPOINTMENTS_STORAGE_KEY,
+      CLIENTS_STORAGE_KEY,
+      SERVICES_STORAGE_KEY,
+      WORK_SETTINGS_STORAGE_KEY,
+      LANGUAGE_STORAGE_KEY,
+      OFFLINE_QUEUE_STORAGE_KEY,
+    ];
+
+    for (
+      const key of keys
+    ) {
+      const legacyValue =
+        localStorage.getItem(
+          key
+        );
+
+      const scopedKey =
+        `${key}:${userId}`;
+
+      if (
+        legacyValue !== null &&
+        localStorage.getItem(
+          scopedKey
+        ) === null
+      ) {
+        localStorage.setItem(
+          scopedKey,
+          legacyValue
+        );
+      }
+
+      localStorage.removeItem(
+        key
+      );
+    }
+
+    localStorage.setItem(
+      LOCAL_STORAGE_OWNER_KEY,
+      userId
+    );
+  }
+
   function getQueue() {
     return safeArray<PendingOperation>(
       localStorage.getItem(
-        OFFLINE_QUEUE_STORAGE_KEY
+        getStorageKey(
+          OFFLINE_QUEUE_STORAGE_KEY
+        )
       )
     );
   }
@@ -1554,7 +1643,9 @@ export default function Home() {
     queue: PendingOperation[]
   ) {
     localStorage.setItem(
-      OFFLINE_QUEUE_STORAGE_KEY,
+      getStorageKey(
+        OFFLINE_QUEUE_STORAGE_KEY
+      ),
       JSON.stringify(
         queue
       )
@@ -1654,6 +1745,7 @@ export default function Home() {
     useCallback(
       async () => {
         if (
+          !session ||
           !navigator.onLine ||
           syncingRef.current
         ) {
@@ -1663,7 +1755,9 @@ export default function Home() {
         let queue =
           safeArray<PendingOperation>(
             localStorage.getItem(
-              OFFLINE_QUEUE_STORAGE_KEY
+              getStorageKey(
+                OFFLINE_QUEUE_STORAGE_KEY
+              )
             )
           );
 
@@ -1711,7 +1805,9 @@ export default function Home() {
               );
 
             localStorage.setItem(
-              OFFLINE_QUEUE_STORAGE_KEY,
+              getStorageKey(
+                OFFLINE_QUEUE_STORAGE_KEY
+              ),
               JSON.stringify(
                 queue
               )
@@ -1754,6 +1850,7 @@ export default function Home() {
       },
       [
         executeOperation,
+        session,
       ]
     );
 
@@ -1808,21 +1905,27 @@ export default function Home() {
     const rawClients =
       safeArray<Client>(
         localStorage.getItem(
-          CLIENTS_STORAGE_KEY
+          getStorageKey(
+            CLIENTS_STORAGE_KEY
+          )
         )
       );
 
     const rawServices =
       safeArray<Service>(
         localStorage.getItem(
-          SERVICES_STORAGE_KEY
+          getStorageKey(
+            SERVICES_STORAGE_KEY
+          )
         )
       );
 
     const rawAppointments =
       safeArray<Appointment>(
         localStorage.getItem(
-          APPOINTMENTS_STORAGE_KEY
+          getStorageKey(
+            APPOINTMENTS_STORAGE_KEY
+          )
         )
       );
 
@@ -1870,7 +1973,9 @@ export default function Home() {
     setWorkSettings(
       safeObject<WorkSettings>(
         localStorage.getItem(
-          WORK_SETTINGS_STORAGE_KEY
+          getStorageKey(
+            WORK_SETTINGS_STORAGE_KEY
+          )
         ),
         DEFAULT_WORK_SETTINGS
       )
@@ -1878,7 +1983,9 @@ export default function Home() {
 
     const storedLanguage =
       localStorage.getItem(
-        LANGUAGE_STORAGE_KEY
+        getStorageKey(
+          LANGUAGE_STORAGE_KEY
+        )
       );
 
     if (
@@ -1917,15 +2024,8 @@ export default function Home() {
     navigator.onLine
   );
 
-  const queue =
-    safeArray<PendingOperation>(
-      localStorage.getItem(
-        OFFLINE_QUEUE_STORAGE_KEY
-      )
-    );
-
   setPendingCount(
-    queue.length
+    0
   );
 
   function handleOnline() {
@@ -2106,7 +2206,14 @@ useEffect(() => {
       return;
     }
 
+    const userId =
+      session.user.id;
+
     async function loadData() {
+      migrateLegacyLocalStorage(
+        userId
+      );
+
       setIsLoaded(
         false
       );
@@ -2189,7 +2296,7 @@ useEffect(() => {
               )
               .eq(
                 "id",
-                "main"
+                userId
               )
               .maybeSingle(),
           ]);
@@ -2464,13 +2571,16 @@ useEffect(() => {
 
   useEffect(() => {
     if (
-      !isLoaded
+      !isLoaded ||
+      !session
     ) {
       return;
     }
 
     localStorage.setItem(
-      CLIENTS_STORAGE_KEY,
+      getStorageKey(
+        CLIENTS_STORAGE_KEY
+      ),
       JSON.stringify(
         clients
       )
@@ -2478,17 +2588,21 @@ useEffect(() => {
   }, [
     clients,
     isLoaded,
+    session,
   ]);
 
   useEffect(() => {
     if (
-      !isLoaded
+      !isLoaded ||
+      !session
     ) {
       return;
     }
 
     localStorage.setItem(
-      SERVICES_STORAGE_KEY,
+      getStorageKey(
+        SERVICES_STORAGE_KEY
+      ),
       JSON.stringify(
         services
       )
@@ -2496,17 +2610,21 @@ useEffect(() => {
   }, [
     services,
     isLoaded,
+    session,
   ]);
 
   useEffect(() => {
     if (
-      !isLoaded
+      !isLoaded ||
+      !session
     ) {
       return;
     }
 
     localStorage.setItem(
-      APPOINTMENTS_STORAGE_KEY,
+      getStorageKey(
+        APPOINTMENTS_STORAGE_KEY
+      ),
       JSON.stringify(
         appointments
       )
@@ -2514,22 +2632,28 @@ useEffect(() => {
   }, [
     appointments,
     isLoaded,
+    session,
   ]);
 
   useEffect(() => {
     if (
-      !isLoaded
+      !isLoaded ||
+      !session
     ) {
       return;
     }
 
     localStorage.setItem(
-      LANGUAGE_STORAGE_KEY,
+      getStorageKey(
+        LANGUAGE_STORAGE_KEY
+      ),
       language
     );
 
     localStorage.setItem(
-      WORK_SETTINGS_STORAGE_KEY,
+      getStorageKey(
+        WORK_SETTINGS_STORAGE_KEY
+      ),
       JSON.stringify(
         workSettings
       )
@@ -2555,11 +2679,14 @@ useEffect(() => {
               "settings",
 
             recordId:
-              "main",
+              session.user.id,
 
             payload: {
               id:
-                "main",
+                session.user.id,
+
+              user_id:
+                session.user.id,
 
               language,
 
@@ -2589,6 +2716,7 @@ useEffect(() => {
     language,
     workSettings,
     isLoaded,
+    session,
   ]);
 
   async function handleLogin(
@@ -2646,12 +2774,150 @@ useEffect(() => {
     );
   }
 
+  async function handleRegister(
+    event: FormEvent
+  ) {
+    event.preventDefault();
+
+    if (
+      !navigator.onLine
+    ) {
+      setLoginError(
+        language ===
+          "uk"
+          ? "Для реєстрації потрібен інтернет."
+          : "Для регистрации нужен интернет."
+      );
+
+      return;
+    }
+
+    if (
+      !registerName.trim()
+    ) {
+      setLoginError(
+        language ===
+          "uk"
+          ? "Вкажи ім'я."
+          : "Укажи имя."
+      );
+
+      return;
+    }
+
+    if (
+      !loginEmail.trim()
+    ) {
+      setLoginError(
+        "Email обязателен."
+      );
+
+      return;
+    }
+
+    if (
+      loginPassword.length < 6
+    ) {
+      setLoginError(
+        language ===
+          "uk"
+          ? "Пароль має містити щонайменше 6 символів."
+          : "Пароль должен содержать минимум 6 символов."
+      );
+
+      return;
+    }
+
+    setLoginLoading(
+      true
+    );
+
+    setLoginError(
+      ""
+    );
+
+    const {
+      data,
+      error,
+    } =
+      await supabase.auth.signUp({
+        email:
+          loginEmail.trim(),
+
+        password:
+          loginPassword,
+
+        options: {
+          data: {
+            name:
+              registerName.trim(),
+          },
+        },
+      });
+
+    if (
+      error
+    ) {
+      setLoginError(
+        error.message
+      );
+
+      setLoginLoading(
+        false
+      );
+
+      return;
+    }
+
+    if (
+      !data.session
+    ) {
+      setLoginError(
+        language ===
+          "uk"
+          ? "Акаунт створено. Підтвердь email, а потім увійди."
+          : "Аккаунт создан. Подтверди email, затем войди."
+      );
+
+      setAuthMode(
+        "login"
+      );
+    }
+
+    setLoginLoading(
+      false
+    );
+  }
+
   async function handleLogout() {
     if (
       navigator.onLine
     ) {
       await supabase.auth.signOut();
     }
+
+    settingsReadyRef.current =
+      false;
+
+    setClients(
+      []
+    );
+
+    setServices(
+      []
+    );
+
+    setAppointments(
+      []
+    );
+
+    setPendingCount(
+      0
+    );
+
+    setIsLoaded(
+      false
+    );
 
     setSession(
       null
@@ -4919,13 +5185,84 @@ useEffect(() => {
       >
         <form
           onSubmit={
-            handleLogin
+            authMode ===
+              "login"
+              ? handleLogin
+              : handleRegister
           }
           className="w-full max-w-sm rounded-[30px] border border-white/70 bg-white/60 p-6 shadow-[0_20px_60px_rgba(110,70,90,0.18)] backdrop-blur-xl"
         >
           <h1 className="text-center text-2xl font-semibold">
             Nails
           </h1>
+
+          <div className="mt-5 grid grid-cols-2 rounded-2xl bg-white/45 p-1">
+            <button
+              type="button"
+              onClick={() => {
+                setAuthMode(
+                  "login"
+                );
+
+                setLoginError(
+                  ""
+                );
+              }}
+              className={`h-10 rounded-xl text-sm font-medium transition ${
+                authMode ===
+                "login"
+                  ? "bg-white text-neutral-900 shadow-sm"
+                  : "text-neutral-500"
+              }`}
+            >
+              Войти
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setAuthMode(
+                  "register"
+                );
+
+                setLoginError(
+                  ""
+                );
+              }}
+              className={`h-10 rounded-xl text-sm font-medium transition ${
+                authMode ===
+                "register"
+                  ? "bg-white text-neutral-900 shadow-sm"
+                  : "text-neutral-500"
+              }`}
+            >
+              Регистрация
+            </button>
+          </div>
+
+          {authMode ===
+            "register" && (
+            <input
+              type="text"
+              value={
+                registerName
+              }
+              onChange={(
+                event
+              ) =>
+                setRegisterName(
+                  event.target.value
+                )
+              }
+              placeholder={
+                language ===
+                  "uk"
+                  ? "Ваше ім'я"
+                  : "Ваше имя"
+              }
+              className="mt-4 h-12 w-full rounded-2xl border border-white/80 bg-white/80 px-4 text-black shadow-sm"
+            />
+          )}
 
           <input
             type="email"
@@ -4940,7 +5277,13 @@ useEffect(() => {
               )
             }
             placeholder="Email"
-            className="mt-6 h-12 w-full rounded-2xl border border-white/80 bg-white/80 px-4 text-black shadow-sm"
+            autoComplete="email"
+            className={`${
+              authMode ===
+              "register"
+                ? "mt-3"
+                : "mt-4"
+            } h-12 w-full rounded-2xl border border-white/80 bg-white/80 px-4 text-black shadow-sm`}
           />
 
           <input
@@ -4956,11 +5299,17 @@ useEffect(() => {
               )
             }
             placeholder="Пароль"
+            autoComplete={
+              authMode ===
+                "login"
+                ? "current-password"
+                : "new-password"
+            }
             className="mt-3 h-12 w-full rounded-2xl border border-white/80 bg-white/80 px-4 text-black shadow-sm"
           />
 
           {loginError && (
-            <div className="mt-3 rounded-2xl bg-red-50 p-3 text-sm text-red-700">
+            <div className="mt-3 rounded-2xl bg-white/70 p-3 text-sm text-neutral-700">
               {loginError}
             </div>
           )}
@@ -4969,11 +5318,14 @@ useEffect(() => {
             disabled={
               loginLoading
             }
-            className="mt-4 h-12 w-full rounded-2xl bg-neutral-900 font-medium text-white shadow-lg"
+            className="mt-4 h-12 w-full rounded-2xl bg-neutral-900 font-medium text-white shadow-lg disabled:opacity-60"
           >
             {loginLoading
               ? "..."
-              : "Увійти / Войти"}
+              : authMode ===
+                "login"
+                ? "Войти"
+                : "Создать аккаунт"}
           </button>
         </form>
       </main>
