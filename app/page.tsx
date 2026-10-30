@@ -5235,7 +5235,7 @@ useEffect(() => {
               className={`h-10 rounded-xl text-sm font-medium transition ${
                 authMode ===
                 "login"
-                  ? "bg-white text-neutral-900 shadow-sm"
+                  ? "bg-white/90 text-rose-600 shadow-[0_5px_14px_rgba(190,110,140,0.14)]"
                   : "text-neutral-500"
               }`}
             >
@@ -5256,7 +5256,7 @@ useEffect(() => {
               className={`h-10 rounded-xl text-sm font-medium transition ${
                 authMode ===
                 "register"
-                  ? "bg-white text-neutral-900 shadow-sm"
+                  ? "bg-white/90 text-rose-600 shadow-[0_5px_14px_rgba(190,110,140,0.14)]"
                   : "text-neutral-500"
               }`}
             >
@@ -5398,7 +5398,7 @@ useEffect(() => {
                             -1
                           )
                     }
-                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white/65 text-2xl shadow-sm"
+                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[18px] border border-white/75 bg-white/72 text-[24px] font-light text-neutral-700 shadow-[0_8px_18px_rgba(110,75,90,0.10)] backdrop-blur-md transition active:scale-95"
                   >
                     ‹
                   </button>
@@ -5446,14 +5446,14 @@ useEffect(() => {
                             1
                           )
                     }
-                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white/65 text-2xl shadow-sm"
+                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[18px] border border-white/75 bg-white/72 text-[24px] font-light text-neutral-700 shadow-[0_8px_18px_rgba(110,75,90,0.10)] backdrop-blur-md transition active:scale-95"
                   >
                     ›
                   </button>
                 </div>
 
                 <div className="mt-4 flex items-center justify-between gap-2">
-                  <div className="flex rounded-2xl bg-white/40 p-1">
+                  <div className="flex rounded-[18px] border border-white/55 bg-white/35 p-1 shadow-inner backdrop-blur-md">
                     <button
                       onClick={() =>
                         setCalendarView(
@@ -5463,7 +5463,7 @@ useEffect(() => {
                       className={`rounded-xl px-4 py-2 text-xs font-medium transition ${
                         calendarView ===
                         "day"
-                          ? "bg-white text-neutral-900 shadow-sm"
+                          ? "bg-white/90 text-rose-600 shadow-[0_5px_14px_rgba(190,110,140,0.14)]"
                           : "text-neutral-500"
                       }`}
                     >
@@ -5479,7 +5479,7 @@ useEffect(() => {
                       className={`rounded-xl px-4 py-2 text-xs font-medium transition ${
                         calendarView ===
                         "month"
-                          ? "bg-white text-neutral-900 shadow-sm"
+                          ? "bg-white/90 text-rose-600 shadow-[0_5px_14px_rgba(190,110,140,0.14)]"
                           : "text-neutral-500"
                       }`}
                     >
@@ -5542,10 +5542,10 @@ useEffect(() => {
                                 )
                               );
                             }}
-                            className={`relative flex min-w-0 flex-col items-center rounded-2xl px-1 py-2 transition ${
+                            className={`relative flex min-w-0 flex-col items-center rounded-[18px] px-1 py-2 transition-all duration-200 ${
                               selected
                                 ? isWorkDay
-                                  ? "bg-rose-200/80 shadow-sm"
+                                  ? "bg-gradient-to-b from-rose-100 to-rose-200/80 shadow-[0_6px_16px_rgba(225,120,160,0.16)] ring-1 ring-white/70"
                                   : "bg-neutral-300/75 shadow-sm"
                                 : isWorkDay
                                 ? "bg-white/15"
@@ -5757,7 +5757,7 @@ useEffect(() => {
                                   appointment
                                 );
                               }}
-                              className="absolute left-3 right-3 z-10 overflow-hidden rounded-[20px] border border-white/90 bg-white/75 text-left shadow-[0_8px_24px_rgba(120,85,100,0.14)] backdrop-blur-xl transition active:scale-[0.99]"
+                              className="absolute left-3 right-3 z-10 overflow-hidden rounded-[24px] border border-white/95 bg-white/82 text-left shadow-[0_12px_30px_rgba(120,85,100,0.13)] backdrop-blur-xl transition-all duration-200 active:scale-[0.985]"
                               style={{
                                 top: `${top + 6}px`,
 
@@ -5769,15 +5769,15 @@ useEffect(() => {
                               }}
                             >
                               <div
-                                className={`absolute bottom-0 left-0 top-0 w-[5px] ${getAppointmentAccentClass(
+                                className={`absolute bottom-2 left-2 top-2 w-[4px] rounded-full ${getAppointmentAccentClass(
                                   appointment.status
                                 )}`}
                               />
 
-                              <div className="flex h-full flex-col justify-center px-4 pl-5">
+                              <div className="flex h-full flex-col justify-center px-4 pl-6">
                                 <div className="flex items-start justify-between gap-3">
                                   <div className="min-w-0">
-                                    <p className="truncate text-[14px] font-semibold text-neutral-900">
+                                    <p className="truncate text-[15px] font-semibold tracking-[-0.01em] text-neutral-900">
                                       {appointment.name}
                                     </p>
 
@@ -5789,14 +5789,14 @@ useEffect(() => {
 
                                     {height >=
                                       82 && (
-                                      <p className="mt-0.5 truncate text-[11px] text-neutral-500">
+                                      <p className="mt-1 truncate text-[11px] text-neutral-500/90">
                                         {serviceLabel}
                                       </p>
                                     )}
                                   </div>
 
                                   <div className="shrink-0 text-right">
-                                    <p className="text-[10px] font-medium text-neutral-500">
+                                    <p className="text-[10px] font-semibold text-neutral-500">
                                       {appointment.time} – {endTime}
                                     </p>
 
@@ -5936,7 +5936,7 @@ useEffect(() => {
               onClick={() =>
                 openNewAppointment()
               }
-              className="absolute bottom-4 right-5 z-30 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-rose-400 to-pink-500 text-3xl font-light text-white shadow-[0_12px_30px_rgba(225,100,145,0.38)] transition active:scale-95"
+              className="absolute bottom-4 right-5 z-30 flex h-14 w-14 items-center justify-center rounded-[22px] border border-white/70 bg-gradient-to-br from-rose-300 via-rose-400 to-pink-500 text-[30px] font-light text-white shadow-[0_14px_30px_rgba(225,100,145,0.30)] backdrop-blur-md transition-all active:scale-95"
             >
               +
             </button>
@@ -6529,7 +6529,7 @@ useEffect(() => {
         )}
 
         <nav className="shrink-0 px-3 pb-3 pt-2">
-          <div className="grid grid-cols-4 gap-1 rounded-[28px] border border-white/75 bg-white/62 p-2 shadow-[0_12px_40px_rgba(110,75,90,0.16)] backdrop-blur-xl">
+          <div className="grid grid-cols-4 gap-1 rounded-[30px] border border-white/80 bg-white/66 p-2 shadow-[0_14px_38px_rgba(110,75,90,0.14)] backdrop-blur-2xl">
             {bottomNavItems.map(
               (item) => {
                 const active =
@@ -6547,14 +6547,14 @@ useEffect(() => {
                     }
                     className={`flex h-[66px] min-w-0 flex-col items-center justify-center gap-1 rounded-[20px] px-1 transition-all ${
                       active
-                        ? "bg-rose-100/90 shadow-sm"
+                        ? "bg-gradient-to-b from-rose-50 to-rose-100/90 shadow-[0_6px_16px_rgba(225,120,160,0.16)] ring-1 ring-white/70"
                         : "bg-transparent"
                     }`}
                   >
                     <div
-                      className={`relative h-8 w-8 transition-all ${
+                      className={`relative h-8 w-8 transition-all duration-200 ${
                         active
-                          ? "scale-110 opacity-100"
+                          ? "scale-110 opacity-100 drop-shadow-[0_4px_8px_rgba(220,110,150,0.22)]"
                           : "opacity-65"
                       }`}
                     >
@@ -6574,7 +6574,7 @@ useEffect(() => {
                     <span
                       className={`max-w-full truncate text-[10px] font-medium ${
                         active
-                          ? "text-rose-500"
+                          ? "text-rose-600"
                           : "text-neutral-500"
                       }`}
                     >
