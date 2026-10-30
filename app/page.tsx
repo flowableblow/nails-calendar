@@ -5745,88 +5745,72 @@ useEffect(() => {
 
                           return (
                             <button
-                              key={
-                                appointment.id
-                              }
-                              onClick={(
-                                event
-                              ) => {
-                                event.stopPropagation();
+  key={appointment.id}
+  onClick={(event) => {
+    event.stopPropagation();
 
-                                openEditAppointment(
-                                  appointment
-                                );
-                              }}
-                              className="absolute left-3 right-3 z-10 overflow-hidden rounded-[30px] text-left transition-all duration-200 active:scale-[0.985]"
-                              style={{
-                                top: `${top + 6}px`,
+    openEditAppointment(
+      appointment
+    );
+  }}
+  className="absolute left-3 right-3 z-10 overflow-hidden text-left"
+  style={{
+    top: `${top + 6}px`,
+    height: `${Math.max(
+      height - 12,
+      54
+    )}px`,
+  }}
+>
+  <div className="absolute inset-0">
+    <Image
+      src="/icons/appointment-card.png"
+      alt=""
+      fill
+      className="object-fill"
+    />
+  </div>
 
-                                height: `${Math.max(
-                                  height -
-                                    12,
-                                  62
-                                )}px`,
-                              }}
-                            >
-                              <Image
-                                src="/icons/appointment-pillow.png"
-                                alt=""
-                                fill
-                                sizes="(max-width: 768px) 100vw, 420px"
-                                className="pointer-events-none select-none object-fill drop-shadow-[0_12px_22px_rgba(170,105,130,0.20)]"
-                                priority={false}
-                              />
+  <div className="relative z-10 flex h-full flex-col justify-center px-5 pl-7">
+    <div className="flex items-start justify-between gap-3">
+      <div className="min-w-0">
+        <p className="truncate text-[14px] font-semibold text-neutral-900">
+          {appointment.name}
+        </p>
 
-                              <div className="pointer-events-none absolute inset-x-8 top-[9%] h-[18%] rounded-full bg-white/25 blur-xl" />
+        {phone && (
+          <p className="mt-0.5 truncate text-[10px] font-medium text-neutral-500">
+            {phone}
+          </p>
+        )}
 
-                              <div
-                                className={`absolute bottom-[14%] left-[5%] top-[14%] z-10 w-[4px] rounded-full shadow-[0_0_8px_rgba(255,255,255,0.45)] ${getAppointmentAccentClass(
-                                  appointment.status
-                                )}`}
-                              />
+        {height >= 82 && (
+          <p className="mt-1 truncate text-[11px] text-neutral-500">
+            {serviceLabel}
+          </p>
+        )}
+      </div>
 
-                              <div className="relative z-20 flex h-full flex-col justify-center px-5 pl-8 pr-6">
-                                <div className="flex items-start justify-between gap-3">
-                                  <div className="min-w-0">
-                                    <p className="truncate text-[15px] font-semibold tracking-[-0.01em] text-neutral-900">
-                                      {appointment.name}
-                                    </p>
+      <div className="shrink-0 text-right">
+        <p className="text-[10px] font-medium text-neutral-500">
+          {appointment.time} – {endTime}
+        </p>
 
-                                    {phone && (
-                                      <p className="mt-0.5 truncate text-[10px] font-medium text-neutral-500">
-                                        {phone}
-                                      </p>
-                                    )}
-
-                                    {height >=
-                                      82 && (
-                                      <p className="mt-1 truncate text-[11px] text-neutral-500/90">
-                                        {serviceLabel}
-                                      </p>
-                                    )}
-                                  </div>
-
-                                  <div className="shrink-0 text-right">
-                                    <p className="text-[10px] font-semibold text-neutral-500">
-                                      {appointment.time} – {endTime}
-                                    </p>
-
-                                    {height >=
-                                      76 && (
-                                      <span
-                                        className={`mt-1 inline-block rounded-full border px-2 py-0.5 text-[8px] ${getStatusBadgeClass(
-                                          appointment.status
-                                        )}`}
-                                      >
-                                        {statusLabel(
-                                          appointment.status
-                                        )}
-                                      </span>
-                                    )}
-                                  </div>
-                                </div>
-                              </div>
-                            </button>
+        {height >= 76 && (
+          <span
+            className={`mt-1 inline-block rounded-full border px-2 py-0.5 text-[8px] ${getStatusBadgeClass(
+              appointment.status
+            )}`}
+          >
+            {statusLabel(
+              appointment.status
+            )}
+          </span>
+        )}
+      </div>
+    </div>
+  </div>
+</button>
                           );
                         }
                       )}
