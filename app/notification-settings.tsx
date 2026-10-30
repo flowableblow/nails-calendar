@@ -130,6 +130,24 @@ export default function NotificationSettings({
   useEffect(() => {
     async function loadSettings() {
       const {
+        data: userData,
+      } =
+        await supabase.auth.getUser();
+
+      const userId =
+        userData.user?.id;
+
+      if (
+        !userId
+      ) {
+        setLoading(
+          false
+        );
+
+        return;
+      }
+
+      const {
         data,
         error,
       } =
@@ -142,7 +160,7 @@ export default function NotificationSettings({
           )
           .eq(
             "id",
-            "main"
+            userId
           )
           .maybeSingle();
 
@@ -184,13 +202,119 @@ export default function NotificationSettings({
     nextIntervals: number[]
   ) {
     const {
-      error,
+      data: userData,
+    } =
+      await supabase.auth.getUser();
+
+    const userId =
+      userData.user?.id;
+
+    if (
+      !userId
+    ) {
+      throw new Error(
+        "User not found"
+      );
+    }
+
+    const {
+      data: existingSettings,
+      error: existingSettingsError,
     } =
       await supabase
         .from(
           "settings"
         )
-        .update({
+        .select(
+          "id"
+        )
+        .eq(
+          "id",
+          userId
+        )
+        .maybeSingle();
+
+    if (
+      existingSettingsError
+    ) {
+      throw existingSettingsError;
+    }
+
+    if (
+      existingSettings
+    ) {
+      const {
+        data,
+        error,
+      } =
+        await supabase
+          .from(
+            "settings"
+          )
+          .update({
+            notifications_enabled:
+              nextEnabled,
+
+            notification_intervals:
+              nextIntervals,
+
+            timezone:
+              "Europe/Kyiv",
+
+            updated_at:
+              new Date().toISOString(),
+          })
+          .eq(
+            "id",
+            userId
+          )
+          .select(
+            "id"
+          )
+          .maybeSingle();
+
+      if (
+        error
+      ) {
+        throw error;
+      }
+
+      if (
+        !data
+      ) {
+        throw new Error(
+          "Settings were not updated"
+        );
+      }
+
+      return;
+    }
+
+    const {
+      error: insertError,
+    } =
+      await supabase
+        .from(
+          "settings"
+        )
+        .insert({
+          id:
+            userId,
+
+          user_id:
+            userId,
+
+          language,
+
+          start_hour:
+            8,
+
+          end_hour:
+            21,
+
+          work_days:
+            [0, 1, 2, 3, 4, 5, 6],
+
           notifications_enabled:
             nextEnabled,
 
@@ -202,16 +326,12 @@ export default function NotificationSettings({
 
           updated_at:
             new Date().toISOString(),
-        })
-        .eq(
-          "id",
-          "main"
-        );
+        });
 
     if (
-      error
+      insertError
     ) {
-      throw error;
+      throw insertError;
     }
   }
 
