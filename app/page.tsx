@@ -5551,6 +5551,22 @@ useEffect(() => {
                   </span>
                 </div>
 
+                {(
+                  calendarView === "day"
+                    ? !selectedDateIsToday
+                    : !visibleMonthIsCurrent
+                ) && (
+                  <button
+                    type="button"
+                    onClick={goToday}
+                    className="mt-3 flex h-10 w-full items-center justify-center rounded-[16px] border border-white/70 bg-white/55 text-[11px] font-medium text-rose-500 shadow-sm backdrop-blur-xl transition active:scale-[0.99]"
+                  >
+                    {calendarView === "day"
+                      ? t.returnToday
+                      : t.returnCurrentMonth}
+                  </button>
+                )}
+
                 {calendarView ===
                   "day" && (
                   <div className="mt-4 grid grid-cols-7 gap-1">
