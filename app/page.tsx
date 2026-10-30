@@ -781,6 +781,22 @@ function normalizePhone(
   );
 }
 
+function capitalizeFirst(
+  value: string
+) {
+  const trimmed =
+    value.trim();
+
+  if (!trimmed) {
+    return "";
+  }
+
+  return (
+    trimmed.charAt(0).toUpperCase() +
+    trimmed.slice(1)
+  );
+}
+
 function normalizeClient(
   client: Partial<Client> & {
     id: number;
@@ -829,8 +845,10 @@ function normalizeClient(
       ),
 
     name:
-      client.name ??
-      "",
+      capitalizeFirst(
+        client.name ??
+          ""
+      ),
 
     phone:
       client.phone ??
@@ -862,8 +880,10 @@ function normalizeService(
       ),
 
     name:
-      service.name ??
-      "",
+      capitalizeFirst(
+        service.name ??
+          ""
+      ),
 
     duration:
       Number(
@@ -2463,8 +2483,10 @@ useEffect(() => {
                   : undefined,
 
               name:
-                row.name ??
-                "",
+                capitalizeFirst(
+                  row.name ??
+                    ""
+                ),
 
               serviceId:
                 row.service_id !==
@@ -2477,8 +2499,10 @@ useEffect(() => {
                   : undefined,
 
               service:
-                row.service ??
-                "",
+                capitalizeFirst(
+                  row.service ??
+                    ""
+                ),
 
               addonServiceIds:
                 Array.isArray(
@@ -3949,7 +3973,9 @@ useEffect(() => {
     }
 
     const name =
-      appointmentName.trim();
+      capitalizeFirst(
+        appointmentName
+      );
 
     const phone =
       appointmentPhone.trim();
@@ -4164,14 +4190,18 @@ useEffect(() => {
 
         name:
           client?.name ||
-          appointmentName.trim(),
+          capitalizeFirst(
+            appointmentName
+          ),
 
         serviceId:
           service?.id,
 
         service:
           service?.name ||
-          appointmentService.trim() ||
+          capitalizeFirst(
+            appointmentService
+          ) ||
           (
             language ===
             "uk"
@@ -4295,7 +4325,9 @@ useEffect(() => {
 
     const finalName =
       selectedClient?.name ||
-      appointmentName.trim();
+      capitalizeFirst(
+        appointmentName
+      );
 
     if (
       !finalName
@@ -4492,7 +4524,9 @@ useEffect(() => {
           Date.now(),
 
         name:
-          clientName.trim(),
+          capitalizeFirst(
+            clientName
+          ),
 
         phone:
           clientPhone.trim(),
@@ -4817,7 +4851,9 @@ useEffect(() => {
           Date.now(),
 
         name:
-          serviceName.trim(),
+          capitalizeFirst(
+            serviceName
+          ),
 
         duration:
           Number(
