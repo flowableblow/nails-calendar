@@ -5798,7 +5798,7 @@ useEffect(() => {
                               }}
                             >
                               <Image
-                                src="/icons/appointment-card.png"
+                                src="/icons/appointment-card-v2.png"
                                 alt=""
                                 fill
                                 sizes="(max-width: 768px) 100vw, 420px"
