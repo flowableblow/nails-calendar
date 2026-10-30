@@ -1894,82 +1894,150 @@ export default function Home() {
   }
 
   useEffect(() => {
-    const current =
-      new Date();
+  const current =
+    new Date();
 
-    setToday(
-      current
-    );
+  setToday(
+    current
+  );
 
-    setSelectedDate(
-      current
-    );
+  setSelectedDate(
+    current
+  );
 
-    setVisibleMonth(
-      new Date(
-        current.getFullYear(),
-        current.getMonth(),
-        1
+  setVisibleMonth(
+    new Date(
+      current.getFullYear(),
+      current.getMonth(),
+      1
+    )
+  );
+
+  setIsOnline(
+    navigator.onLine
+  );
+
+  const queue =
+    safeArray<PendingOperation>(
+      localStorage.getItem(
+        OFFLINE_QUEUE_STORAGE_KEY
       )
     );
 
+  setPendingCount(
+    queue.length
+  );
+
+  function handleOnline() {
     setIsOnline(
-      navigator.onLine
+      true
     );
 
-    const queue =
-      safeArray<PendingOperation>(
-        localStorage.getItem(
-          OFFLINE_QUEUE_STORAGE_KEY
-        )
-      );
+    void syncOfflineQueue();
+  }
 
-    setPendingCount(
-      queue.length
+  function handleOffline() {
+    setIsOnline(
+      false
     );
 
-    function handleOnline() {
-      setIsOnline(
-        true
-      );
+    setDatabaseStatus(
+      "offline"
+    );
+  }
 
-      void syncOfflineQueue();
-    }
+  window.addEventListener(
+    "online",
+    handleOnline
+  );
 
-    function handleOffline() {
-      setIsOnline(
-        false
-      );
+  window.addEventListener(
+    "offline",
+    handleOffline
+  );
 
-      setDatabaseStatus(
-        "offline"
-      );
-    }
-
-    window.addEventListener(
+  return () => {
+    window.removeEventListener(
       "online",
       handleOnline
     );
 
-    window.addEventListener(
+    window.removeEventListener(
       "offline",
       handleOffline
     );
+  };
+}, [
+  syncOfflineQueue,
+]);
 
-    return () => {
-      window.removeEventListener(
-        "online",
-        handleOnline
-      );
+useEffect(() => {
+  if (
+    typeof window ===
+    "undefined"
+  ) {
+    return;
+  }
 
-      window.removeEventListener(
-        "offline",
-        handleOffline
-      );
-    };
-  }, [
-    syncOfflineQueue,
-  ]);
+  if (
+    appointments.length === 0
+  ) {
+    return;
+  }
+
+  const params =
+    new URLSearchParams(
+      window.location.search
+    );
+
+  const appointmentId =
+    params.get(
+      "appointment"
+    );
+
+  if (!appointmentId) {
+    return;
+  }
+
+  const appointment =
+    appointments.find(
+      (item) =>
+        String(item.id) ===
+        String(
+          appointmentId
+        )
+    );
+
+  if (!appointment) {
+    return;
+  }
+
+  setSelectedDate(
+  new Date(
+    `${appointment.date}T12:00:00`
+  )
+);
+
+  setVisibleMonth(
+    new Date(
+      `${appointment.date}T12:00:00`
+    )
+  );
+
+  setActiveTab(
+    "calendar"
+  );
+
+  openEditAppointment(
+    appointment
+  );
+
+  window.history.replaceState(
+    {},
+    "",
+    window.location.pathname
+  );
+}, [appointments]);
 
   useEffect(() => {
     const storedLanguage =
