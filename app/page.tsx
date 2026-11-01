@@ -5900,13 +5900,16 @@ useEffect(() => {
                                 )}px`,
                               }}
                             >
-                              <Image
-                                src="/icons/appointment-card-v2.png"
-                                alt=""
-                                fill
-                                sizes="(max-width: 768px) 100vw, 420px"
-                                className="pointer-events-none select-none object-fill drop-shadow-[0_10px_18px_rgba(170,105,130,0.16)]"
-                                priority={false}
+                              <div
+                                aria-hidden="true"
+                                className="pointer-events-none absolute inset-0 select-none drop-shadow-[0_10px_18px_rgba(170,105,130,0.16)]"
+                                style={{
+                                  border: "1px solid transparent",
+                                  borderImageSource: "url('/icons/appointment-card-v3.png')",
+                                  borderImageSlice: "160 230 160 230 fill",
+                                  borderImageWidth: "42px 42px 42px 42px",
+                                  borderImageRepeat: "stretch",
+                                }}
                               />
 
                               <div className="pointer-events-none absolute inset-x-8 top-[9%] h-[18%] rounded-full bg-white/25 blur-xl" />
