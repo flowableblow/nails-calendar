@@ -86,6 +86,12 @@ type QueueTable =
 type PendingOperation =
   | {
       queueId: string;
+      type: "auto-complete";
+      table: "appointments";
+      recordId: number;
+    }
+  | {
+      queueId: string;
       type: "upsert";
       table: QueueTable;
       recordId: string | number;
@@ -1719,6 +1725,19 @@ export default function Home() {
       if (authError || !user || user.id !== expectedUserId) {
         throw new Error("Account changed. Operation was not sent.");
       }
+      if (operation.type === "auto-complete") {
+        // Atomic, conditional write. Never overwrite a manual status or a
+        // record another device has already changed.
+        const { error } = await supabase
+          .from("appointments")
+          .update({ status: "completed" })
+          .eq("id", operation.recordId)
+          .eq("user_id", expectedUserId)
+          .eq("status", "scheduled")
+          .eq("manual_status", false);
+        if (error) throw error;
+        return;
+      }
       if (operation.type === "upsert") {
         const payload = {
           ...operation.payload,
@@ -1825,9 +1844,27 @@ export default function Home() {
           } catch (
             error
           ) {
+            const syncError = error as {
+              message?: string;
+              code?: string;
+              details?: string;
+              hint?: string;
+              status?: number;
+            } | null;
+            const failureDetails = {
+              operationType: operation.type,
+              table: operation.table,
+              recordId: operation.recordId,
+              message: syncError?.message ?? String(error),
+              code: syncError?.code ?? null,
+              details: syncError?.details ?? null,
+              hint: syncError?.hint ?? null,
+              status: syncError?.status ?? null,
+            };
+            // Use a string, not an object: Next.js dev overlay can display
+            // object arguments as {}, hiding the actual PostgREST error.
             console.error(
-              "Sync failed:",
-              error
+              `Sync failed (queue preserved): ${JSON.stringify(failureDetails, null, 2)}`
             );
 
             setDatabaseStatus(
@@ -1895,10 +1932,23 @@ export default function Home() {
     } catch (
       error
     ) {
-      console.error(
-        "Cloud unavailable. Saved to offline queue:",
-        error
-      );
+      const writeError = error as {
+        message?: string;
+        code?: string;
+        details?: string;
+        hint?: string;
+        status?: number;
+      } | null;
+      console.error("Save failed (operation queued):", {
+        operationType: operation.type,
+        table: operation.table,
+        recordId: operation.recordId,
+        message: writeError?.message ?? String(error),
+        code: writeError?.code ?? null,
+        details: writeError?.details ?? null,
+        hint: writeError?.hint ?? null,
+        status: writeError?.status ?? null,
+      });
 
       enqueueOperation(
         operation
@@ -2996,7 +3046,7 @@ useEffect(() => {
         inFlight.add(appointment.id);
         const completed = { ...appointment, status: "completed" as const };
         setAppointments((current) => current.map((item) =>
-          item.id === completed.id && item.status === "scheduled"
+          item.id === completed.id && item.status === "scheduled" && !item.manualStatus
             ? completed
             : item
         ));
@@ -3007,24 +3057,9 @@ useEffect(() => {
             if (user?.id !== ownerId) return;
             await saveOrQueue({
               queueId: createQueueId(),
-              type: "upsert",
+              type: "auto-complete",
               table: "appointments",
               recordId: completed.id,
-              payload: {
-                id: completed.id,
-                user_id: ownerId,
-                date: completed.date,
-                time: completed.time,
-                client_id: completed.clientId ?? null,
-                name: completed.name,
-                service_id: completed.serviceId ?? null,
-                service: completed.service,
-                addon_service_ids: completed.addonServiceIds,
-                duration: completed.duration,
-                price: completed.price,
-                status: completed.status,
-                manual_status: false,
-              },
             });
           } catch (error) {
             console.error("Automatic completion failed:", error);
