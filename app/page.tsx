@@ -118,9 +118,6 @@ const LANGUAGE_STORAGE_KEY =
 const OFFLINE_QUEUE_STORAGE_KEY =
   "nails-calendar-offline-queue";
 
-const LOCAL_STORAGE_OWNER_KEY =
-  "nails-calendar-local-owner";
-
 const DEFAULT_WORK_SETTINGS: WorkSettings = {
   startHour: 8,
   endHour: 21,
@@ -1361,6 +1358,9 @@ export default function Home() {
       false
     );
 
+  // Prevent data from the previous session being rendered or persisted.
+  const [dataOwnerId, setDataOwnerId] = useState<string | null>(null);
+
   const [
     isAppointmentModalOpen,
     setIsAppointmentModalOpen,
@@ -1616,62 +1616,8 @@ export default function Home() {
       : baseKey;
   }
 
-  function migrateLegacyLocalStorage(
-    userId: string
-  ) {
-    const existingOwner =
-      localStorage.getItem(
-        LOCAL_STORAGE_OWNER_KEY
-      );
-
-    if (
-      existingOwner
-    ) {
-      return;
-    }
-
-    const keys = [
-      APPOINTMENTS_STORAGE_KEY,
-      CLIENTS_STORAGE_KEY,
-      SERVICES_STORAGE_KEY,
-      WORK_SETTINGS_STORAGE_KEY,
-      LANGUAGE_STORAGE_KEY,
-      OFFLINE_QUEUE_STORAGE_KEY,
-    ];
-
-    for (
-      const key of keys
-    ) {
-      const legacyValue =
-        localStorage.getItem(
-          key
-        );
-
-      const scopedKey =
-        `${key}:${userId}`;
-
-      if (
-        legacyValue !== null &&
-        localStorage.getItem(
-          scopedKey
-        ) === null
-      ) {
-        localStorage.setItem(
-          scopedKey,
-          legacyValue
-        );
-      }
-
-      localStorage.removeItem(
-        key
-      );
-    }
-
-    localStorage.setItem(
-      LOCAL_STORAGE_OWNER_KEY,
-      userId
-    );
-  }
+  // Legacy shared storage is intentionally left untouched for recovery.
+  // Never assign old unscoped data to whichever account signs in first.
 
   function getQueue() {
     return safeArray<PendingOperation>(
@@ -1728,62 +1674,40 @@ export default function Home() {
     );
   }
 
-  const executeOperation =
-    useCallback(
-      async (
-        operation: PendingOperation
-      ) => {
-        if (
-          operation.type ===
-          "upsert"
-        ) {
-          const {
-            error,
-          } =
-            await supabase
-              .from(
-                operation.table
-              )
-              .upsert(
-                operation.payload,
-                {
-                  onConflict:
-                    "id",
-                }
-              );
-
-          if (
-            error
-          ) {
-            throw error;
-          }
-
-          return;
+  const executeOperation = useCallback(
+    async (operation: PendingOperation, expectedUserId: string) => {
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError || !user || user.id !== expectedUserId) {
+        throw new Error("Account changed. Operation was not sent.");
+      }
+      if (operation.type === "upsert") {
+        const payload = {
+          ...operation.payload,
+          user_id: expectedUserId,
+        };
+        const { data, error } = await supabase
+          .from(operation.table)
+          .upsert(payload, { onConflict: "id" })
+          .select("id,user_id")
+          .maybeSingle();
+        if (error) throw error;
+        if (!data || data.user_id !== expectedUserId) {
+          throw new Error("Write was not confirmed for this account.");
         }
-
-        const {
-          error,
-        } =
-          await supabase
-            .from(
-              operation.table
-            )
-            .delete()
-            .eq(
-              operation.column,
-              operation.value
-            );
-
-        if (
-          error
-        ) {
-          throw error;
-        }
-      },
-      [
-        supabase,
-      ]
-    );
+        return;
+      }
+      const { data, error } = await supabase
+        .from(operation.table)
+        .delete()
+        .eq(operation.column, operation.value)
+        .eq("user_id", expectedUserId)
+        .select("id");
+      if (error) throw error;
+      // Deleting zero rows is harmless, e.g. a previously removed record.
+      void data;
+    },
+    [supabase]
+  );
 
   const syncOfflineQueue =
     useCallback(
@@ -1796,12 +1720,11 @@ export default function Home() {
           return;
         }
 
+        const queueStorageKey = `${OFFLINE_QUEUE_STORAGE_KEY}:${session.user.id}`;
         let queue =
           safeArray<PendingOperation>(
             localStorage.getItem(
-              getStorageKey(
-                OFFLINE_QUEUE_STORAGE_KEY
-              )
+              queueStorageKey
             )
           );
 
@@ -1835,12 +1758,14 @@ export default function Home() {
           queue.length >
           0
         ) {
+          const { data: { user: currentUser } } = await supabase.auth.getUser();
+          if (currentUser?.id !== session.user.id) break;
           const operation =
             queue[0];
 
           try {
             await executeOperation(
-              operation
+              operation, session.user.id
             );
 
             queue =
@@ -1849,9 +1774,7 @@ export default function Home() {
               );
 
             localStorage.setItem(
-              getStorageKey(
-                OFFLINE_QUEUE_STORAGE_KEY
-              ),
+              queueStorageKey,
               JSON.stringify(
                 queue
               )
@@ -1901,6 +1824,9 @@ export default function Home() {
   async function saveOrQueue(
     operation: PendingOperation
   ) {
+    if (!session?.user?.id || !isLoaded || dataOwnerId !== session.user.id) {
+      throw new Error("Account data not ready. Nothing was saved.");
+    }
     if (
       !navigator.onLine
     ) {
@@ -1921,7 +1847,7 @@ export default function Home() {
 
     try {
       await executeOperation(
-        operation
+        operation, session.user.id
       );
 
       setDatabaseStatus(
@@ -2253,11 +2179,17 @@ useEffect(() => {
     const userId =
       session.user.id;
 
-    async function loadData() {
-      migrateLegacyLocalStorage(
-        userId
-      );
+    let cancelled = false;
+    settingsReadyRef.current = false;
+    setIsLoaded(false);
+    setDataOwnerId(null);
+    setClients([]);
+    setServices([]);
+    setAppointments([]);
+    setPendingCount(0);
+    setWorkSettings(DEFAULT_WORK_SETTINGS);
 
+    async function loadData() {
       setIsLoaded(
         false
       );
@@ -2266,6 +2198,7 @@ useEffect(() => {
         !navigator.onLine
       ) {
         loadLocalData();
+        setDataOwnerId(userId);
 
         setDatabaseStatus(
           "offline"
@@ -2302,6 +2235,7 @@ useEffect(() => {
               .select(
                 "*"
               )
+              .eq("user_id", userId)
               .order(
                 "name"
               ),
@@ -2313,6 +2247,7 @@ useEffect(() => {
               .select(
                 "*"
               )
+              .eq("user_id", userId)
               .order(
                 "name"
               ),
@@ -2324,6 +2259,7 @@ useEffect(() => {
               .select(
                 "*"
               )
+              .eq("user_id", userId)
               .order(
                 "date"
               )
@@ -2533,6 +2469,8 @@ useEffect(() => {
             })
           );
 
+        if (cancelled) return;
+        setDataOwnerId(userId);
         setClients(
           nextClients
         );
@@ -2593,7 +2531,10 @@ useEffect(() => {
           error
         );
 
-        loadLocalData();
+        if (!cancelled) {
+          loadLocalData();
+          setDataOwnerId(userId);
+        }
 
         setDatabaseStatus(
           navigator.onLine
@@ -2601,16 +2542,15 @@ useEffect(() => {
             : "offline"
         );
       } finally {
-        settingsReadyRef.current =
-          true;
-
-        setIsLoaded(
-          true
-        );
+        if (!cancelled) {
+          settingsReadyRef.current = true;
+          setIsLoaded(true);
+        }
       }
     }
 
     void loadData();
+    return () => { cancelled = true; };
   }, [
     session,
     supabase,
@@ -2620,7 +2560,8 @@ useEffect(() => {
   useEffect(() => {
     if (
       !isLoaded ||
-      !session
+      !session ||
+      dataOwnerId !== session.user.id
     ) {
       return;
     }
@@ -2637,12 +2578,14 @@ useEffect(() => {
     clients,
     isLoaded,
     session,
+    dataOwnerId,
   ]);
 
   useEffect(() => {
     if (
       !isLoaded ||
-      !session
+      !session ||
+      dataOwnerId !== session.user.id
     ) {
       return;
     }
@@ -2659,12 +2602,14 @@ useEffect(() => {
     services,
     isLoaded,
     session,
+    dataOwnerId,
   ]);
 
   useEffect(() => {
     if (
       !isLoaded ||
-      !session
+      !session ||
+      dataOwnerId !== session.user.id
     ) {
       return;
     }
@@ -2681,12 +2626,14 @@ useEffect(() => {
     appointments,
     isLoaded,
     session,
+    dataOwnerId,
   ]);
 
   useEffect(() => {
     if (
       !isLoaded ||
-      !session
+      !session ||
+      dataOwnerId !== session.user.id
     ) {
       return;
     }
@@ -2765,6 +2712,7 @@ useEffect(() => {
     workSettings,
     isLoaded,
     session,
+    dataOwnerId,
   ]);
 
   async function handleLogin(
@@ -2966,6 +2914,7 @@ useEffect(() => {
     setIsLoaded(
       false
     );
+    setDataOwnerId(null);
 
     setSession(
       null
@@ -5411,7 +5360,7 @@ useEffect(() => {
   }
 
   if (
-    !isLoaded
+    !isLoaded || dataOwnerId !== session.user.id
   ) {
     return (
       <main
