@@ -59,6 +59,7 @@ type WorkSettings = {
   startHour: number;
   endHour: number;
   workDays: number[];
+  dateOverrides: Record<string, boolean>;
 };
 
 type Tab =
@@ -122,6 +123,7 @@ const DEFAULT_WORK_SETTINGS: WorkSettings = {
   startHour: 8,
   endHour: 21,
   workDays: [0, 1, 2, 3, 4, 5, 6],
+  dateOverrides: {},
 };
 
 const APP_BACKGROUND_STYLE = {
@@ -950,6 +952,13 @@ function getWeekDates(
   );
 }
 
+function isDateWorking(date: Date, settings: WorkSettings) {
+  const override = settings.dateOverrides?.[formatDateKey(date)];
+  return typeof override === "boolean"
+    ? override
+    : settings.workDays.includes(date.getDay());
+}
+
 function getMonthCalendarDays(
   date: Date
 ) {
@@ -1350,6 +1359,13 @@ export default function Home() {
       DEFAULT_WORK_SETTINGS
     );
 
+  const [scheduleEditorOpen, setScheduleEditorOpen] = useState(false);
+  // Stable during Next.js prerender; updated to the current month after mount.
+  const [scheduleMonth, setScheduleMonth] = useState(
+    new Date("2000-01-01T12:00:00")
+  );
+  const [selectedOverrideDate, setSelectedOverrideDate] = useState<string | null>(null);
+
   const [
     isLoaded,
     setIsLoaded,
@@ -1433,6 +1449,10 @@ export default function Home() {
       null
     );
 
+  const [clientSuggestionsOpen, setClientSuggestionsOpen] = useState(false);
+  const [serviceSuggestionsOpen, setServiceSuggestionsOpen] = useState(false);
+  const [addonSearch, setAddonSearch] = useState("");
+
   const [
     selectedClientId,
     setSelectedClientId,
@@ -1464,6 +1484,9 @@ export default function Home() {
     setAppointmentPhone,
   ] =
     useState("");
+
+  const [appointmentTelegram, setAppointmentTelegram] = useState("");
+  const [appointmentInstagram, setAppointmentInstagram] = useState("");
 
   const [
     appointmentDate,
@@ -1582,6 +1605,8 @@ export default function Home() {
     setClientSearch,
   ] =
     useState("");
+
+  const [serviceSettingsSearch, setServiceSettingsSearch] = useState("");
 
   const [
     reminderText,
@@ -1940,16 +1965,15 @@ export default function Home() {
       )
     );
 
-    setWorkSettings(
-      safeObject<WorkSettings>(
-        localStorage.getItem(
-          getStorageKey(
-            WORK_SETTINGS_STORAGE_KEY
-          )
-        ),
-        DEFAULT_WORK_SETTINGS
-      )
+    const storedSchedule = safeObject<WorkSettings>(
+      localStorage.getItem(getStorageKey(WORK_SETTINGS_STORAGE_KEY)),
+      DEFAULT_WORK_SETTINGS
     );
+    setWorkSettings({
+      ...DEFAULT_WORK_SETTINGS,
+      ...storedSchedule,
+      dateOverrides: storedSchedule.dateOverrides ?? {},
+    });
 
     const storedLanguage =
       localStorage.getItem(
@@ -1988,6 +2012,10 @@ export default function Home() {
       current.getMonth(),
       1
     )
+  );
+
+  setScheduleMonth(
+    new Date(current.getFullYear(), current.getMonth(), 1)
   );
 
   setIsOnline(
@@ -2510,13 +2538,18 @@ useEffect(() => {
               ),
 
             workDays:
-              Array.isArray(
-                row.work_days
-              )
-                ? row.work_days.map(
-                    Number
-                  )
+              Array.isArray(row.work_days)
+                ? row.work_days.map(Number)
                 : DEFAULT_WORK_SETTINGS.workDays,
+            dateOverrides:
+              row.date_overrides && typeof row.date_overrides === "object" &&
+              !Array.isArray(row.date_overrides)
+                ? Object.fromEntries(
+                    Object.entries(row.date_overrides).filter(
+                      ([key, value]) => /^\d{4}-\d{2}-\d{2}$/.test(key) && typeof value === "boolean"
+                    )
+                  ) as Record<string, boolean>
+                : {},
           });
         }
 
@@ -2693,6 +2726,9 @@ useEffect(() => {
 
               work_days:
                 workSettings.workDays,
+
+              date_overrides:
+                workSettings.dateOverrides,
 
               updated_at:
                 new Date().toISOString(),
@@ -2921,6 +2957,75 @@ useEffect(() => {
     );
   }
 
+  // Automatically complete past appointments. This runs on opening the app
+  // and periodically while it is open; offline writes use the existing queue.
+  useEffect(() => {
+    if (!session || !isLoaded || dataOwnerId !== session.user.id) return;
+    const ownerId = session.user.id;
+    const inFlight = new Set<number>();
+
+    const completeEndedAppointments = () => {
+      const now = Date.now();
+      const ended = appointments.filter((appointment) => {
+        if (appointment.status !== "scheduled" || inFlight.has(appointment.id)) {
+          return false;
+        }
+        const start = new Date(`${appointment.date}T${appointment.time}`).getTime();
+        const duration = Number(appointment.duration);
+        return Number.isFinite(start) && Number.isFinite(duration) &&
+          duration > 0 && start + duration * 60_000 <= now;
+      });
+
+      if (ended.length === 0) return;
+      for (const appointment of ended) {
+        inFlight.add(appointment.id);
+        const completed = { ...appointment, status: "completed" as const };
+        setAppointments((current) => current.map((item) =>
+          item.id === completed.id && item.status === "scheduled"
+            ? completed
+            : item
+        ));
+
+        void (async () => {
+          try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user?.id !== ownerId) return;
+            await saveOrQueue({
+              queueId: createQueueId(),
+              type: "upsert",
+              table: "appointments",
+              recordId: completed.id,
+              payload: {
+                id: completed.id,
+                user_id: ownerId,
+                date: completed.date,
+                time: completed.time,
+                client_id: completed.clientId ?? null,
+                name: completed.name,
+                service_id: completed.serviceId ?? null,
+                service: completed.service,
+                addon_service_ids: completed.addonServiceIds,
+                duration: completed.duration,
+                price: completed.price,
+                status: completed.status,
+              },
+            });
+          } catch (error) {
+            console.error("Automatic completion failed:", error);
+          } finally {
+            inFlight.delete(completed.id);
+          }
+        })();
+      }
+    };
+
+    completeEndedAppointments();
+    const interval = window.setInterval(completeEndedAppointments, 30_000);
+    return () => {
+      window.clearInterval(interval);
+    };
+  }, [appointments, isLoaded, dataOwnerId, session, supabase]);
+
   const todayKey =
     formatDateKey(
       today
@@ -2942,9 +3047,7 @@ useEffect(() => {
       today.getMonth();
 
   const selectedDateIsWorkDay =
-    workSettings.workDays.includes(
-      selectedDate.getDay()
-    );
+    isDateWorking(selectedDate, workSettings);
 
   const selectedDayAppointments =
     appointments
@@ -3013,6 +3116,10 @@ useEffect(() => {
       ) =>
         service.isAddon
     );
+
+  const filteredSettingsServices = services.filter((service) =>
+    service.name.toLocaleLowerCase().includes(serviceSettingsSearch.trim().toLocaleLowerCase())
+  );
 
   const filteredClients =
     [
@@ -3677,6 +3784,9 @@ useEffect(() => {
   }
 
   function resetAppointmentForm() {
+    setClientSuggestionsOpen(false);
+    setServiceSuggestionsOpen(false);
+    setAddonSearch("");
     setEditingAppointmentId(
       null
     );
@@ -3700,6 +3810,8 @@ useEffect(() => {
     setAppointmentPhone(
       ""
     );
+    setAppointmentTelegram("");
+    setAppointmentInstagram("");
 
     setAppointmentDate(
       selectedDateKey
@@ -3755,6 +3867,9 @@ useEffect(() => {
   function openEditAppointment(
     appointment: Appointment
   ) {
+    setClientSuggestionsOpen(false);
+    setServiceSuggestionsOpen(false);
+    setAddonSearch("");
     setEditingAppointmentId(
       appointment.id
     );
@@ -3815,6 +3930,8 @@ useEffect(() => {
       linkedClient?.phone ??
         ""
     );
+    setAppointmentTelegram(linkedClient?.telegram ?? "");
+    setAppointmentInstagram(linkedClient?.instagram ?? "");
 
     setSelectedServiceId(
       appointment.serviceId
@@ -3928,6 +4045,8 @@ useEffect(() => {
 
     const phone =
       appointmentPhone.trim();
+    const telegram = appointmentTelegram.trim();
+    const instagram = appointmentInstagram.trim();
 
     if (
       !name
@@ -3978,13 +4097,16 @@ useEffect(() => {
       existingClient
     ) {
       if (
-        phone &&
-        !existingClient.phone
+        (phone && !existingClient.phone) ||
+        (telegram && !existingClient.telegram) ||
+        (instagram && !existingClient.instagram)
       ) {
         const updatedClient: Client =
           {
             ...existingClient,
-            phone,
+            phone: existingClient.phone || phone,
+            telegram: existingClient.telegram || telegram,
+            instagram: existingClient.instagram || instagram,
           };
 
         setClients(
@@ -4051,11 +4173,9 @@ useEffect(() => {
 
         phone,
 
-        telegram:
-          "",
+        telegram,
 
-        instagram:
-          "",
+        instagram,
 
         note:
           "",
@@ -4093,11 +4213,9 @@ useEffect(() => {
         phone:
           newClient.phone,
 
-        telegram:
-          "",
+        telegram: newClient.telegram,
 
-        instagram:
-          "",
+        instagram: newClient.instagram,
 
         note:
           "",
@@ -4939,14 +5057,7 @@ useEffect(() => {
     const minutesFromStart =
       Math.max(
         0,
-        Math.round(
-          (
-            y /
-            HOUR_HEIGHT
-          ) *
-            2
-        ) *
-          30
+        Math.floor(y / HOUR_HEIGHT) * 60
       );
 
     const totalMinutes =
@@ -5490,14 +5601,7 @@ useEffect(() => {
                     </button>
                   </div>
 
-                  <span
-                    className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[10px] font-medium ${connectionClass()}`}
-                  >
-                    <span
-                      className={`h-2 w-2 rounded-full ${connectionDotClass()}`}
-                    />
-                    {connectionLabel()}
-                  </span>
+
                 </div>
 
                 {(
@@ -5542,9 +5646,7 @@ useEffect(() => {
                           ).length;
 
                         const isWorkDay =
-                          workSettings.workDays.includes(
-                            date.getDay()
-                          );
+                          isDateWorking(date, workSettings);
 
                         return (
                           <button
@@ -5570,8 +5672,8 @@ useEffect(() => {
                                   ? "bg-gradient-to-b from-rose-100 to-rose-200/80 shadow-[0_6px_16px_rgba(225,120,160,0.16)] ring-1 ring-white/70"
                                   : "bg-neutral-300/75 shadow-sm"
                                 : isWorkDay
-                                ? "bg-white/15"
-                                : "bg-neutral-200/35 opacity-70"
+                                ? "bg-rose-100/50"
+                                : "bg-neutral-200/55 opacity-80"
                             }`}
                           >
                             <span className="text-[9px] font-medium capitalize text-neutral-500">
@@ -5623,8 +5725,8 @@ useEffect(() => {
                 <div
   className={`relative min-h-full overflow-hidden rounded-[30px] border shadow-[0_12px_45px_rgba(105,75,90,0.10)] backdrop-blur-md ${
     selectedDateIsWorkDay
-      ? "border-white/70 bg-white/42"
-      : "border-rose-200/70 bg-[linear-gradient(180deg,rgba(255,155,170,0.20)_0%,rgba(255,120,140,0.11)_45%,rgba(255,145,160,0.16)_100%)]"
+      ? "border-rose-200/70 bg-[linear-gradient(180deg,rgba(255,180,201,0.26)_0%,rgba(255,155,190,0.16)_50%,rgba(255,182,203,0.22)_100%)]"
+      : "border-neutral-300/70 bg-[linear-gradient(180deg,rgba(190,190,197,0.26)_0%,rgba(190,190,197,0.17)_50%,rgba(190,190,197,0.23)_100%)]"
   }`}
 >
                   {!selectedDateIsWorkDay && (
@@ -5967,9 +6069,7 @@ useEffect(() => {
                           selectedDateKey;
 
                         const isWorkDay =
-                          workSettings.workDays.includes(
-                            item.date.getDay()
-                          );
+                          isDateWorking(item.date, workSettings);
 
                         return (
                           <button
@@ -6001,8 +6101,8 @@ useEffect(() => {
                                 : !item.isCurrentMonth
                                 ? "text-neutral-300"
                                 : isWorkDay
-                                ? "bg-white/40"
-                                : "bg-neutral-200/40 text-neutral-400"
+                                ? "bg-rose-100/60"
+                                : "bg-neutral-200/60 text-neutral-500"
                             }`}
                           >
                             <div className="text-sm font-medium">
@@ -6289,34 +6389,22 @@ useEffect(() => {
           <div className="flex min-h-0 flex-1 flex-col">
             <header className="shrink-0 px-4 pb-2 pt-4">
               <div className="rounded-[28px] border border-white/70 bg-white/55 p-4 shadow-[0_12px_40px_rgba(120,80,95,0.12)] backdrop-blur-xl">
-                <h1 className="text-2xl font-semibold">
-                  {t.settings}
-                </h1>
+                <div className="flex items-center justify-between gap-3">
+                  <h1 className="text-2xl font-semibold">{t.settings}</h1>
+                  <span
+                    role="status"
+                    title={connectionLabel()}
+                    aria-label={connectionLabel()}
+                    className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1.5 text-[10px] font-medium ${connectionClass()}`}
+                  >
+                    <span className={`h-2 w-2 rounded-full ${connectionDotClass()}`} />
+                    {connectionLabel()}
+                  </span>
+                </div>
               </div>
             </header>
 
             <section className="min-h-0 flex-1 overflow-y-auto px-4 pb-4">
-              <div className="rounded-[24px] border border-white/70 bg-white/55 p-4 backdrop-blur-lg">
-                <h2 className="font-semibold">
-                  {t.sync}
-                </h2>
-
-                <div
-                  className={`mt-3 rounded-2xl border p-4 ${connectionClass()}`}
-                >
-                  <p className="font-medium">
-                    {connectionLabel()}
-                  </p>
-
-                  {pendingCount >
-                    0 && (
-                    <p className="mt-1 text-xs">
-                      В очереди: {pendingCount}
-                    </p>
-                  )}
-                </div>
-              </div>
-
               <div className="mt-3 rounded-[24px] border border-white/70 bg-white/55 p-4 backdrop-blur-lg">
                 <h2 className="font-semibold">
                   {t.language}
@@ -6514,8 +6602,8 @@ useEffect(() => {
                           workSettings.workDays.includes(
                             day.value
                           )
-                            ? "bg-neutral-900 text-white"
-                            : "bg-white/65 text-neutral-400"
+                            ? "bg-rose-400 text-white shadow-[0_4px_12px_rgba(244,114,182,0.24)]"
+                            : "bg-neutral-200/70 text-neutral-400"
                         }`}
                       >
                         {day[
@@ -6525,6 +6613,93 @@ useEffect(() => {
                     )
                   )}
                 </div>
+
+                <button
+                  type="button"
+                  onClick={() => setScheduleEditorOpen((open) => !open)}
+                  className="mt-4 flex h-11 w-full items-center justify-between rounded-2xl border border-rose-200/80 bg-rose-50/70 px-4 text-sm font-medium text-rose-600"
+                >
+                  <span>{language === "uk" ? "Індивідуальний графік" : "Индивидуальный график"}</span>
+                  <span>{scheduleEditorOpen ? "−" : "+"}</span>
+                </button>
+
+                {scheduleEditorOpen && (
+                  <div className="mt-3 rounded-2xl border border-white/80 bg-white/60 p-3">
+                    <p className="mb-3 text-xs text-neutral-500">
+                      {language === "uk"
+                        ? "Натисни дату, щоб змінити її статус. Рожевий — робочий, сірий — вихідний."
+                        : "Нажми на дату, чтобы изменить её статус. Розовый — рабочий, серый — выходной."}
+                    </p>
+                    <div className="mb-3 flex items-center justify-between">
+                      <button type="button" aria-label="Предыдущий месяц"
+                        onClick={() => setScheduleMonth((m) => new Date(m.getFullYear(), m.getMonth() - 1, 1))}
+                        className="h-9 w-9 rounded-xl bg-white/80 text-xl text-neutral-600">‹</button>
+                      <span className="text-sm font-semibold capitalize">
+                        {formatMonthTitle(scheduleMonth, language)}
+                      </span>
+                      <button type="button" aria-label="Следующий месяц"
+                        onClick={() => setScheduleMonth((m) => new Date(m.getFullYear(), m.getMonth() + 1, 1))}
+                        className="h-9 w-9 rounded-xl bg-white/80 text-xl text-neutral-600">›</button>
+                    </div>
+                    <div className="grid grid-cols-7 gap-1">
+                      {WEEKDAYS.map((day) => (
+                        <span key={day.value} className="py-1 text-center text-[10px] text-neutral-400">
+                          {day[language]}
+                        </span>
+                      ))}
+                      {getMonthCalendarDays(scheduleMonth).map(({ date, isCurrentMonth }) => {
+                        const key = formatDateKey(date);
+                        const working = isDateWorking(date, workSettings);
+                        const isCustom = Object.prototype.hasOwnProperty.call(workSettings.dateOverrides, key);
+                        return (
+                          <button
+                            type="button"
+                            key={key}
+                            aria-label={`${key}: ${working ? "Рабочий" : "Выходной"}`}
+                            aria-pressed={working}
+                            onClick={() => {
+                              setSelectedOverrideDate(key);
+                              setWorkSettings((prev) => ({
+                                ...prev,
+                                dateOverrides: { ...prev.dateOverrides, [key]: !isDateWorking(date, prev) },
+                              }));
+                            }}
+                            className={`relative h-10 rounded-xl text-xs font-semibold transition-colors ${
+                              working
+                                ? "bg-rose-400 text-white shadow-sm"
+                                : "bg-neutral-200/80 text-neutral-500"
+                            } ${isCurrentMonth ? "" : "opacity-35"}`}
+                          >
+                            {date.getDate()}
+                            {isCustom && <span className="absolute bottom-1 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-white ring-1 ring-neutral-400/50" />}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    {selectedOverrideDate && Object.prototype.hasOwnProperty.call(workSettings.dateOverrides, selectedOverrideDate) && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const key = selectedOverrideDate;
+                          setWorkSettings((prev) => {
+                            const next = { ...prev.dateOverrides };
+                            delete next[key];
+                            return { ...prev, dateOverrides: next };
+                          });
+                          setSelectedOverrideDate(null);
+                        }}
+                        className="mt-3 w-full rounded-xl bg-white/80 px-3 py-2 text-xs text-neutral-600"
+                      >
+                        {language === "uk" ? `Скинути ${selectedOverrideDate} до звичайного графіка` : `Сбросить ${selectedOverrideDate} к обычному графику`}
+                      </button>
+                    )}
+                    <p className="mt-3 text-[11px] text-neutral-500">
+                      {language === "uk"
+                        ? "Особливі дати мають пріоритет над днями тижня. Існуючі записи не видаляються."
+                        : "Особые даты важнее дней недели. Существующие записи не удаляются."}
+                    </p>
+                  </div>
+                )}
               </div>
 
               <div className="mt-3 rounded-[24px] border border-white/70 bg-white/55 p-4 backdrop-blur-lg">
@@ -6541,8 +6716,30 @@ useEffect(() => {
                   />
                 </div>
 
+                <div className="relative mt-3">
+                  <input
+                    type="search"
+                    value={serviceSettingsSearch}
+                    onChange={(event) => setServiceSettingsSearch(event.target.value)}
+                    placeholder={language === "uk" ? "Пошук послуги за назвою..." : "Поиск услуги по названию..."}
+                    aria-label={language === "uk" ? "Пошук послуг" : "Поиск услуг"}
+                    className="h-12 w-full rounded-2xl border border-white/80 bg-white/75 px-4 text-sm shadow-sm outline-none focus:border-rose-300 focus:ring-2 focus:ring-rose-200/60"
+                  />
+                </div>
+
+                {serviceSettingsSearch.trim() && (
+                  <p className="mt-2 text-xs text-neutral-500">
+                    {language === "uk" ? "Знайдено" : "Найдено"}: {filteredSettingsServices.length}
+                  </p>
+                )}
+
                 <div className="mt-3 space-y-2">
-                  {services.map(
+                  {filteredSettingsServices.length === 0 && (
+                    <p className="rounded-2xl bg-white/60 p-4 text-center text-sm text-neutral-500">
+                      {language === "uk" ? "Послуг не знайдено" : "Услуги не найдены"}
+                    </p>
+                  )}
+                  {filteredSettingsServices.map(
                     (
                       service
                     ) => (
@@ -6696,113 +6893,81 @@ useEffect(() => {
             </h2>
 
             <div className="mt-5 space-y-4">
-              {clients.length >
-                0 && (
-                <div>
-                  <label className="mb-1 block text-sm text-neutral-500">
-                    {t.client}
-                  </label>
-
-                  <select
-                    value={
-                      selectedClientId
+              <div className="relative">
+                <label className="mb-1 block text-sm text-neutral-500">
+                  {t.clientName}
+                </label>
+                <input
+                  value={selectedClientId
+                    ? (clients.find((client) => client.id === Number(selectedClientId))?.name ?? appointmentName)
+                    : appointmentName}
+                  onChange={(event) => {
+                    setSelectedClientId("");
+                    setAppointmentName(event.target.value);
+                    setAppointmentPhone("");
+                    setAppointmentTelegram("");
+                    setAppointmentInstagram("");
+                    setClientSuggestionsOpen(true);
+                  }}
+                  onFocus={() => setClientSuggestionsOpen(true)}
+                  onBlur={(event) => {
+                    if (!event.currentTarget.parentElement?.contains(event.relatedTarget as Node | null)) {
+                      setClientSuggestionsOpen(false);
                     }
-                    onChange={(
-                      event
-                    ) => {
-                      const value =
-                        event.target.value;
-
-                      setSelectedClientId(
-                        value
-                      );
-
-                      if (
-                        value
-                      ) {
-                        const client =
-                          clients.find(
-                            (
-                              item
-                            ) =>
-                              item.id ===
-                              Number(
-                                value
-                              )
-                          );
-
-                        setAppointmentName(
-                          ""
-                        );
-
-                        setAppointmentPhone(
-                          client?.phone ??
-                            ""
-                        );
-                      } else {
-                        setAppointmentName(
-                          ""
-                        );
-
-                        setAppointmentPhone(
-                          ""
-                        );
-                      }
+                  }}
+                  placeholder={t.clientName}
+                  autoComplete="off"
+                  className="h-12 w-full rounded-2xl border border-white/80 bg-white/80 px-3 shadow-sm"
+                />
+                {selectedClientId && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedClientId("");
+                      setAppointmentName("");
+                      setAppointmentPhone("");
+                      setAppointmentTelegram("");
+                      setAppointmentInstagram("");
+                      setClientSuggestionsOpen(true);
                     }}
-                    className="h-12 w-full rounded-2xl border border-white/80 bg-white/80 px-3 shadow-sm"
+                    className="absolute right-3 top-9 text-xs text-rose-600"
                   >
-                    <option value="">
-                      {t.manualName}
-                    </option>
-
-                    {clients.map(
-                      (
-                        client
-                      ) => (
-                        <option
-                          key={
-                            client.id
-                          }
-                          value={
-                            client.id
-                          }
+                    ✕
+                  </button>
+                )}
+                {clientSuggestionsOpen && !selectedClientId && (
+                  <div className="absolute left-0 right-0 top-full z-50 mt-1 max-h-48 overflow-y-auto rounded-2xl border border-rose-100 bg-white p-1 shadow-xl">
+                    {clients
+                      .filter((client) => client.name.trim().toLocaleLowerCase().startsWith(appointmentName.trim().toLocaleLowerCase()))
+                      .slice(0, 8)
+                      .map((client) => (
+                        <button
+                          key={client.id}
+                          type="button"
+                          onMouseDown={(event) => event.preventDefault()}
+                          onClick={() => {
+                            setSelectedClientId(String(client.id));
+                            setAppointmentName("");
+                            setAppointmentPhone(client.phone);
+                            setAppointmentTelegram(client.telegram);
+                            setAppointmentInstagram(client.instagram);
+                            setClientSuggestionsOpen(false);
+                          }}
+                          className="block w-full rounded-xl px-3 py-2 text-left hover:bg-rose-50"
                         >
-                          {client.name}
-                          {client.phone
-                            ? ` · ${client.phone}`
-                            : ""}
-                        </option>
-                      )
+                          <span className="block text-sm font-medium">{client.name}</span>
+                          {client.phone && <span className="block text-xs text-neutral-500">{client.phone}</span>}
+                        </button>
+                      ))}
+                    {appointmentName.trim() && !clients.some((client) => client.name.trim().toLocaleLowerCase().startsWith(appointmentName.trim().toLocaleLowerCase())) && (
+                      <div className="px-3 py-2 text-xs text-neutral-500">Новый клиент — будет создан при сохранении</div>
                     )}
-                  </select>
-                </div>
-              )}
+                  </div>
+                )}
+              </div>
 
               {!selectedClientId && (
                 <>
-                  <FieldLabel
-                    label={
-                      t.clientName
-                    }
-                  >
-                    <input
-                      value={
-                        appointmentName
-                      }
-                      onChange={(
-                        event
-                      ) =>
-                        setAppointmentName(
-                          event.target.value
-                        )
-                      }
-                      placeholder={
-                        t.clientName
-                      }
-                      className="h-12 w-full rounded-2xl border border-white/80 bg-white/80 px-3 shadow-sm"
-                    />
-                  </FieldLabel>
-
                   <FieldLabel
                     label={
                       t.clientPhone
@@ -6824,91 +6989,102 @@ useEffect(() => {
                       className="h-12 w-full rounded-2xl border border-white/80 bg-white/80 px-3 shadow-sm"
                     />
                   </FieldLabel>
+
+                  <FieldLabel label="Telegram">
+                    <input
+                      value={appointmentTelegram}
+                      onChange={(event) => setAppointmentTelegram(event.target.value)}
+                      placeholder="@username"
+                      autoCapitalize="none"
+                      autoCorrect="off"
+                      className="h-12 w-full rounded-2xl border border-white/80 bg-white/80 px-3 shadow-sm"
+                    />
+                  </FieldLabel>
+
+                  <FieldLabel label="Instagram">
+                    <input
+                      value={appointmentInstagram}
+                      onChange={(event) => setAppointmentInstagram(event.target.value)}
+                      placeholder="username"
+                      autoCapitalize="none"
+                      autoCorrect="off"
+                      className="h-12 w-full rounded-2xl border border-white/80 bg-white/80 px-3 shadow-sm"
+                    />
+                  </FieldLabel>
                 </>
               )}
 
-              {mainServices.length >
-                0 && (
-                <div>
-                  <label className="mb-1 block text-sm text-neutral-500">
-                    {t.mainService}
-                  </label>
-
-                  <select
-                    value={
-                      selectedServiceId
+              <div className="relative">
+                <label className="mb-1 block text-sm text-neutral-500">{t.mainService}</label>
+                <input
+                  value={appointmentService}
+                  onChange={(event) => {
+                    setSelectedServiceId("");
+                    setAppointmentService(event.target.value);
+                    setServiceSuggestionsOpen(true);
+                  }}
+                  onFocus={() => setServiceSuggestionsOpen(true)}
+                  onBlur={(event) => {
+                    if (!event.currentTarget.parentElement?.contains(event.relatedTarget as Node | null)) {
+                      setServiceSuggestionsOpen(false);
                     }
-                    onChange={(
-                      event
-                    ) =>
-                      handleServiceSelection(
-                        event.target.value
-                      )
-                    }
-                    className="h-12 w-full rounded-2xl border border-white/80 bg-white/80 px-3 shadow-sm"
-                  >
-                    <option value="">
-                      {t.manualService}
-                    </option>
-
-                    {mainServices.map(
-                      (
-                        service
-                      ) => (
-                        <option
-                          key={
-                            service.id
-                          }
-                          value={
-                            service.id
-                          }
+                  }}
+                  placeholder={t.serviceName}
+                  autoComplete="off"
+                  className="h-12 w-full rounded-2xl border border-white/80 bg-white/80 px-3 shadow-sm"
+                />
+                {serviceSuggestionsOpen && (
+                  <div className="absolute left-0 right-0 top-full z-50 mt-1 max-h-48 overflow-y-auto rounded-2xl border border-rose-100 bg-white p-1 shadow-xl">
+                    {mainServices
+                      .filter((service) => service.name.trim().toLocaleLowerCase().startsWith(appointmentService.trim().toLocaleLowerCase()))
+                      .slice(0, 8)
+                      .map((service) => (
+                        <button
+                          key={service.id}
+                          type="button"
+                          onMouseDown={(event) => event.preventDefault()}
+                          onClick={() => {
+                            handleServiceSelection(String(service.id));
+                            setServiceSuggestionsOpen(false);
+                          }}
+                          className="block w-full rounded-xl px-3 py-2 text-left hover:bg-rose-50"
                         >
-                          {service.name} — {service.price} грн ·{" "}
-                          {formatDurationLabel(
-                            service.duration,
-                            language
-                          )}
-                        </option>
-                      )
+                          <span className="block text-sm font-medium">{service.name}</span>
+                          <span className="block text-xs text-neutral-500">{service.price} грн · {formatDurationLabel(service.duration, language)}</span>
+                        </button>
+                      ))}
+                    {appointmentService.trim() && !mainServices.some((service) => service.name.trim().toLocaleLowerCase().startsWith(appointmentService.trim().toLocaleLowerCase())) && (
+                      <div className="px-3 py-2 text-xs text-neutral-500">Можно указать новую услугу вручную</div>
                     )}
-                  </select>
-                </div>
-              )}
-
-              {!selectedServiceId && (
-                <FieldLabel
-                  label={
-                    t.mainService
-                  }
-                >
-                  <input
-                    value={
-                      appointmentService
-                    }
-                    onChange={(
-                      event
-                    ) =>
-                      setAppointmentService(
-                        event.target.value
-                      )
-                    }
-                    placeholder={
-                      t.serviceName
-                    }
-                    className="h-12 w-full rounded-2xl border border-white/80 bg-white/80 px-3 shadow-sm"
-                  />
-                </FieldLabel>
-              )}
+                  </div>
+                )}
+              </div>
 
               <div>
                 <label className="mb-2 block text-sm text-neutral-500">
                   {t.extraServices}
                 </label>
 
-                {addonServices.length >
-                0 ? (
+                {addonServices.length > 0 ? (
                   <div className="space-y-2">
-                    {addonServices.map(
+                    <input
+                      type="search"
+                      value={addonSearch}
+                      onChange={(event) => setAddonSearch(event.target.value)}
+                      placeholder={language === "uk" ? "Пошук додаткової послуги..." : "Поиск дополнительной услуги..."}
+                      aria-label={language === "uk" ? "Пошук додаткової послуги" : "Поиск дополнительной услуги"}
+                      className="h-12 w-full rounded-2xl border border-white/80 bg-white/80 px-4 text-sm shadow-sm outline-none focus:border-violet-300"
+                    />
+                    {addonServices.filter((service) =>
+                      service.name.trim().toLocaleLowerCase().startsWith(addonSearch.trim().toLocaleLowerCase())
+                    ).length === 0 && (
+                      <div className="rounded-2xl bg-white/45 p-3 text-sm text-neutral-500">
+                        {language === "uk" ? "Нічого не знайдено" : "Ничего не найдено"}
+                      </div>
+                    )}
+                    {addonServices.filter((service) =>
+                      service.name.trim().toLocaleLowerCase().startsWith(addonSearch.trim().toLocaleLowerCase())
+                    ).map(
                       (
                         service
                       ) => {
@@ -7906,20 +8082,19 @@ function AddButton({
   size?: "sm" | "md" | "lg";
 }) {
   const sizes = {
-    sm: "h-10 w-10 rounded-[14px] text-xl",
-    md: "h-11 w-11 rounded-[16px] text-2xl",
-    lg: "h-14 w-14 rounded-[20px] text-[30px]",
+    sm: "h-11 w-11",
+    md: "h-12 w-12",
+    lg: "h-16 w-16",
   };
 
   return (
     <button
       type="button"
-      onClick={
-        onClick
-      }
-      className={`flex items-center justify-center border border-white/70 bg-[linear-gradient(145deg,#ff9bb8_0%,#ff5f94_55%,#ff3f82_100%)] font-light text-white shadow-[0_10px_24px_rgba(229,95,143,0.28),inset_0_1px_0_rgba(255,255,255,0.72)] backdrop-blur-md transition-all active:scale-95 ${sizes[size]}`}
+      aria-label="Добавить"
+      onClick={onClick}
+      className={`${sizes[size]} relative shrink-0 transition-transform duration-150 active:scale-90`}
     >
-      +
+      <Image src="/icons/add-plus.png" alt="" fill sizes="64px" className="object-contain" />
     </button>
   );
 }
@@ -8051,21 +8226,23 @@ function Modal({
 }) {
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/30 backdrop-blur-[2px]">
-      <div className="max-h-[92dvh] w-full max-w-md overflow-y-auto rounded-t-[32px] border-t border-white/80 bg-rose-50/90 p-5 shadow-[0_-20px_60px_rgba(80,50,65,0.18)] backdrop-blur-xl">
-        <div className="mx-auto mb-2 h-1.5 w-10 rounded-full bg-neutral-300/80" />
-
-        <div className="flex justify-end">
-          <button
-            onClick={
-              onClose
-            }
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-white/60 text-sm text-neutral-500"
-          >
-            ✕
-          </button>
+      <div className="flex max-h-[92dvh] w-full max-w-md flex-col overflow-hidden rounded-t-[32px] border-t border-white/80 bg-rose-50/90 shadow-[0_-20px_60px_rgba(80,50,65,0.18)] backdrop-blur-xl">
+        <div className="relative z-10 shrink-0 px-5 pt-4 pb-2">
+          <div className="mx-auto mt-1 h-1.5 w-10 rounded-full bg-neutral-300/80" />
+          <div className="flex justify-end">
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Закрыть окно"
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-white/60 text-sm text-neutral-500"
+            >
+              ✕
+            </button>
+          </div>
         </div>
-
-        {children}
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 pb-5">
+          {children}
+        </div>
       </div>
     </div>
   );
