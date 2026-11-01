@@ -35,6 +35,7 @@ type Appointment = {
   duration: number;
   price: number;
   status: AppointmentStatus;
+  manualStatus?: boolean;
 };
 
 type Client = {
@@ -1118,6 +1119,19 @@ function getAppointmentAccentClass(
   }
 
   return "bg-fuchsia-400";
+}
+
+function getStatusBulbSrc(status: AppointmentStatus) {
+  switch (status) {
+    case "completed":
+      return "/icons/status-completed.png";
+    case "cancelled":
+      return "/icons/status-cancelled.png";
+    case "no-show":
+      return "/icons/status-no-show.png";
+    default:
+      return "/icons/status-scheduled.png";
+  }
 }
 
 function sumPrices(
@@ -2494,6 +2508,7 @@ useEffect(() => {
                   row.status ??
                   "scheduled"
                 ) as AppointmentStatus,
+              manualStatus: row.manual_status === true,
             })
           );
 
@@ -2967,7 +2982,7 @@ useEffect(() => {
     const completeEndedAppointments = () => {
       const now = Date.now();
       const ended = appointments.filter((appointment) => {
-        if (appointment.status !== "scheduled" || inFlight.has(appointment.id)) {
+        if (appointment.status !== "scheduled" || appointment.manualStatus || inFlight.has(appointment.id)) {
           return false;
         }
         const start = new Date(`${appointment.date}T${appointment.time}`).getTime();
@@ -3008,6 +3023,7 @@ useEffect(() => {
                 duration: completed.duration,
                 price: completed.price,
                 status: completed.status,
+                manual_status: false,
               },
             });
           } catch (error) {
@@ -4292,6 +4308,14 @@ useEffect(() => {
 
         status:
           appointmentStatus,
+        manualStatus: (() => {
+          const previous = editingAppointmentId !== null
+            ? appointments.find((item) => item.id === editingAppointmentId)
+            : undefined;
+          return previous
+            ? Boolean(previous.manualStatus) || previous.status !== appointmentStatus
+            : appointmentStatus !== "scheduled";
+        })(),
       };
 
     setAppointments(
@@ -4368,6 +4392,7 @@ useEffect(() => {
 
         status:
           appointment.status,
+        manual_status: appointment.manualStatus === true,
       },
     });
 
@@ -4734,6 +4759,7 @@ useEffect(() => {
 
             status:
               appointment.status,
+            manual_status: appointment.manualStatus === true,
           },
         });
       }
@@ -5891,13 +5917,10 @@ useEffect(() => {
                               }}
                               className="absolute left-3 right-3 z-10 overflow-hidden rounded-[30px] text-left transition-all duration-200 active:scale-[0.985]"
                               style={{
-                                top: `${top + 6}px`,
-
-                                height: `${Math.max(
-                                  height -
-                                    12,
-                                  62
-                                )}px`,
+                                // Align the actual pillow with the appointment start and end.
+                                // A small bleed compensates for the PNG's transparent edge.
+                                top: `${top - 4}px`,
+                                height: `${Math.max(height + 8, 62)}px`,
                               }}
                             >
                               <div
@@ -5905,7 +5928,7 @@ useEffect(() => {
                                 className="pointer-events-none absolute inset-0 select-none drop-shadow-[0_10px_18px_rgba(170,105,130,0.16)]"
                                 style={{
                                   border: "1px solid transparent",
-                                  borderImageSource: "url('/icons/appointment-card-v3.png')",
+                                  borderImageSource: "url('/icons/appointment-card-v4.png')",
                                   borderImageSlice: "160 230 160 230 fill",
                                   borderImageWidth: "42px 42px 42px 42px",
                                   borderImageRepeat: "stretch",
@@ -6005,13 +6028,17 @@ useEffect(() => {
                                         )}
 
                                         <span
-                                          className={`ml-0.5 h-2 w-2 rounded-full shadow-[0_0_0_3px_rgba(255,255,255,0.60)] ${getAppointmentAccentClass(
-                                            appointment.status
-                                          )}`}
-                                          title={statusLabel(
-                                            appointment.status
-                                          )}
-                                        />
+                                          className="relative ml-0.5 inline-block h-7 w-7 shrink-0"
+                                          title={statusLabel(appointment.status)}
+                                        >
+                                          <Image
+                                            src={getStatusBulbSrc(appointment.status)}
+                                            alt={statusLabel(appointment.status)}
+                                            fill
+                                            sizes="28px"
+                                            className="object-contain"
+                                          />
+                                        </span>
                                       </div>
                                     )}
                                   </div>
