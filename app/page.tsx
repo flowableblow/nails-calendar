@@ -5747,7 +5747,7 @@ useEffect(() => {
                   "day" && (
                   <div
                     ref={weekStripRef}
-                    className="mt-3 w-full overflow-hidden touch-pan-y select-none"
+                    className="relative isolate mt-3 w-full overflow-hidden touch-pan-y select-none [contain:paint]"
                     onTouchStart={handleWeekTouchStart}
                     onTouchMove={handleWeekTouchMove}
                     onTouchEnd={handleWeekTouchEnd}
@@ -5760,7 +5760,7 @@ useEffect(() => {
                     }}
                   >
                     <div
-                      className="flex w-[300%]"
+                      className="flex w-[300%] [backface-visibility:hidden]"
                       style={{
                         transform: `translate3d(calc(-33.333333% + ${weekAnimating ? -weekSlideDirection * weekStripWidth : weekDragX}px), 0, 0)`,
                         transition: weekAnimating ? "transform 280ms cubic-bezier(0.22, 1, 0.36, 1)" : "none",
@@ -5771,7 +5771,7 @@ useEffect(() => {
                       }}
                     >
                     {[prevWeekDates, weekDates, nextWeekDates].map((dates, weekIndex) => (
-                      <div key={weekIndex} className="grid w-1/3 shrink-0 grid-cols-7 gap-1">
+                      <div key={weekIndex} className="grid w-1/3 min-w-0 shrink-0 grid-cols-7 gap-1 [backface-visibility:hidden]">
                     {dates.map(
                       (
                         date
@@ -5873,9 +5873,9 @@ useEffect(() => {
 
             {calendarView ===
               "day" && (
-              <section className="min-h-0 flex-1 overflow-y-auto px-3 pb-3">
+              <section className="min-h-0 flex-1 overflow-y-auto px-3 pb-3 [transform:translateZ(0)]">
                 <div
-  className={`relative min-h-full overflow-hidden rounded-[30px] border shadow-[0_12px_45px_rgba(105,75,90,0.10)] backdrop-blur-md ${
+  className={`relative isolate min-h-full overflow-hidden rounded-[30px] border shadow-[0_12px_45px_rgba(105,75,90,0.10)] [contain:paint] ${
     selectedDateIsWorkDay
       ? "border-rose-200/70 bg-[linear-gradient(180deg,rgba(255,180,201,0.26)_0%,rgba(255,155,190,0.16)_50%,rgba(255,182,203,0.22)_100%)]"
       : "border-neutral-300/70 bg-[linear-gradient(180deg,rgba(190,190,197,0.26)_0%,rgba(190,190,197,0.17)_50%,rgba(190,190,197,0.23)_100%)]"
@@ -6181,10 +6181,10 @@ useEffect(() => {
             )}
 
             {calendarView === "month" && (
-              <section className="min-h-0 flex-1 overflow-y-auto px-3 pb-3">
+              <section className="min-h-0 flex-1 overflow-y-auto px-3 pb-3 [transform:translateZ(0)]">
                 <div
                   ref={monthStripRef}
-                  className="w-full overflow-hidden touch-pan-y select-none"
+                  className="relative isolate w-full overflow-hidden touch-pan-y select-none [contain:paint]"
                   onTouchStart={handleMonthTouchStart}
                   onTouchMove={handleMonthTouchMove}
                   onTouchEnd={handleMonthTouchEnd}
@@ -6202,7 +6202,7 @@ useEffect(() => {
                   }}
                 >
                   <div
-                    className="flex w-[300%] items-start"
+                    className="flex w-[300%] items-start [backface-visibility:hidden]"
                     style={{
                       transform: `translate3d(calc(-33.333333% + ${monthAnimating ? -monthSlideDirection * monthStripWidth : monthDragX}px), 0, 0)`,
                       transition: monthAnimating ? "transform 280ms cubic-bezier(0.22, 1, 0.36, 1)" : "none",
@@ -6215,7 +6215,7 @@ useEffect(() => {
                     {[-1, 0, 1].map((offset) => {
                       const shownMonth = new Date(visibleMonth.getFullYear(), visibleMonth.getMonth() + offset, 1);
                       return (
-                        <div key={offset} className="w-1/3 shrink-0 rounded-[30px] border border-white/70 bg-white/50 p-3 shadow-[0_12px_45px_rgba(105,75,90,0.10)] backdrop-blur-xl">
+                        <div key={offset} className="w-1/3 min-w-0 shrink-0 rounded-[30px] border border-white/70 bg-[#fff0f5]/90 p-3 shadow-[0_12px_45px_rgba(105,75,90,0.10)] [backface-visibility:hidden]">
                           <div className="grid grid-cols-7 gap-1">
                             {WEEKDAYS.map((day) => (
                               <div key={day.value} className="py-2 text-center text-[10px] font-medium text-neutral-400">
