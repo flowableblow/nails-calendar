@@ -3143,11 +3143,6 @@ useEffect(() => {
     ) *
     HOUR_HEIGHT;
 
-  const monthDays =
-    getMonthCalendarDays(
-      visibleMonth
-    );
-
   const weekDates = getWeekDates(selectedDate);
   const prevWeekDates = getWeekDates(new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate() - 7, 12));
   const nextWeekDates = getWeekDates(new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate() + 7, 12));
@@ -3863,6 +3858,67 @@ useEffect(() => {
     setWeekSlideDirection(0);
     setWeekDragX(0);
     if (direction) changeDay(direction * 7);
+  }
+
+  // Three-month carousel with horizontal touch gestures.
+  const monthSwipeStartRef = useRef<{ x: number; y: number } | null>(null);
+  const monthSwipeHandledRef = useRef(false);
+  const monthStripRef = useRef<HTMLDivElement | null>(null);
+  const [monthStripWidth, setMonthStripWidth] = useState(350);
+  const [monthDragX, setMonthDragX] = useState(0);
+  const [monthSlideDirection, setMonthSlideDirection] = useState<0 | -1 | 1>(0);
+  const [monthAnimating, setMonthAnimating] = useState(false);
+
+  function handleMonthTouchStart(event: TouchEvent<HTMLDivElement>) {
+    if (monthAnimating || event.touches.length !== 1) return;
+    const width = monthStripRef.current?.getBoundingClientRect().width;
+    if (width) setMonthStripWidth(width);
+    monthSwipeHandledRef.current = false;
+    monthSwipeStartRef.current = {
+      x: event.touches[0].clientX,
+      y: event.touches[0].clientY,
+    };
+  }
+
+  function handleMonthTouchMove(event: TouchEvent<HTMLDivElement>) {
+    const start = monthSwipeStartRef.current;
+    if (!start || monthAnimating || event.touches.length !== 1) return;
+    const dx = event.touches[0].clientX - start.x;
+    const dy = event.touches[0].clientY - start.y;
+    if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 8) {
+      monthSwipeStartRef.current = null;
+      setMonthDragX(0);
+      return;
+    }
+    if (Math.abs(dx) > 5) {
+      monthSwipeHandledRef.current = true;
+      setMonthDragX(Math.max(-monthStripWidth, Math.min(monthStripWidth, dx)));
+    }
+  }
+
+  function handleMonthTouchEnd(event: TouchEvent<HTMLDivElement>) {
+    const start = monthSwipeStartRef.current;
+    monthSwipeStartRef.current = null;
+    if (!start || monthAnimating || event.changedTouches.length !== 1) return;
+    const dx = event.changedTouches[0].clientX - start.x;
+    const dy = event.changedTouches[0].clientY - start.y;
+    if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy) * 1.25) {
+      monthSwipeHandledRef.current = true;
+      setMonthSlideDirection(dx < 0 ? 1 : -1);
+    } else {
+      if (Math.abs(monthDragX) < 3) { setMonthDragX(0); return; }
+      setMonthSlideDirection(0);
+    }
+    setMonthAnimating(true);
+  }
+
+  function finishMonthSlide() {
+    if (!monthAnimating) return;
+    const direction = monthSlideDirection;
+    setMonthAnimating(false);
+    setMonthSlideDirection(0);
+    setMonthDragX(0);
+    if (direction) changeMonth(direction);
   }
 
   function changeMonth(
@@ -6088,106 +6144,79 @@ useEffect(() => {
               </section>
             )}
 
-            {calendarView ===
-              "month" && (
+            {calendarView === "month" && (
               <section className="min-h-0 flex-1 overflow-y-auto px-3 pb-3">
-                <div className="rounded-[30px] border border-white/70 bg-white/50 p-3 shadow-[0_12px_45px_rgba(105,75,90,0.10)] backdrop-blur-xl">
-                  <div className="grid grid-cols-7 gap-1">
-                    {WEEKDAYS.map(
-                      (
-                        day
-                      ) => (
-                        <div
-                          key={
-                            day.value
-                          }
-                          className="py-2 text-center text-[10px] font-medium text-neutral-400"
-                        >
-                          {day[
-                            language
-                          ]}
+                <div
+                  ref={monthStripRef}
+                  className="w-full overflow-hidden touch-pan-y select-none"
+                  onTouchStart={handleMonthTouchStart}
+                  onTouchMove={handleMonthTouchMove}
+                  onTouchEnd={handleMonthTouchEnd}
+                  onTouchCancel={() => {
+                    monthSwipeStartRef.current = null;
+                    setMonthDragX(0);
+                    setMonthAnimating(false);
+                    setMonthSlideDirection(0);
+                  }}
+                  onClickCapture={(event) => {
+                    if (monthSwipeHandledRef.current) {
+                      event.stopPropagation();
+                      monthSwipeHandledRef.current = false;
+                    }
+                  }}
+                >
+                  <div
+                    className="flex w-[300%] items-start"
+                    style={{
+                      transform: `translate3d(calc(-33.333333% + ${monthAnimating ? -monthSlideDirection * monthStripWidth : monthDragX}px), 0, 0)`,
+                      transition: monthAnimating ? "transform 280ms cubic-bezier(0.22, 1, 0.36, 1)" : "none",
+                      willChange: "transform",
+                    }}
+                    onTransitionEnd={(event) => {
+                      if (event.target === event.currentTarget && event.propertyName === "transform") finishMonthSlide();
+                    }}
+                  >
+                    {[-1, 0, 1].map((offset) => {
+                      const shownMonth = new Date(visibleMonth.getFullYear(), visibleMonth.getMonth() + offset, 1);
+                      return (
+                        <div key={offset} className="w-1/3 shrink-0 rounded-[30px] border border-white/70 bg-white/50 p-3 shadow-[0_12px_45px_rgba(105,75,90,0.10)] backdrop-blur-xl">
+                          <div className="grid grid-cols-7 gap-1">
+                            {WEEKDAYS.map((day) => (
+                              <div key={day.value} className="py-2 text-center text-[10px] font-medium text-neutral-400">
+                                {day[language]}
+                              </div>
+                            ))}
+                            {getMonthCalendarDays(shownMonth).map((item) => {
+                              const dateKey = formatDateKey(item.date);
+                              const count = appointments.filter((appointment) => appointment.date === dateKey).length;
+                              const selected = dateKey === selectedDateKey;
+                              const isWorkDay = isDateWorking(item.date, workSettings);
+                              return (
+                                <button
+                                  key={dateKey}
+                                  type="button"
+                                  onClick={() => {
+                                    setSelectedDate(item.date);
+                                    setVisibleMonth(new Date(item.date.getFullYear(), item.date.getMonth(), 1));
+                                    setCalendarView("day");
+                                  }}
+                                  className={`relative min-h-[58px] rounded-2xl p-2 transition ${
+                                    selected
+                                      ? isWorkDay ? "bg-rose-200/90 shadow-sm" : "bg-neutral-300/80 shadow-sm"
+                                      : !item.isCurrentMonth ? "text-neutral-300"
+                                      : isWorkDay ? "bg-rose-100/60" : "bg-neutral-200/60 text-neutral-500"
+                                  }`}
+                                >
+                                  <div className="text-sm font-medium">{item.date.getDate()}</div>
+                                  {!isWorkDay && item.isCurrentMonth && <div className="mt-1 text-[7px]">{t.weekend}</div>}
+                                  {count > 0 && <div className="absolute bottom-2 left-1/2 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-rose-500" />}
+                                </button>
+                              );
+                            })}
+                          </div>
                         </div>
-                      )
-                    )}
-
-                    {monthDays.map(
-                      (
-                        item
-                      ) => {
-                        const dateKey =
-                          formatDateKey(
-                            item.date
-                          );
-
-                        const count =
-                          appointments.filter(
-                            (
-                              appointment
-                            ) =>
-                              appointment.date ===
-                              dateKey
-                          ).length;
-
-                        const selected =
-                          dateKey ===
-                          selectedDateKey;
-
-                        const isWorkDay =
-                          isDateWorking(item.date, workSettings);
-
-                        return (
-                          <button
-                            key={
-                              dateKey
-                            }
-                            onClick={() => {
-                              setSelectedDate(
-                                item.date
-                              );
-
-                              setVisibleMonth(
-                                new Date(
-                                  item.date.getFullYear(),
-                                  item.date.getMonth(),
-                                  1
-                                )
-                              );
-
-                              setCalendarView(
-                                "day"
-                              );
-                            }}
-                            className={`relative min-h-[58px] rounded-2xl p-2 transition ${
-                              selected
-                                ? isWorkDay
-                                  ? "bg-rose-200/90 shadow-sm"
-                                  : "bg-neutral-300/80 shadow-sm"
-                                : !item.isCurrentMonth
-                                ? "text-neutral-300"
-                                : isWorkDay
-                                ? "bg-rose-100/60"
-                                : "bg-neutral-200/60 text-neutral-500"
-                            }`}
-                          >
-                            <div className="text-sm font-medium">
-                              {item.date.getDate()}
-                            </div>
-
-                            {!isWorkDay &&
-                              item.isCurrentMonth && (
-                                <div className="mt-1 text-[7px]">
-                                  {t.weekend}
-                                </div>
-                              )}
-
-                            {count >
-                              0 && (
-                              <div className="absolute bottom-2 left-1/2 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-rose-500" />
-                            )}
-                          </button>
-                        );
-                      }
-                    )}
+                      );
+                    })}
                   </div>
                 </div>
               </section>
