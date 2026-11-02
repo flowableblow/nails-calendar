@@ -8,6 +8,7 @@ import {
   useState,
   type FormEvent,
   type MouseEvent,
+  type TouchEvent,
   type ReactNode,
 } from "react";
 import type { Session } from "@supabase/supabase-js";
@@ -3804,6 +3805,36 @@ useEffect(() => {
     );
   }
 
+  // Touch-only gesture for the week strip. Keep date buttons tappable.
+  const weekSwipeStartRef = useRef<{ x: number; y: number } | null>(null);
+  const weekSwipeHandledRef = useRef(false);
+
+  function handleWeekTouchStart(event: TouchEvent<HTMLDivElement>) {
+    if (event.touches.length !== 1) {
+      weekSwipeStartRef.current = null;
+      return;
+    }
+    weekSwipeHandledRef.current = false;
+    weekSwipeStartRef.current = {
+      x: event.touches[0].clientX,
+      y: event.touches[0].clientY,
+    };
+  }
+
+  function handleWeekTouchEnd(event: TouchEvent<HTMLDivElement>) {
+    const start = weekSwipeStartRef.current;
+    weekSwipeStartRef.current = null;
+    if (!start || event.changedTouches.length !== 1) return;
+
+    const dx = event.changedTouches[0].clientX - start.x;
+    const dy = event.changedTouches[0].clientY - start.y;
+    // Ignore short movements and vertical scrolling.
+    if (Math.abs(dx) < 45 || Math.abs(dx) <= Math.abs(dy) * 1.25) return;
+
+    weekSwipeHandledRef.current = true;
+    changeDay(dx < 0 ? 7 : -7);
+  }
+
   function changeMonth(
     amount: number
   ) {
@@ -5683,7 +5714,18 @@ useEffect(() => {
 
                 {calendarView ===
                   "day" && (
-                  <div className="mt-4 grid grid-cols-7 gap-1">
+                  <div
+                    className="mt-4 grid grid-cols-7 gap-1 touch-pan-y select-none"
+                    onTouchStart={handleWeekTouchStart}
+                    onTouchEnd={handleWeekTouchEnd}
+                    onTouchCancel={() => { weekSwipeStartRef.current = null; }}
+                    onClickCapture={(event) => {
+                      if (weekSwipeHandledRef.current) {
+                        event.stopPropagation();
+                        weekSwipeHandledRef.current = false;
+                      }
+                    }}
+                  >
                     {weekDates.map(
                       (
                         date
