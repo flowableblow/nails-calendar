@@ -3143,6 +3143,19 @@ useEffect(() => {
     ) *
     HOUR_HEIGHT;
 
+  const ribbonMonths = [-2, -1, 0, 1, 2].map((offset) =>
+    new Date(visibleMonth.getFullYear(), visibleMonth.getMonth() + offset, 1)
+  );
+  const ribbonMonthLabel = (date: Date) =>
+    new Intl.DateTimeFormat(getLocale(language), { month: "short" }).format(date).replace(/\.$/, "");
+  function chooseRibbonMonth(month: Date) {
+    setVisibleMonth(new Date(month.getFullYear(), month.getMonth(), 1));
+    if (calendarView === "day") {
+      const day = Math.min(selectedDate.getDate(), new Date(month.getFullYear(), month.getMonth() + 1, 0).getDate());
+      setSelectedDate(new Date(month.getFullYear(), month.getMonth(), day, 12));
+    }
+  }
+
   const weekDates = getWeekDates(selectedDate);
   const prevWeekDates = getWeekDates(new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate() - 7, 12));
   const nextWeekDates = getWeekDates(new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate() + 7, 12));
@@ -5678,40 +5691,63 @@ useEffect(() => {
           <div className="relative flex min-h-0 flex-1 flex-col">
             <header className="shrink-0 px-3 pb-2 pt-3">
               <div className="rounded-[28px] border border-white/70 bg-white/55 p-4 shadow-[0_12px_40px_rgba(120,80,95,0.12)] backdrop-blur-xl">
-                <div className="flex min-h-[52px] items-center justify-center">
-                  <button type="button" onClick={goToday} className="min-w-0 px-3 text-center">
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-neutral-400">
+                <div className="relative flex min-h-[76px] items-center justify-center overflow-hidden rounded-[24px] bg-gradient-to-b from-white/45 via-rose-50/20 to-transparent px-3">
+                  <span aria-hidden="true" className="pointer-events-none absolute left-3 top-2 text-[19px] text-rose-300/70">✧</span>
+                  <button type="button" onClick={goToday} className="relative min-w-0 px-3 py-2 text-center active:scale-[0.98] transition-transform">
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-rose-400/90">
                       {calendarView === "day" ? selectedDateIsToday ? t.today : formatWeekday(selectedDate, language) : t.calendar}
                     </p>
-                    <h1 className="mt-0.5 truncate text-[22px] font-semibold capitalize tracking-tight">
+                    <h1 className="mt-0.5 truncate text-[26px] font-semibold capitalize tracking-tight text-[#53313e]">
                       {calendarView === "day" ? formatDateTitle(selectedDate, language) : formatMonthTitle(visibleMonth, language)}
                     </h1>
+                    <div aria-hidden="true" className="mx-auto mt-1 h-[2px] w-20 rounded-full bg-gradient-to-r from-transparent via-rose-400/65 to-transparent" />
                   </button>
+                  <span aria-hidden="true" className="pointer-events-none absolute right-3 top-2 text-[19px] text-rose-300/70">✧</span>
                 </div>
-                <div className="mt-4 flex h-11 items-center justify-between gap-2">
-                  <div className="flex shrink-0 rounded-[18px] border border-white/55 bg-white/35 p-1 shadow-inner backdrop-blur-md">
+                <div className="mt-2 flex h-11 items-center justify-between gap-2">
+                  <div className="flex shrink-0 rounded-[18px] border border-white/75 bg-white/35 p-1 shadow-inner backdrop-blur-md">
                     <button type="button" onClick={() => setCalendarView("day")}
-                      className={`rounded-xl px-4 py-2 text-xs font-medium transition ${calendarView === "day" ? "bg-white/90 text-rose-600 shadow-[0_5px_14px_rgba(190,110,140,0.14)]" : "text-neutral-500"}`}>
+                      className={`rounded-[14px] px-4 py-2 text-xs font-medium transition-all ${calendarView === "day" ? "border border-white/90 bg-gradient-to-b from-white/95 to-rose-100/90 text-rose-600 shadow-[0_4px_12px_rgba(211,96,136,0.22)]" : "text-neutral-500"}`}>
                       {t.day}
                     </button>
                     <button type="button" onClick={() => setCalendarView("month")}
-                      className={`rounded-xl px-4 py-2 text-xs font-medium transition ${calendarView === "month" ? "bg-white/90 text-rose-600 shadow-[0_5px_14px_rgba(190,110,140,0.14)]" : "text-neutral-500"}`}>
+                      className={`rounded-[14px] px-4 py-2 text-xs font-medium transition-all ${calendarView === "month" ? "border border-white/90 bg-gradient-to-b from-white/95 to-rose-100/90 text-rose-600 shadow-[0_4px_12px_rgba(211,96,136,0.22)]" : "text-neutral-500"}`}>
                       {t.month}
                     </button>
                   </div>
                   <button type="button" onClick={goToday}
                     aria-hidden={calendarView === "day" ? selectedDateIsToday : visibleMonthIsCurrent}
                     tabIndex={(calendarView === "day" ? selectedDateIsToday : visibleMonthIsCurrent) ? -1 : 0}
-                    className={`min-w-0 flex-1 h-10 rounded-[16px] border border-white/70 bg-white/55 px-2 text-[10px] font-medium text-rose-500 shadow-sm backdrop-blur-xl transition-opacity active:scale-[0.99] ${(calendarView === "day" ? selectedDateIsToday : visibleMonthIsCurrent) ? "invisible pointer-events-none" : "visible"}`}>
+                    className={`min-w-0 flex-1 h-10 rounded-[16px] border border-white/80 bg-gradient-to-b from-white/75 to-rose-100/40 px-2 text-[10px] font-medium text-rose-500 shadow-[0_4px_12px_rgba(211,96,136,0.08)] transition-opacity active:scale-[0.99] ${(calendarView === "day" ? selectedDateIsToday : visibleMonthIsCurrent) ? "invisible pointer-events-none" : "visible"}`}>
                     {calendarView === "day" ? t.returnToday : t.returnCurrentMonth}
                   </button>
+                </div>
+                <div aria-label="Быстрый выбор месяца" className="mt-3 grid grid-cols-5 gap-1 rounded-[22px] border border-white/75 bg-gradient-to-b from-white/40 to-rose-100/45 p-1.5 shadow-[inset_0_2px_5px_rgba(255,255,255,0.8),0_6px_16px_rgba(154,68,98,0.08)]">
+                  {ribbonMonths.map((month) => {
+                    const current = month.getMonth() === visibleMonth.getMonth() && month.getFullYear() === visibleMonth.getFullYear();
+                    return (
+                      <button
+                        type="button"
+                        key={`${month.getFullYear()}-${month.getMonth()}`}
+                        onClick={() => chooseRibbonMonth(month)}
+                        aria-label={new Intl.DateTimeFormat(getLocale(language), { month: "long", year: "numeric" }).format(month)}
+                        aria-current={current ? "date" : undefined}
+                        className={`relative h-9 min-w-0 overflow-hidden rounded-[16px] text-[11px] font-semibold capitalize transition-all duration-200 active:scale-95 ${current
+                          ? "border border-white/90 bg-gradient-to-b from-[#ffc2d4] via-[#f994b3] to-[#ef668e] text-white shadow-[inset_0_2px_3px_rgba(255,255,255,0.85),inset_0_-2px_4px_rgba(163,38,86,0.2),0_4px_12px_rgba(219,83,130,0.28)]"
+                          : "border border-transparent text-[#856e78] hover:bg-white/50"}`}
+                      >
+                        {current && <span aria-hidden="true" className="pointer-events-none absolute inset-x-2 top-0 h-2 rounded-full bg-white/35 blur-[3px]" />}
+                        <span className="relative">{ribbonMonthLabel(month)}</span>
+                      </button>
+                    );
+                  })}
                 </div>
 
                 {calendarView ===
                   "day" && (
                   <div
                     ref={weekStripRef}
-                    className="mt-4 w-full overflow-hidden touch-pan-y select-none"
+                    className="mt-3 w-full overflow-hidden touch-pan-y select-none"
                     onTouchStart={handleWeekTouchStart}
                     onTouchMove={handleWeekTouchMove}
                     onTouchEnd={handleWeekTouchEnd}
@@ -5779,14 +5815,14 @@ useEffect(() => {
                                 )
                               );
                             }}
-                            className={`relative flex min-w-0 flex-col items-center rounded-[18px] px-1 py-2 transition-all duration-200 ${
+                            className={`relative flex min-w-0 flex-col items-center rounded-[19px] border px-1 py-2.5 transition-all duration-200 active:scale-[0.97] ${
                               selected
                                 ? isWorkDay
-                                  ? "bg-gradient-to-b from-rose-100 to-rose-200/80 shadow-[0_6px_16px_rgba(225,120,160,0.16)] ring-1 ring-white/70"
-                                  : "bg-neutral-300/75 shadow-sm"
+                                  ? "border-white/90 bg-gradient-to-b from-[#ffd0df] via-[#f9a6c1] to-[#ef7599] shadow-[inset_0_2px_3px_rgba(255,255,255,0.85),0_6px_13px_rgba(222,100,146,0.26)]"
+                                  : "border-white/85 bg-gradient-to-b from-neutral-200 to-neutral-300 shadow-sm"
                                 : isWorkDay
-                                ? "bg-rose-100/50"
-                                : "bg-neutral-200/55 opacity-80"
+                                ? "border-white/70 bg-gradient-to-b from-white/65 to-rose-100/60 shadow-[inset_0_1px_2px_rgba(255,255,255,0.75)]"
+                                : "border-white/50 bg-neutral-200/65 opacity-85"
                             }`}
                           >
                             <span className="text-[9px] font-medium capitalize text-neutral-500">
@@ -6200,11 +6236,11 @@ useEffect(() => {
                                     setVisibleMonth(new Date(item.date.getFullYear(), item.date.getMonth(), 1));
                                     setCalendarView("day");
                                   }}
-                                  className={`relative min-h-[58px] rounded-2xl p-2 transition ${
+                                  className={`relative min-h-[58px] rounded-[17px] border p-2 transition-all duration-200 active:scale-[0.96] ${
                                     selected
-                                      ? isWorkDay ? "bg-rose-200/90 shadow-sm" : "bg-neutral-300/80 shadow-sm"
-                                      : !item.isCurrentMonth ? "text-neutral-300"
-                                      : isWorkDay ? "bg-rose-100/60" : "bg-neutral-200/60 text-neutral-500"
+                                      ? isWorkDay ? "border-white/90 bg-gradient-to-b from-[#ffc4d7] to-[#ed7e9f] text-white shadow-[inset_0_2px_3px_rgba(255,255,255,0.7),0_5px_11px_rgba(224,85,139,0.25)]" : "border-white/80 bg-neutral-300/85 shadow-sm"
+                                      : !item.isCurrentMonth ? "border-transparent text-neutral-300"
+                                      : isWorkDay ? "border-white/55 bg-gradient-to-b from-white/55 to-rose-100/60" : "border-white/45 bg-neutral-200/70 text-neutral-500"
                                   }`}
                                 >
                                   <div className="text-sm font-medium">{item.date.getDate()}</div>
