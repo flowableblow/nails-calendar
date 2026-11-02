@@ -3148,10 +3148,9 @@ useEffect(() => {
       visibleMonth
     );
 
-  const weekDates =
-    getWeekDates(
-      selectedDate
-    );
+  const weekDates = getWeekDates(selectedDate);
+  const prevWeekDates = getWeekDates(new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate() - 7, 12));
+  const nextWeekDates = getWeekDates(new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate() + 7, 12));
 
   const mainServices =
     services.filter(
@@ -3805,15 +3804,19 @@ useEffect(() => {
     );
   }
 
-  // Touch-only gesture for the week strip. Keep date buttons tappable.
+  // Three-week carousel: the adjacent weeks are already rendered while dragging.
   const weekSwipeStartRef = useRef<{ x: number; y: number } | null>(null);
   const weekSwipeHandledRef = useRef(false);
+  const [weekDragX, setWeekDragX] = useState(0);
+  const [weekSlideDirection, setWeekSlideDirection] = useState<0 | -1 | 1>(0);
+  const [weekAnimating, setWeekAnimating] = useState(false);
+  const [weekStripWidth, setWeekStripWidth] = useState(350);
+  const weekStripRef = useRef<HTMLDivElement | null>(null);
 
   function handleWeekTouchStart(event: TouchEvent<HTMLDivElement>) {
-    if (event.touches.length !== 1) {
-      weekSwipeStartRef.current = null;
-      return;
-    }
+    if (weekAnimating || event.touches.length !== 1) return;
+    const width = weekStripRef.current?.getBoundingClientRect().width;
+    if (width) setWeekStripWidth(width);
     weekSwipeHandledRef.current = false;
     weekSwipeStartRef.current = {
       x: event.touches[0].clientX,
@@ -3821,18 +3824,45 @@ useEffect(() => {
     };
   }
 
+  function handleWeekTouchMove(event: TouchEvent<HTMLDivElement>) {
+    const start = weekSwipeStartRef.current;
+    if (!start || weekAnimating || event.touches.length !== 1) return;
+    const dx = event.touches[0].clientX - start.x;
+    const dy = event.touches[0].clientY - start.y;
+    if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 8) {
+      weekSwipeStartRef.current = null;
+      setWeekDragX(0);
+      return;
+    }
+    if (Math.abs(dx) > 5) {
+      weekSwipeHandledRef.current = true;
+      setWeekDragX(Math.max(-weekStripWidth, Math.min(weekStripWidth, dx)));
+    }
+  }
+
   function handleWeekTouchEnd(event: TouchEvent<HTMLDivElement>) {
     const start = weekSwipeStartRef.current;
     weekSwipeStartRef.current = null;
-    if (!start || event.changedTouches.length !== 1) return;
-
+    if (!start || weekAnimating || event.changedTouches.length !== 1) return;
     const dx = event.changedTouches[0].clientX - start.x;
     const dy = event.changedTouches[0].clientY - start.y;
-    // Ignore short movements and vertical scrolling.
-    if (Math.abs(dx) < 45 || Math.abs(dx) <= Math.abs(dy) * 1.25) return;
+    if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy) * 1.25) {
+      weekSwipeHandledRef.current = true;
+      setWeekSlideDirection(dx < 0 ? 1 : -1);
+    } else {
+      if (Math.abs(weekDragX) < 3) { setWeekDragX(0); return; }
+      setWeekSlideDirection(0);
+    }
+    setWeekAnimating(true); // Animate to next week, previous week, or snap back.
+  }
 
-    weekSwipeHandledRef.current = true;
-    changeDay(dx < 0 ? 7 : -7);
+  function finishWeekSlide() {
+    if (!weekAnimating) return;
+    const direction = weekSlideDirection;
+    setWeekAnimating(false);
+    setWeekSlideDirection(0);
+    setWeekDragX(0);
+    if (direction) changeDay(direction * 7);
   }
 
   function changeMonth(
@@ -5715,10 +5745,12 @@ useEffect(() => {
                 {calendarView ===
                   "day" && (
                   <div
-                    className="mt-4 grid grid-cols-7 gap-1 touch-pan-y select-none"
+                    ref={weekStripRef}
+                    className="mt-4 w-full overflow-hidden touch-pan-y select-none"
                     onTouchStart={handleWeekTouchStart}
+                    onTouchMove={handleWeekTouchMove}
                     onTouchEnd={handleWeekTouchEnd}
-                    onTouchCancel={() => { weekSwipeStartRef.current = null; }}
+                    onTouchCancel={() => { weekSwipeStartRef.current = null; setWeekDragX(0); setWeekAnimating(false); setWeekSlideDirection(0); }}
                     onClickCapture={(event) => {
                       if (weekSwipeHandledRef.current) {
                         event.stopPropagation();
@@ -5726,7 +5758,20 @@ useEffect(() => {
                       }
                     }}
                   >
-                    {weekDates.map(
+                    <div
+                      className="flex w-[300%]"
+                      style={{
+                        transform: `translate3d(calc(-33.333333% + ${weekAnimating ? -weekSlideDirection * weekStripWidth : weekDragX}px), 0, 0)`,
+                        transition: weekAnimating ? "transform 280ms cubic-bezier(0.22, 1, 0.36, 1)" : "none",
+                        willChange: "transform",
+                      }}
+                      onTransitionEnd={(event) => {
+                        if (event.target === event.currentTarget && event.propertyName === "transform") finishWeekSlide();
+                      }}
+                    >
+                    {[prevWeekDates, weekDates, nextWeekDates].map((dates, weekIndex) => (
+                      <div key={weekIndex} className="grid w-1/3 shrink-0 grid-cols-7 gap-1">
+                    {dates.map(
                       (
                         date
                       ) => {
@@ -5817,6 +5862,9 @@ useEffect(() => {
                         );
                       }
                     )}
+                      </div>
+                    ))}
+                    </div>
                   </div>
                 )}
               </div>
