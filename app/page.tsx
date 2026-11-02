@@ -5622,125 +5622,34 @@ useEffect(() => {
           <div className="relative flex min-h-0 flex-1 flex-col">
             <header className="shrink-0 px-3 pb-2 pt-3">
               <div className="rounded-[28px] border border-white/70 bg-white/55 p-4 shadow-[0_12px_40px_rgba(120,80,95,0.12)] backdrop-blur-xl">
-                <div className="flex items-center justify-between">
-                  <button
-                    onClick={() =>
-                      calendarView ===
-                      "day"
-                        ? changeDay(
-                            -1
-                          )
-                        : changeMonth(
-                            -1
-                          )
-                    }
-                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[18px] border border-white/75 bg-white/72 text-[24px] font-light text-neutral-700 shadow-[0_8px_18px_rgba(110,75,90,0.10)] backdrop-blur-md transition active:scale-95"
-                  >
-                    ‹
-                  </button>
-
-                  <button
-                    onClick={
-                      goToday
-                    }
-                    className="min-w-0 px-3 text-center"
-                  >
+                <div className="flex min-h-[52px] items-center justify-center">
+                  <button type="button" onClick={goToday} className="min-w-0 px-3 text-center">
                     <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-neutral-400">
-                      {calendarView ===
-                      "day"
-                        ? selectedDateIsToday
-                          ? t.today
-                          : formatWeekday(
-                              selectedDate,
-                              language
-                            )
-                        : t.calendar}
+                      {calendarView === "day" ? selectedDateIsToday ? t.today : formatWeekday(selectedDate, language) : t.calendar}
                     </p>
-
                     <h1 className="mt-0.5 truncate text-[22px] font-semibold capitalize tracking-tight">
-                      {calendarView ===
-                      "day"
-                        ? formatDateTitle(
-                            selectedDate,
-                            language
-                          )
-                        : formatMonthTitle(
-                            visibleMonth,
-                            language
-                          )}
+                      {calendarView === "day" ? formatDateTitle(selectedDate, language) : formatMonthTitle(visibleMonth, language)}
                     </h1>
                   </button>
-
-                  <button
-                    onClick={() =>
-                      calendarView ===
-                      "day"
-                        ? changeDay(
-                            1
-                          )
-                        : changeMonth(
-                            1
-                          )
-                    }
-                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[18px] border border-white/75 bg-white/72 text-[24px] font-light text-neutral-700 shadow-[0_8px_18px_rgba(110,75,90,0.10)] backdrop-blur-md transition active:scale-95"
-                  >
-                    ›
-                  </button>
                 </div>
-
-                <div className="mt-4 flex items-center justify-between gap-2">
-                  <div className="flex rounded-[18px] border border-white/55 bg-white/35 p-1 shadow-inner backdrop-blur-md">
-                    <button
-                      onClick={() =>
-                        setCalendarView(
-                          "day"
-                        )
-                      }
-                      className={`rounded-xl px-4 py-2 text-xs font-medium transition ${
-                        calendarView ===
-                        "day"
-                          ? "bg-white/90 text-rose-600 shadow-[0_5px_14px_rgba(190,110,140,0.14)]"
-                          : "text-neutral-500"
-                      }`}
-                    >
+                <div className="mt-4 flex h-11 items-center justify-between gap-2">
+                  <div className="flex shrink-0 rounded-[18px] border border-white/55 bg-white/35 p-1 shadow-inner backdrop-blur-md">
+                    <button type="button" onClick={() => setCalendarView("day")}
+                      className={`rounded-xl px-4 py-2 text-xs font-medium transition ${calendarView === "day" ? "bg-white/90 text-rose-600 shadow-[0_5px_14px_rgba(190,110,140,0.14)]" : "text-neutral-500"}`}>
                       {t.day}
                     </button>
-
-                    <button
-                      onClick={() =>
-                        setCalendarView(
-                          "month"
-                        )
-                      }
-                      className={`rounded-xl px-4 py-2 text-xs font-medium transition ${
-                        calendarView ===
-                        "month"
-                          ? "bg-white/90 text-rose-600 shadow-[0_5px_14px_rgba(190,110,140,0.14)]"
-                          : "text-neutral-500"
-                      }`}
-                    >
+                    <button type="button" onClick={() => setCalendarView("month")}
+                      className={`rounded-xl px-4 py-2 text-xs font-medium transition ${calendarView === "month" ? "bg-white/90 text-rose-600 shadow-[0_5px_14px_rgba(190,110,140,0.14)]" : "text-neutral-500"}`}>
                       {t.month}
                     </button>
                   </div>
-
-
-                </div>
-
-                {(
-                  calendarView === "day"
-                    ? !selectedDateIsToday
-                    : !visibleMonthIsCurrent
-                ) && (
-                  <button
-                    type="button"
-                    onClick={goToday}
-                    className="mt-3 flex h-10 w-full items-center justify-center rounded-[16px] border border-white/70 bg-white/55 text-[11px] font-medium text-rose-500 shadow-sm backdrop-blur-xl transition active:scale-[0.99]"
-                  >
-                    {calendarView === "day"
-                      ? t.returnToday
-                      : t.returnCurrentMonth}
+                  <button type="button" onClick={goToday}
+                    aria-hidden={calendarView === "day" ? selectedDateIsToday : visibleMonthIsCurrent}
+                    tabIndex={(calendarView === "day" ? selectedDateIsToday : visibleMonthIsCurrent) ? -1 : 0}
+                    className={`min-w-0 flex-1 h-10 rounded-[16px] border border-white/70 bg-white/55 px-2 text-[10px] font-medium text-rose-500 shadow-sm backdrop-blur-xl transition-opacity active:scale-[0.99] ${(calendarView === "day" ? selectedDateIsToday : visibleMonthIsCurrent) ? "invisible pointer-events-none" : "visible"}`}>
+                    {calendarView === "day" ? t.returnToday : t.returnCurrentMonth}
                   </button>
-                )}
+                </div>
 
                 {calendarView ===
                   "day" && (
