@@ -5815,10 +5815,10 @@ useEffect(() => {
                                 )
                               );
                             }}
-                            className={`relative flex min-w-0 flex-col items-center rounded-[19px] border px-1 py-2.5 transition-all duration-200 active:scale-[0.97] ${
+                            className={`relative isolate flex min-w-0 flex-col items-center overflow-hidden rounded-[19px] border px-1 py-2.5 transition-[background-color,background-image,border-color] duration-200 active:scale-[0.97] [background-clip:padding-box] ${
                               selected
                                 ? isWorkDay
-                                  ? "border-white/90 bg-gradient-to-b from-[#ffd0df] via-[#f9a6c1] to-[#ef7599] shadow-[inset_0_2px_3px_rgba(255,255,255,0.85),0_6px_13px_rgba(222,100,146,0.26)]"
+                                  ? "border-white/90 bg-gradient-to-b from-[#ffd0df] via-[#f9a6c1] to-[#ef7599] shadow-[inset_0_2px_3px_rgba(255,255,255,0.85),inset_0_-3px_6px_rgba(222,100,146,0.18)]"
                                   : "border-white/85 bg-gradient-to-b from-neutral-200 to-neutral-300 shadow-sm"
                                 : isWorkDay
                                 ? "border-white/70 bg-gradient-to-b from-white/65 to-rose-100/60 shadow-[inset_0_1px_2px_rgba(255,255,255,0.75)]"
